@@ -1364,7 +1364,7 @@ namespace cxxtlib
 			}
 		};
 
-		#define IGNORE_ONCE(pContext) for (; *pContext != FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); pContext++
+		#define IGNORE_ONCE(pContext) for (; *pContext != ::cxxtlib::format::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); pContext++
 		
 		template<typename Char, typename Type, typename Enable = void>
 		struct Formatter
@@ -1767,7 +1767,7 @@ namespace cxxtlib
 			}
 		};
 
-		#define CUSTOM_FORMATTER(Type) struct ::cxxtlib::format::Formatter<Type> : public FormatterBase<Char>
+		#define CUSTOM_FORMATTER(Type) struct ::cxxtlib::format::Formatter<Type> : public ::cxxtlib::format::FormatterBase<Char>
 
 		template<typename Char, typename Reader, typename Writer>
 		static CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE void formatHandle(Reader& pReader, Writer& pWriter) CXXTLIB_FORMAT_NOEXCEPT
