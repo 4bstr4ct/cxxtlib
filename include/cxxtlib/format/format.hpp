@@ -1288,12 +1288,6 @@ namespace cxxtlib
 		public:
 			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::CString;
 		};
-
-		#define CUSTOM_TYPE_OF(Type) struct ::cxxtlib::format::TypeOf<Type> \
-		{ \
-		public: \
-			static CXXTLIB_FORMAT_CONSTEXPR const ::cxxtlib::format::FormatArgumentType value = ::cxxtlib::format::FormatArgumentType::Custom; \
-		}
 		
 		template<typename Char>
 		struct FormatTraits;
@@ -1363,8 +1357,6 @@ namespace cxxtlib
 				pContext++;
 			}
 		};
-
-		#define IGNORE_ONCE(pContext) for (; *pContext != ::cxxtlib::format::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); pContext++
 		
 		template<typename Char, typename Type, typename Enable = void>
 		struct Formatter
@@ -1767,8 +1759,6 @@ namespace cxxtlib
 			}
 		};
 
-		#define CUSTOM_FORMATTER(Type) struct ::cxxtlib::format::Formatter<Type> : public ::cxxtlib::format::FormatterBase<Char>
-
 		template<typename Char, typename Reader, typename Writer>
 		static CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE void formatHandle(Reader& pReader, Writer& pWriter) CXXTLIB_FORMAT_NOEXCEPT
 		{
@@ -2028,347 +2018,325 @@ namespace cxxtlib
 	}
 }
 
+/**
+ * Helper macros.
+ */
+
+#define IGNORE_ONCE(pContext) \
+for (; *pContext != cxxtlib::format::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); \
+pContext++;
+
+#define CUSTOM_TYPE_OF(Type) \
+struct cxxtlib::format::TypeOf<Type> \
+{ \
+public: \
+	static CXXTLIB_FORMAT_CONSTEXPR const cxxtlib::format::FormatArgumentType value = cxxtlib::format::FormatArgumentType::Custom; \
+};
+
+#define CUSTOM_FORMATTER(Type) \
+struct cxxtlib::format::Formatter<Type> : public cxxtlib::format::FormatterBase<Char>
+
+/**
+ * Custom formatter for std::basic_string<Char, Traits>
+ */
+
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_BASIC_STRING_FORMATTER == 1
 
 #include <string>
 
-namespace cxxtlib
+template<typename Char, typename Traits>
+CUSTOM_TYPE_OF(::std::basic_string<Char COMMA Traits>);
+
+template<typename Char, typename Traits>
+CUSTOM_FORMATTER(Char COMMA ::std::basic_string<Char COMMA Traits>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::basic_string<Char, Traits>
-		 */
-		template<typename Char, typename Traits>
-		CUSTOM_TYPE_OF(::std::basic_string<Char COMMA Traits>);
-
-		template<typename Char, typename Traits>
-		CUSTOM_FORMATTER(Char COMMA ::std::basic_string<Char COMMA Traits>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::basic_string<Char, Traits>& pValue)
-			{
-				pContext.append(pValue.data(), (details::uint32)pValue.size()); 
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::basic_string<Char, Traits>& pValue)
+	{
+		pContext.append(pValue.data(), (details::uint32)pValue.size()); 
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::initializer_list<Type>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_INITIALIZER_LIST_FORMATTER == 1
 
 #include <initializer_list>
 
-namespace cxxtlib
+template<typename Type>
+CUSTOM_TYPE_OF(::std::initializer_list<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::initializer_list<Type>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::initializer_list<Type>
-		 */
-		template<typename Type>
-		CUSTOM_TYPE_OF(::std::initializer_list<Type>);
-
-		template<typename Char, typename Type>
-		CUSTOM_FORMATTER(Char COMMA ::std::initializer_list<Type>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::initializer_list<Type>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, Type>::format(pContext, *pValue.begin());
-
-				using ConstIterator = typename ::std::initializer_list<Type>::const_iterator;
-				for (ConstIterator iterator = pValue.begin() + 1; iterator != pValue.end(); iterator++)
-				{
-					Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-					Formatter<Char, Type>::format(pContext, *iterator);
-				}
-			
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}		
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::initializer_list<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::initializer_list<Type>::const_iterator;
+		for (ConstIterator iterator = pValue.begin() + 1; iterator != pValue.end(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+	
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::array<Type, size>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_ARRAY_FORMATTER == 1
 
 #include <array>
 
-namespace cxxtlib
+template<typename Type, ::std::size_t tSize>
+CUSTOM_TYPE_OF(::std::array<Type COMMA tSize>);
+
+template<typename Char, typename Type, ::std::size_t tSize>
+CUSTOM_FORMATTER(Char COMMA ::std::array<Type COMMA tSize>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::array<Type, size>
-		 */
-		template<typename Type, ::std::size_t tSize>
-		CUSTOM_TYPE_OF(::std::array<Type COMMA tSize>);
-
-		template<typename Char, typename Type, ::std::size_t tSize>
-		CUSTOM_FORMATTER(Char COMMA ::std::array<Type COMMA tSize>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::array<Type, tSize>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, Type>::format(pContext, *pValue.begin());
-
-				using ConstIterator = typename ::std::array<Type, tSize>::const_iterator;
-				for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
-				{
-					Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-					Formatter<Char, Type>::format(pContext, *iterator);
-				}
-
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::array<Type, tSize>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::array<Type, tSize>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::vector<Type>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_VECTOR_FORMATTER == 1
 
 #include <vector>
 
-namespace cxxtlib
+template<typename Type>
+CUSTOM_TYPE_OF(::std::vector<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::vector<Type>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::vector<Type>
-		 */
-		template<typename Type>
-		CUSTOM_TYPE_OF(::std::vector<Type>);
-
-		template<typename Char, typename Type>
-		CUSTOM_FORMATTER(Char COMMA ::std::vector<Type>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::vector<Type>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, Type>::format(pContext, *pValue.begin());
-
-				using ConstIterator = typename ::std::vector<Type>::const_iterator;
-				for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
-				{
-					Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-					Formatter<Char, Type>::format(pContext, *iterator);
-				}
-			
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::vector<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::vector<Type>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+	
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::list<Type>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_LIST_FORMATTER == 1
 
 #include <list>
 
-namespace cxxtlib
+template<typename Type>
+CUSTOM_TYPE_OF(::std::list<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::list<Type>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::list<Type>
-		 */
-		template<typename Type>
-		CUSTOM_TYPE_OF(::std::list<Type>);
-
-		template<typename Char, typename Type>
-		CUSTOM_FORMATTER(Char COMMA ::std::list<Type>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::list<Type>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, Type>::format(pContext, *pValue.begin());
-
-				using ConstIterator = typename ::std::list<Type>::const_iterator;
-				for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
-				{
-					Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-					Formatter<Char, Type>::format(pContext, *iterator);
-				}
-			
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::list<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::list<Type>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+	
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::deque<Type>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_DEQUE_FORMATTER == 1
 
 #include <deque>
 
-namespace cxxtlib
+template<typename Type>
+CUSTOM_TYPE_OF(::std::deque<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::deque<Type>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::deque<Type>
-		 */
-		template<typename Type>
-		CUSTOM_TYPE_OF(::std::deque<Type>);
-
-		template<typename Char, typename Type>
-		CUSTOM_FORMATTER(Char COMMA ::std::deque<Type>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::deque<Type>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, Type>::format(pContext, *pValue.begin());
-
-				using ConstIterator = ::std::deque<Type>::const_iterator;
-				for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
-				{
-					Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-					Formatter<Char, Type>::format(pContext, *iterator);
-				}
-			
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::deque<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::deque<Type>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+	
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::map<Key, Value>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_PAIR_FORMATTER == 1
 
 #include <utility> // For std::pair<Key, Value>
 
-namespace cxxtlib
+template<typename Key, typename Value>
+CUSTOM_TYPE_OF(::std::pair<Key COMMA Value>);
+
+template<typename Char, typename Key, typename Value>
+CUSTOM_FORMATTER(Char COMMA ::std::pair<Key COMMA Value>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::map<Key, Value>
-		 */
-		template<typename Key, typename Value>
-		CUSTOM_TYPE_OF(::std::pair<Key COMMA Value>);
-
-		template<typename Char, typename Key, typename Value>
-		CUSTOM_FORMATTER(Char COMMA ::std::pair<Key COMMA Value>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::pair<Key, Value>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, Key>::format(pContext, pValue.first);
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-				Formatter<Char, Value>::format(pContext, pValue.second);
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::pair<Key, Value>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Key>::format(pContext, pValue.first);
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+		Formatter<Char, Value>::format(pContext, pValue.second);
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
+
+/**
+ * Custom formatter for std::map<Key, Value>
+ */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_MAP_FORMATTER == 1
 
 #include <map>
 
-namespace cxxtlib
+template<typename Key, typename Value>
+CUSTOM_TYPE_OF(::std::map<Key COMMA Value>);
+
+template<typename Char, typename Key, typename Value>
+CUSTOM_FORMATTER(Char COMMA ::std::map<Key COMMA Value>)
 {
-	namespace format
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
 	{
-		/**
-		 * Custom formatter for std::map<Key, Value>
-		 */
-		template<typename Key, typename Value>
-		CUSTOM_TYPE_OF(::std::map<Key COMMA Value>);
-
-		template<typename Char, typename Key, typename Value>
-		CUSTOM_FORMATTER(Char COMMA ::std::map<Key COMMA Value>)
-		{
-		public:
-			template<typename ParserContext>
-			static void parse(ParserContext& pContext)
-			{
-				IGNORE_ONCE(pContext);
-			}
-
-			template<typename FormatterContext>
-			static void format(FormatterContext& pContext, const ::std::map<Key, Value>& pValue)
-			{
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-				Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
-
-				using ConstIterator = typename ::std::map<Key, Value>::const_iterator;
-				for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
-				{
-					Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-					Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *iterator);
-				}
-
-				Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-			}
-		};
+		IGNORE_ONCE(pContext);
 	}
-}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::map<Key, Value>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::map<Key, Value>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *iterator);
+		}
+
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
 
 #endif
 

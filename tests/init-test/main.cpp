@@ -78,7 +78,6 @@ public:
 
 		long double duration = (long double)(end - start);
 		this->function(duration);
-
 	}
 };
 
@@ -178,7 +177,6 @@ void testPrintf()
 			float(),
 			double(2135.354684343565435),
 			details::ldouble(),
-			nullptr,
 			7, 8, 9,
 			&vec,
 			&vec,
