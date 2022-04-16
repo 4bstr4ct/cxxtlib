@@ -1,6 +1,7 @@
 // #define ENABLE_STD_FORMATTERS 1
 #define ENABLE_STD_FORMATTERS 1
-#include <cxxtlib/format/format.hpp>
+// #include <cxxtlib/format/format.hpp>
+#include "format.hpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -87,7 +88,7 @@ std::list<double> lst = { 10, 12, 13, 14, 15 };
 std::map<float, bool> mp = { { 5.0f, true }, { -9.0f, true }, { 1.0f, false} };
 
 template<int tCount>
-void testFormatter()
+void testFormatterWithHeapWriter()
 {
 	using namespace ::cxxtlib::format;
 	
@@ -121,13 +122,14 @@ void testFormatter()
 }
 
 template<int tCount>
-void testFormatterWithSize()
+void testFormatterWithStackWriter()
 {
 	using namespace ::cxxtlib::format;
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
-		auto formatted = format<char, 450>("{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
+		char buffer[450];
+		int written = format<char, 450>(buffer, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -150,7 +152,7 @@ void testFormatterWithSize()
 			"jejejejejejej"
 			);
 
-		cleanup(formatted);
+		// cleanup(formatted);
 	}
 }
 
@@ -350,7 +352,7 @@ int main(void)
 	{
 		{
 			Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
-			testFormatter<count>();
+			testFormatterWithHeapWriter<count>();
 		}
 	}
 	
@@ -370,7 +372,7 @@ int main(void)
 	{
 		{
 			Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
-			testFormatterWithSize<count>();
+			testFormatterWithStackWriter<count>();
 		}
 	}
 
