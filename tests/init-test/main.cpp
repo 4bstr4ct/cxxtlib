@@ -129,7 +129,7 @@ void testFormatterWithStackWriter()
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
 		char buffer[450];
-		int written = format<char, 450>(buffer, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
+		unsigned int written = format<char, 450>(buffer, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -288,7 +288,8 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
-	stdprint(cout, "{} != {}", 5, Point{ 5, 8, 9 });
+	print<ostream, char>(cout, "Press any key to start tests...\n");
+	cin.get();
 
 	/*
 	std::vector<std::vector<int>> mat = { { 0, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1 }, { 1, 0, 1, 1, 0}, { 0, 1, 0, 0, 0 }, { 0, 0, 1, 0, 1 } };
@@ -317,7 +318,7 @@ int main(void)
 	);
 	*/
 
-#define TEST_PRINTING 0
+#define TEST_PRINTING 1
 #if TEST_PRINTING == 1
 	cout << "\nTesting print!\n";
 
@@ -339,7 +340,7 @@ int main(void)
 		}
 	}
 	
-	cout << "\End!\n";
+	cout << "\End!\n\n\n";
 #endif
 
 #define TEST_FORMATING 1

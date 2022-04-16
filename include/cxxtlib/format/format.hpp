@@ -1964,7 +1964,7 @@ namespace cxxtlib
 		class StackWriter
 		{
 		private:
-			Char* mData; // [tCapacity + 1];
+			Char* mData;
 			details::uint32 mSize;
 
 		public:
@@ -1980,20 +1980,22 @@ namespace cxxtlib
 			
 			CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE void append(Char pChar) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				// static_assert(this->mSize + 1 <= tCapacity);
-				this->mData[this->mSize++] = pChar;
-				this->mData[this->mSize] = (Char)FormatTraits<Char>::terminationSpecifier;
+				if (this->mSize + 1 <= tCapacity)
+					this->mData[this->mSize++] = pChar;
 			}
 
 			CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE void append(const Char* const pData, details::uint32 pSize) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				// static_assert(this->mSize + pSize <= tCapacity);
-				for (details::uint32 i = 0; i < pSize; i++) this->mData[this->mSize + i] = pData[i];
-				this->mData[this->mSize += pSize] = FormatTraits<Char>::terminationSpecifier;
+				if (this->mSize + pSize <= tCapacity)
+				{
+					for (details::uint32 i = 0; i < pSize; i++)
+						this->mData[this->mSize + i] = pData[i];
+				}
 			}
 
 			CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE Char* get() CXXTLIB_FORMAT_NOEXCEPT
 			{
+				this->mData[this->mSize] = FormatTraits<Char>::terminationSpecifier;
 				return this->mData;
 			}
 		};
@@ -2021,7 +2023,7 @@ namespace cxxtlib
 		 * Returns the length of chars written to the buffer.
 		 */
 		template<typename Char, details::uint32 tSize, typename... Arguments>
-		static CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE details::uint32 format(Char pBuffer[tSize], const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE details::uint32 format(Char* pBuffer, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			// Setting up the reader (later referenced as ParserContext).
 			Reader<Char> reader = Reader<Char>(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
@@ -2032,6 +2034,10 @@ namespace cxxtlib
 			return writer.size();
 		}
 
+		/**
+		 * Should only be used when default format function is used. Default format method creates formatted string on heap
+		 * and returns it. It does not handle memory deallocation of the formatted string. That is handled by this function.
+		 */
 		template<typename Char>
 		static CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_FORMAT_INLINE void cleanup(Char* pFormatted) CXXTLIB_FORMAT_NOEXCEPT
 		{
