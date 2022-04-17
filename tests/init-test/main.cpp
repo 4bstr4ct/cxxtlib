@@ -1,7 +1,5 @@
-// #define ENABLE_STD_FORMATTERS 1
 #define ENABLE_STD_FORMATTERS 1
-// #include <cxxtlib/format/format.hpp>
-#include "format.hpp"
+#include <cxxtlib/format/format.hpp>
 
 #include <stdio.h>
 #include <iostream>
@@ -33,8 +31,7 @@ public:
 	template<typename ParserContext>
 	static void parse(ParserContext& pContext)
 	{
-		for (; *pContext != '}'; pContext++);
-		pContext++;
+		IGNORE_ONCE(pContext);
 	}
 
 	template<typename FormatterContext>
@@ -49,7 +46,6 @@ public:
 		Formatter<Char, Char>::template format<FormatterContext>(pContext, ']');
 	}
 };
-
 
 #include <chrono>
 #include <functional>
@@ -288,6 +284,21 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
+	forward_list<int> fl = { 4, 5, 6 };
+	print<ostream, char>(cout, "foraward_list => {}\n", fl);
+
+	set<int> s = { 4, 5, 6 };
+	print<ostream, char>(cout, "set => {}\n", s);
+
+	unordered_set<int> us = { 4, 5, 6 };
+	print<ostream, char>(cout, "unordered_set => {}\n", us);
+
+	map<int, bool> m = { { 4, true }, { 5, false }, { 6, false } };
+	print<ostream, char>(cout, "map => {}\n", m);
+
+	unordered_map<int, bool> um = { { 4, true }, { 5, false }, { 6, false } };
+	print<ostream, char>(cout, "unordered_map => {}\n", um);
+
 	print<ostream, char>(cout, "Press any key to start tests...\n");
 	cin.get();
 
@@ -318,7 +329,7 @@ int main(void)
 	);
 	*/
 
-#define TEST_PRINTING 1
+#define TEST_PRINTING 0
 #if TEST_PRINTING == 1
 	cout << "\nTesting print!\n";
 
@@ -340,10 +351,10 @@ int main(void)
 		}
 	}
 	
-	cout << "\End!\n\n\n";
+	cout << "\nEnd!\n\n\n";
 #endif
 
-#define TEST_FORMATING 1
+#define TEST_FORMATING 0
 #if TEST_FORMATING == 1
 	const int count = 1000000;
 

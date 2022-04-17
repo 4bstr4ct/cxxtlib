@@ -2119,46 +2119,6 @@ public:
 #endif
 
 /**
- * Custom formatter for std::initializer_list<Type>
- */
-
-#if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_INITIALIZER_LIST_FORMATTER == 1
-
-#include <initializer_list>
-
-template<typename Type>
-CUSTOM_TYPE_OF(::std::initializer_list<Type>);
-
-template<typename Char, typename Type>
-CUSTOM_FORMATTER(Char COMMA ::std::initializer_list<Type>)
-{
-public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
-	{
-		IGNORE_ONCE(pContext);
-	}
-
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::initializer_list<Type>& pValue)
-	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
-		Formatter<Char, Type>::format(pContext, *pValue.begin());
-
-		using ConstIterator = typename ::std::initializer_list<Type>::const_iterator;
-		for (ConstIterator iterator = pValue.begin() + 1; iterator != pValue.end(); iterator++)
-		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
-			Formatter<Char, Type>::format(pContext, *iterator);
-		}
-	
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
-	}
-};
-
-#endif
-
-/**
  * Custom formatter for std::array<Type, size>
  */
 
@@ -2319,7 +2279,87 @@ public:
 #endif
 
 /**
- * Custom formatter for std::map<Key, Value>
+ * Custom formatter for std::forward_list<Type>
+ */
+
+#if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_FORWARD_LIST_FORMATTER == 1
+
+#include <forward_list>
+
+template<typename Type>
+CUSTOM_TYPE_OF(::std::forward_list<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::forward_list<Type>)
+{
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
+	{
+		IGNORE_ONCE(pContext);
+	}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::forward_list<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::forward_list<Type>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
+
+#endif
+
+/**
+ * Custom formatter for std::initializer_list<Type>
+ */
+
+#if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_INITIALIZER_LIST_FORMATTER == 1
+
+#include <initializer_list>
+
+template<typename Type>
+CUSTOM_TYPE_OF(::std::initializer_list<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::initializer_list<Type>)
+{
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
+	{
+		IGNORE_ONCE(pContext);
+	}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::initializer_list<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::initializer_list<Type>::const_iterator;
+		for (ConstIterator iterator = pValue.begin() + 1; iterator != pValue.end(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
+
+#endif
+
+/**
+ * Custom formatter for std::pair<Key, Value>
  */
 
 #if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_PAIR_FORMATTER == 1
@@ -2346,6 +2386,86 @@ public:
 		Formatter<Char, Key>::format(pContext, pValue.first);
 		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
 		Formatter<Char, Value>::format(pContext, pValue.second);
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
+
+#endif
+
+/**
+ * Custom formatter for std::set<Type>
+ */
+
+#if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_SET_FORMATTER == 1
+
+#include <set>
+
+template<typename Type>
+CUSTOM_TYPE_OF(::std::set<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::set<Type>)
+{
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
+	{
+		IGNORE_ONCE(pContext);
+	}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::set<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::set<Type>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
+
+#endif
+
+/**
+ * Custom formatter for std::unordered_set<Type>
+ */
+
+#if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_UNORDERED_SET_FORMATTER == 1
+
+#include <unordered_set>
+
+template<typename Type>
+CUSTOM_TYPE_OF(::std::unordered_set<Type>);
+
+template<typename Char, typename Type>
+CUSTOM_FORMATTER(Char COMMA ::std::unordered_set<Type>)
+{
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
+	{
+		IGNORE_ONCE(pContext);
+	}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::unordered_set<Type>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Type>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::unordered_set<Type>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Type>::format(pContext, *iterator);
+		}
+
 		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
@@ -2380,6 +2500,46 @@ public:
 		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
 
 		using ConstIterator = typename ::std::map<Key, Value>::const_iterator;
+		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
+		{
+			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *iterator);
+		}
+
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+	}
+};
+
+#endif
+
+/**
+ * Custom formatter for std::unordered_map<Key, Value>
+ */
+
+#if ENABLE_STD_FORMATTERS == 1 || ENABLE_STD_UNORDERED_MAP_FORMATTER == 1
+
+#include <unordered_map>
+
+template<typename Key, typename Value>
+CUSTOM_TYPE_OF(::std::unordered_map<Key COMMA Value>);
+
+template<typename Char, typename Key, typename Value>
+CUSTOM_FORMATTER(Char COMMA ::std::unordered_map<Key COMMA Value>)
+{
+public:
+	template<typename ParserContext>
+	static void parse(ParserContext& pContext)
+	{
+		IGNORE_ONCE(pContext);
+	}
+
+	template<typename FormatterContext>
+	static void format(FormatterContext& pContext, const ::std::unordered_map<Key, Value>& pValue)
+	{
+		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
+
+		using ConstIterator = typename ::std::unordered_map<Key, Value>::const_iterator;
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
 			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
