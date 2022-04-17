@@ -279,6 +279,106 @@ void testCout()
 }
 #endif
 
+template<unsigned int tCount>
+static constexpr void stressTestForFormatterWithHeap()
+{
+	using namespace ::cxxtlib::format;
+
+	for (details::uint32 i = 0; i < tCount; i++)
+	{
+		auto formatted = format<char>("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nDouble value is : {}\nLongDouble value is : {}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+			bool(),
+			char(67),
+			details::int8(1),
+			details::uint8(),
+			details::int16(),
+			details::uint16(),
+			details::int32(),
+			details::uint32(),
+			details::int64(),
+			details::uint64(),
+			float(),
+			double(2135.354684343565435),
+			details::ldouble(),
+			nullptr,
+			7, 8, 9,
+			&vec,
+			&vec,
+			&lst,
+			&mp,
+			"jejejejejejej"
+			);
+
+		cleanup(formatted);
+	}
+}
+
+template<unsigned int tCount>
+static constexpr void stressTestForFormatterWithStack()
+{
+	using namespace ::cxxtlib::format;
+
+	for (details::uint32 i = 0; i < tCount; i++)
+	{
+		char buffer[2048];
+		format<char, 2048>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nDouble value is : {}\nLongDouble value is : {}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+			bool(),
+			char(67),
+			details::int8(1),
+			details::uint8(),
+			details::int16(),
+			details::uint16(),
+			details::int32(),
+			details::uint32(),
+			details::int64(),
+			details::uint64(),
+			float(),
+			double(2135.354684343565435),
+			details::ldouble(),
+			nullptr,
+			7, 8, 9,
+			&vec,
+			&vec,
+			&lst,
+			&mp,
+			"jejejejejejej"
+			);
+	}
+}
+
+template<unsigned int tCount>
+static constexpr void stressTestForSPRINTF()
+{
+	using namespace ::cxxtlib::format;
+
+	for (details::uint32 i = 0; i < tCount; i++)
+	{
+		char buffer[2048];
+		snprintf(buffer, 2048, "Boolean value is : %d\nChar value is : %c\nInt8 value is : %d\nUInt8 value is : %u\nInt16 value is : %d\nUInt16 value is : %u\nInt32 value is : %d\nUInt32 value is : %u\nLongLong value is : %lld\nULongLong value is : %llu\nFloat value is : %f\nDouble value is : %f\nLongDouble value is : %Lf\nNullptr stringified is : %s\nPoint here goes brrr : [%d %d %d]\nAddressOne value is : %p\nAddressTwo value is : %p\nAddressThree value is : %p\nAddressFour value is : %p\nSome string value is : %s\n",
+			bool(),
+			char(67),
+			details::int8(1),
+			details::uint8(),
+			details::int16(),
+			details::uint16(),
+			details::int32(),
+			details::uint32(),
+			details::int64(),
+			details::uint64(),
+			float(),
+			double(2135.354684343565435),
+			details::ldouble(),
+			"nullptr",
+			7, 8, 9,
+			&vec,
+			&vec,
+			&lst,
+			&mp,
+			"jejejejejejej"
+			);
+	}
+}
+
 int main(void)
 {
 	using namespace ::std;
@@ -301,6 +401,38 @@ int main(void)
 
 	print<ostream, char>(cout, "Press any key to start tests...\n");
 	cin.get();
+
+	const int count = 1000000;
+
+	cout << "\nTesting formatter with heap!\n";
+
+	for (int i = 0; i < 3; i++)
+	{
+		{
+			Timer timer = Timer([](long double duration) { std::cout << "Formatter with heap worked for " << duration << " ms.\n"; });
+			stressTestForFormatterWithHeap<count>();
+		}
+	}
+
+	cout << "\nTesting SPRINTF!\n";
+
+	for (int i = 0; i < 3; i++)
+	{
+		{
+			Timer timer = Timer([](long double duration) { std::cout << "SPRINTF worked for " << duration << " ms.\n"; });
+			stressTestForSPRINTF<count>();
+		}
+	}
+
+	cout << "\nTesting formatter with stack!\n";
+
+	for (int i = 0; i < 3; i++)
+	{
+		{
+			Timer timer = Timer([](long double duration) { std::cout << "Formatter with stack worked for " << duration << " ms.\n"; });
+			stressTestForFormatterWithStack<count>();
+		}
+	}
 
 	/*
 	std::vector<std::vector<int>> mat = { { 0, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1 }, { 1, 0, 1, 1, 0}, { 0, 1, 0, 0, 0 }, { 0, 0, 1, 0, 1 } };
