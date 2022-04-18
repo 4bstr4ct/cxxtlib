@@ -1379,91 +1379,59 @@ namespace cxxtlib
 			static_assert(TypeOf<Type>::value != FormatArgumentType::None, "Provided type does not have a formatter!");
 		};
 
-#if 1 // CXXTLIB_FORMAT_CPLUSPLUS < 201103L
-			template<typename Type>
-			struct FormatterEnabler : public details::Identity<typename details::EnableIf
-											<
-												details::And
-												<
-													details::BoolConstant
-													<
-														details::IntegralConstant
-														<
-															FormatArgumentType COMMA
-															TypeOf<Type>::value
-														>::value != FormatArgumentType::None
-													> COMMA
-													details::BoolConstant
-													<
-														details::IntegralConstant
-														<
-															FormatArgumentType COMMA
-															TypeOf<Type>::value
-														>::value != FormatArgumentType::Custom
-													>
-												>::value
-											>::ValueType>::ValueType
-			{
-			public:
-				// CXXTLIB_FORMAT_ALIAS(, ValueType);
-			};
+#if CXXTLIB_FORMAT_CPLUSPLUS < 201103L
+		#define FormatterEnabler(Type) typename details::EnableIf \
+			< \
+				details::And \
+				< \
+					details::BoolConstant \
+					< \
+						details::IntegralConstant \
+						< \
+							FormatArgumentType, \
+							TypeOf<Type>::value \
+						>::value != FormatArgumentType::None \
+					>, \
+					details::BoolConstant \
+					< \
+						details::IntegralConstant \
+						< \
+							FormatArgumentType, \
+							TypeOf<Type>::value \
+						>::value != FormatArgumentType::Custom \
+					> \
+				>::value \
+			>::ValueType
 #else
-			template<typename Type>
-			CXXTLIB_FORMAT_ALIAS(typename details::EnableIf
-			<
-				details::And
-				<
-					details::BoolConstant
-					<
-						details::IntegralConstant
-						<
-							FormatArgumentType COMMA
-							TypeOf<Type>::value
-						>::value != FormatArgumentType::None
-					> COMMA
-					details::BoolConstant
-					<
-						details::IntegralConstant
-						<
-							FormatArgumentType COMMA
-							TypeOf<Type>::value
-						>::value != FormatArgumentType::Custom
-					>
-				>::value
-			>::ValueType, FormatterEnabler);
+			#define FormatterEnabler(Type) typename details::EnableIf \
+			< \
+				details::And \
+				< \
+					details::BoolConstant \
+					< \
+						details::IntegralConstant \
+						< \
+							FormatArgumentType, \
+							TypeOf<Type>::value \
+						>::value != FormatArgumentType::None \
+					>, \
+					details::BoolConstant \
+					< \
+						details::IntegralConstant \
+						< \
+							FormatArgumentType, \
+							TypeOf<Type>::value \
+						>::value != FormatArgumentType::Custom \
+					> \
+				>::value \
+			>::ValueType
 #endif
 
-		/*
-		template<typename Type>
-		using FormatterEnabler = typename details::EnableIf
-		<
-			details::And
-			<
-				details::BoolConstant
-				<
-					details::IntegralConstant
-					<
-						FormatArgumentType,
-						TypeOf<Type>::value
-					>::value != FormatArgumentType::None
-				>,
-				details::BoolConstant
-				<
-					details::IntegralConstant
-					<
-						FormatArgumentType,
-						TypeOf<Type>::value
-					>::value != FormatArgumentType::Custom
-				>
-			>::value
-		>::ValueType;
-		*/
-
 		template<typename Char, typename Type>
-		struct Formatter<Char, Type, FormatterEnabler<Type>>;
+		struct Formatter<Char, Type, FormatterEnabler(Type)>;
 
 		template<typename Char>
-		struct Formatter<Char, bool, FormatterEnabler<bool>> : public FormatterBase<Char>
+		struct Formatter<Char, bool, FormatterEnabler(bool)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1485,7 +1453,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, Char, FormatterEnabler<Char>> : public FormatterBase<Char>
+		struct Formatter<Char, Char, FormatterEnabler(Char)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1502,7 +1470,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::int8, FormatterEnabler<details::int8>> : public FormatterBase<Char>
+		struct Formatter<Char, details::int8, FormatterEnabler(details::int8)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1526,7 +1494,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::uint8, FormatterEnabler<details::uint8>> : public FormatterBase<Char>
+		struct Formatter<Char, details::uint8, FormatterEnabler(details::uint8)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1550,7 +1518,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::int16, FormatterEnabler<details::int16>> : public FormatterBase<Char>
+		struct Formatter<Char, details::int16, FormatterEnabler(details::int16)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1574,7 +1542,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::uint16, FormatterEnabler<details::uint16>> : public FormatterBase<Char>
+		struct Formatter<Char, details::uint16, FormatterEnabler(details::uint16)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1598,7 +1566,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::int32, FormatterEnabler<details::int32>> : public FormatterBase<Char>
+		struct Formatter<Char, details::int32, FormatterEnabler(details::int32)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1622,7 +1590,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::uint32, FormatterEnabler<details::uint32>> : public FormatterBase<Char>
+		struct Formatter<Char, details::uint32, FormatterEnabler(details::uint32)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1646,7 +1614,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::int64, FormatterEnabler<details::int64>> : public FormatterBase<Char>
+		struct Formatter<Char, details::int64, FormatterEnabler(details::int64)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1670,7 +1638,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::uint64, FormatterEnabler<details::uint64>> : public FormatterBase<Char>
+		struct Formatter<Char, details::uint64, FormatterEnabler(details::uint64)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1694,7 +1662,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, float, FormatterEnabler<float>> : public FormatterBase<Char>
+		struct Formatter<Char, float, FormatterEnabler(float)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1718,7 +1686,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, double, FormatterEnabler<double>> : public FormatterBase<Char>
+		struct Formatter<Char, double, FormatterEnabler(double)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1742,7 +1710,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::ldouble, FormatterEnabler<details::ldouble>> : public FormatterBase<Char>
+		struct Formatter<Char, details::ldouble, FormatterEnabler(details::ldouble)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1766,7 +1734,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char, typename Type>
-		struct Formatter<Char, Type*, FormatterEnabler<Type*>> : public FormatterBase<Char>
+		struct Formatter<Char, Type*, FormatterEnabler(Type*)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1790,7 +1758,7 @@ namespace cxxtlib
 		};
 		
 		template<typename Char, typename Type>
-		struct Formatter<Char, const Type*, FormatterEnabler<const Type*>> : public FormatterBase<Char>
+		struct Formatter<Char, const Type*, FormatterEnabler(const Type*)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1814,7 +1782,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, details::null, FormatterEnabler<details::null>> : public FormatterBase<Char>
+		struct Formatter<Char, details::null, FormatterEnabler(details::null)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1831,7 +1799,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, const Char*, FormatterEnabler<const Char*>> : public FormatterBase<Char>
+		struct Formatter<Char, const Char*, FormatterEnabler(const Char*)> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1851,7 +1819,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char>
-		struct Formatter<Char, const Char[], FormatterEnabler<const Char[]>> : public FormatterBase<Char>
+		struct Formatter<Char, const Char[], FormatterEnabler(const Char[])> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -1868,7 +1836,7 @@ namespace cxxtlib
 		};
 
 		template<typename Char, details::uint32 tSize>
-		struct Formatter<Char, const Char[tSize], FormatterEnabler<const Char[tSize]>> : public FormatterBase<Char>
+		struct Formatter<Char, const Char[tSize], FormatterEnabler(const Char[tSize])> : public FormatterBase<Char>
 		{
 		public:
 			template<typename ParserContext>
@@ -2176,7 +2144,7 @@ namespace cxxtlib
 
 		/**
 		 * Formats string and forwards it to any provided stream that supports << operator (cout, ofstream, etc). This method handles formatted cstring
-		 * itself and deallocates at the end of the function.
+		 * itself and deallocates it at the end of the function.
 		 */
 		template<typename Stream, typename Char, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void print(Stream& pStream, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
@@ -2189,12 +2157,11 @@ namespace cxxtlib
 		/**
 		 * Printing method for std library streams that support char_type definition.
 		 */
-		template<typename Stream, typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void stdprint(Stream& pStream, const typename Stream::char_type* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		template<typename Char, typename... Arguments>
+		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
-			CXXTLIB_FORMAT_ALIAS(typename Stream::char_type, Char);
 			Char* formatted = format<Char, Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
-			pStream << formatted;
+			::fwrite(formatted, sizeof(Char), details::ascii::length(formatted), pStream);
 			cleanup<Char>(formatted);
 		}
 	}

@@ -384,7 +384,57 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
-	print<ostream, char>(cout, ":{}:\n", (const char*)"test test");
+	cprint<char>(stdout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {} {}\n",
+			bool(),
+			char(67),
+			details::int8(12),
+			details::uint8(16),
+			details::int16(),
+			details::uint16(),
+			details::int32(874525),
+			details::uint32(),
+			details::int64(),
+			details::uint64(),
+			float(),
+			double(2135.354684343565435),
+			details::ldouble(),
+			nullptr,
+			7, 8, 9,
+			&vec,
+			&vec,
+			&lst,
+			&mp,
+			"jejejejejejej",
+			Point{ 5, 8, 7 },
+			std::string("std::string"),
+			forward_list<int>{ 8, 7, 8, 7, 8, 7, 87, 0 }
+	);
+
+	print<std::ostream, char>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {}\n",
+			bool(),
+			char(67),
+			details::int8(12),
+			details::uint8(16),
+			details::int16(),
+			details::uint16(),
+			details::int32(874525),
+			details::uint32(),
+			details::int64(),
+			details::uint64(),
+			float(),
+			double(2135.354684343565435),
+			details::ldouble(),
+			nullptr,
+			7, 8, 9,
+			&vec,
+			&vec,
+			&lst,
+			&mp,
+			"jejejejejejej",
+			Point{ 5, 8, 7 },
+			std::string("std::string")
+	);
+
 	cin.get();
 
 	forward_list<int> fl = { 4, 5, 6 };
