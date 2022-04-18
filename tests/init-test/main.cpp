@@ -384,6 +384,9 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
+	print<ostream, char>(cout, ":{}:\n", (const char*)"test test");
+	cin.get();
+
 	forward_list<int> fl = { 4, 5, 6 };
 	print<ostream, char>(cout, "foraward_list => {}\n", fl);
 
@@ -402,6 +405,8 @@ int main(void)
 	print<ostream, char>(cout, "Press any key to start tests...\n");
 	cin.get();
 
+#define STRESS_TEST 1
+#if STRESS_TEST == 1
 	const int count = 1000000;
 
 	cout << "\nTesting formatter with heap!\n";
@@ -433,6 +438,7 @@ int main(void)
 			stressTestForFormatterWithStack<count>();
 		}
 	}
+#endif
 
 	/*
 	std::vector<std::vector<int>> mat = { { 0, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1 }, { 1, 0, 1, 1, 0}, { 0, 1, 0, 0, 0 }, { 0, 0, 1, 0, 1 } };
