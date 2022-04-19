@@ -1870,12 +1870,8 @@ namespace cxxtlib
 			{
 				// Appending text from pattern.
 				pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
-
-				/**
-				 * TODO(jorisb): Maybe removing volatile specifiers too?
-				 */
-				// Removing references for types and possibly volatiles in the future.
-				CXXTLIB_FORMAT_ALIAS(typename details::RemoveReference<Argument>::ValueType, DRefArgument);
+				// Removing references for types and volatiles.
+				CXXTLIB_FORMAT_ALIAS(typename details::RemoveVolatile<typename details::RemoveReference<Argument>::ValueType>::ValueType, DRefArgument);
 				// Parsing argument settings / options.
 				Formatter<char, DRefArgument>::template parse<Reader>(pReader);
 				// Appending stringified value.
@@ -2088,6 +2084,8 @@ namespace cxxtlib
 				{
 					for (details::uint32 i = 0; i < pSize; i++)
 						this->mData[this->mSize + i] = pData[i];
+					
+					this->mSize += pSize;
 				}
 			}
 
@@ -2155,7 +2153,7 @@ namespace cxxtlib
 		}
 		
 		/**
-		 * Printing method for std library streams that support char_type definition.
+		 * Printing method for c-like streams.
 		 */
 		template<typename Char, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT

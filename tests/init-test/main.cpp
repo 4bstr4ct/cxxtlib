@@ -320,8 +320,8 @@ static constexpr void stressTestForFormatterWithStack()
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
-		char buffer[2048];
-		format<char, 2048>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nDouble value is : {}\nLongDouble value is : {}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+		char buffer[560];
+		details::uint32 written = format<char, 560>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nDouble value is : {}\nLongDouble value is : {}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -343,6 +343,7 @@ static constexpr void stressTestForFormatterWithStack()
 			&mp,
 			"jejejejejejej"
 			);
+		// std::cout << written << '\n';
 	}
 }
 
