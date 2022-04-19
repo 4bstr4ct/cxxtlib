@@ -454,40 +454,134 @@ namespace cxxtlib
 			CXXTLIB_FORMAT_ALIAS(long double, ldouble);
 
 			/**
-			 * A type representing wode char.
+			 * A type representing wide char.
 			 */
 			CXXTLIB_FORMAT_ALIAS(wchar_t, wchar);
 
+				template<typename Char>
+			struct FormatTraits;
+
+			template<>
+			struct FormatTraits<char>
+			{
+			public:
+				static CXXTLIB_FORMAT_CONSTEXPR const char baseSpecifier = 'b';
+				static CXXTLIB_FORMAT_CONSTEXPR const char decimalBaseSpecifier = 'd';
+				static CXXTLIB_FORMAT_CONSTEXPR const char hexadecimalBaseSpecifier = 'x';
+				static CXXTLIB_FORMAT_CONSTEXPR const char octalBaseSpecifier = 'o';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const char columnSpecifier = ':';
+				static CXXTLIB_FORMAT_CONSTEXPR const char terminationSpecifier = '\0';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const char xSpecifier = 'x';
+				static CXXTLIB_FORMAT_CONSTEXPR const char zeroSpecifier = '0';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const char spaceSpecifier = ' ';
+				static CXXTLIB_FORMAT_CONSTEXPR const char endLineSpecifier = '\n';
+				static CXXTLIB_FORMAT_CONSTEXPR const char leftSquareBracketSpecifier = '[';
+				static CXXTLIB_FORMAT_CONSTEXPR const char rightSquareBracketSpecifier = ']';
+				static CXXTLIB_FORMAT_CONSTEXPR const char leftCurlyBracketSpecifier = '{';
+				static CXXTLIB_FORMAT_CONSTEXPR const char rightCurlyBracketSpecifier = '}';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const char trueStringified[] = "true";
+				static CXXTLIB_FORMAT_CONSTEXPR const char falseStringified[] = "false";
+				static CXXTLIB_FORMAT_CONSTEXPR const char nullptrStringified[] = "nullptr";
+			};
+			
+			template<>
+			struct FormatTraits<details::wchar>
+			{
+			public:
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar baseSpecifier = L'b';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar decimalBaseSpecifier = L'd';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar hexadecimalBaseSpecifier = L'x';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar octalBaseSpecifier = L'o';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar columnSpecifier = L':';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar terminationSpecifier = L'\0';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar xSpecifier = L'x';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar zeroSpecifier = L'0';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar spaceSpecifier = L' ';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar endLineSpecifier = L'\n';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar leftSquareBracketSpecifier = L'[';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar rightSquareBracketSpecifier = L']';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar leftCurlyBracketSpecifier = L'{';
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar rightCurlyBracketSpecifier = L'}';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar trueStringified[] = L"true";
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar falseStringified[] = L"false";
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar nullptrStringified[] = L"nullptr";
+			};
+
 			namespace ascii
 			{
-				CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR uint32 length(const char* pString) CXXTLIB_FORMAT_NOEXCEPT
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR uint32 length(const char* pString) CXXTLIB_FORMAT_NOEXCEPT
 				{
 					uint32 count = 0;
 					while (pString[count]) count++;
 					return count;
 				}
 
-				CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(char* destination, const char* source) CXXTLIB_FORMAT_NOEXCEPT
+				template<typename Char>
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR uint32 length(const Char* pString) CXXTLIB_FORMAT_NOEXCEPT
+				{
+					uint32 count = 0;
+					while (pString[count] != FormatTraits<Char>::terminationSpecifier) count++;
+					return count;
+				}
+
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(char* destination, const char* source) CXXTLIB_FORMAT_NOEXCEPT
 				{
 					char* head = destination;
 					while((*destination++ = *source++) != '\0');
 					return head;
 				}
 
-				CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
+				template<typename Char>
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(Char* destination, const Char* source) CXXTLIB_FORMAT_NOEXCEPT
+				{
+					Char* head = destination;
+					while((*destination++ = *source++) != FormatTraits<Char>::terminationSpecifier);
+					return head;
+				}
+
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
 				{
 					char* head = destination;
 					for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
 					return head;
 				}
 
-				CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void reverse(char* pString) CXXTLIB_FORMAT_NOEXCEPT
+				template<typename Char>
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(Char* destination, const Char* source, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
+				{
+					Char* head = destination;
+					for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
+					return head;
+				}
+
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void reverse(char* pString) CXXTLIB_FORMAT_NOEXCEPT
 				{
 					uint32 size = length((const char*)pString);
 					
 					for (int32 i = 0, j = size - 1; i < j; i++, j--)
 					{
 						char a = pString[i];
+						pString[i] = pString[j];
+						pString[j] = a;
+					}
+				}
+
+				template<typename Char>
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void reverse(Char* pString) CXXTLIB_FORMAT_NOEXCEPT
+				{
+					uint32 size = length((const Char*)pString);
+					
+					for (int32 i = 0, j = size - 1; i < j; i++, j--)
+					{
+						Char a = pString[i];
 						pString[i] = pString[j];
 						pString[j] = a;
 					}
@@ -1305,70 +1399,13 @@ namespace cxxtlib
 		};
 		
 		template<typename Char>
-		struct FormatTraits;
-
-		template<>
-		struct FormatTraits<char>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const char baseSpecifier = 'b';
-			static CXXTLIB_FORMAT_CONSTEXPR const char decimalBaseSpecifier = 'd';
-			static CXXTLIB_FORMAT_CONSTEXPR const char hexadecimalBaseSpecifier = 'x';
-			static CXXTLIB_FORMAT_CONSTEXPR const char octalBaseSpecifier = 'o';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const char columnSpecifier = ':';
-			static CXXTLIB_FORMAT_CONSTEXPR const char terminationSpecifier = '\0';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const char xSpecifier = 'x';
-			static CXXTLIB_FORMAT_CONSTEXPR const char zeroSpecifier = '0';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const char spaceSpecifier = ' ';
-			static CXXTLIB_FORMAT_CONSTEXPR const char endLineSpecifier = '\n';
-			static CXXTLIB_FORMAT_CONSTEXPR const char leftSquareBracketSpecifier = '[';
-			static CXXTLIB_FORMAT_CONSTEXPR const char rightSquareBracketSpecifier = ']';
-			static CXXTLIB_FORMAT_CONSTEXPR const char leftCurlyBracketSpecifier = '{';
-			static CXXTLIB_FORMAT_CONSTEXPR const char rightCurlyBracketSpecifier = '}';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const char trueStringified[] = "true";
-			static CXXTLIB_FORMAT_CONSTEXPR const char falseStringified[] = "false";
-			static CXXTLIB_FORMAT_CONSTEXPR const char nullptrStringified[] = "nullptr";
-		};
-		
-		template<>
-		struct FormatTraits<details::wchar>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar baseSpecifier = L'b';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar decimalBaseSpecifier = L'd';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar hexadecimalBaseSpecifier = L'x';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar octalBaseSpecifier = L'o';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar columnSpecifier = L':';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar terminationSpecifier = L'\0';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar xSpecifier = L'x';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar zeroSpecifier = L'0';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar spaceSpecifier = L' ';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar endLineSpecifier = L'\n';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar leftSquareBracketSpecifier = L'[';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar rightSquareBracketSpecifier = L']';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar leftCurlyBracketSpecifier = L'{';
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar rightCurlyBracketSpecifier = L'}';
-
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar trueStringified[] = L"true";
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar falseStringified[] = L"false";
-			static CXXTLIB_FORMAT_CONSTEXPR const details::wchar nullptrStringified[] = L"nullptr";
-		};
-
-		template<typename Char>
 		struct FormatterBase
 		{
 		public:
 			template<typename ParserContext>
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void ignoreOnce(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				for (; *pContext != FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++);
+				for (; *pContext != details::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++);
 				pContext++;
 			}
 		};
@@ -1444,10 +1481,10 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, bool pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(
-					pValue ? FormatTraits<Char>::trueStringified
-						: FormatTraits<Char>::falseStringified,
-					pValue ? details::ascii::length(FormatTraits<Char>::trueStringified)
-						: details::ascii::length(FormatTraits<Char>::falseStringified)
+					pValue ? details::FormatTraits<Char>::trueStringified
+						: details::FormatTraits<Char>::falseStringified,
+					pValue ? details::ascii::length<Char>(details::FormatTraits<Char>::trueStringified)
+						: details::ascii::length<Char>(details::FormatTraits<Char>::falseStringified)
 				);
 			}
 		};
@@ -1794,7 +1831,7 @@ namespace cxxtlib
 			template<typename FormatterContext>
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::null pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				pContext.append(FormatTraits<Char>::nullptrStringified, 7u);
+				pContext.append(details::FormatTraits<Char>::nullptrStringified, 7u);
 			}
 		};
 
@@ -1813,7 +1850,7 @@ namespace cxxtlib
 			{
 				if (pValue)
 				{
-					pContext.append(pValue, details::ascii::length(pValue));
+					pContext.append(pValue, details::ascii::length<Char>(pValue));
 				}
 			}
 		};
@@ -1831,7 +1868,7 @@ namespace cxxtlib
 			template<typename FormatterContext>
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, const Char pValue[]) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				pContext.append(pValue, details::ascii::length(pValue));
+				pContext.append(pValue, details::ascii::length<Char>(pValue));
 			}
 		};
 
@@ -1862,20 +1899,20 @@ namespace cxxtlib
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			// Setting pointer to the beggining for this section of pattern
-			const char* previous = pReader.iterator();
+			const Char* previous = pReader.iterator();
 			// Iterating untill next '{' character in pattern is present
-			for (; *pReader != FormatTraits<Char>::leftCurlyBracketSpecifier && pReader.iterator() != pReader.end(); pReader++);
+			for (; *pReader != details::FormatTraits<Char>::leftCurlyBracketSpecifier && pReader.iterator() != pReader.end(); pReader++);
 
-			if (*pReader == FormatTraits<Char>::leftCurlyBracketSpecifier)
+			if (*pReader == details::FormatTraits<Char>::leftCurlyBracketSpecifier)
 			{
 				// Appending text from pattern.
 				pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
 				// Removing references for types and volatiles.
 				CXXTLIB_FORMAT_ALIAS(typename details::RemoveVolatile<typename details::RemoveReference<Argument>::ValueType>::ValueType, DRefArgument);
 				// Parsing argument settings / options.
-				Formatter<char, DRefArgument>::template parse<Reader>(pReader);
+				Formatter<Char, DRefArgument>::template parse<Reader>(pReader);
 				// Appending stringified value.
-				Formatter<char, DRefArgument>::template format<Writer>(pWriter, pArgument);
+				Formatter<Char, DRefArgument>::template format<Writer>(pWriter, pArgument);
 			}
 
 			// Going onto the next argument
@@ -2009,7 +2046,7 @@ namespace cxxtlib
 			{
 				this->mCapacity = pCapacity;
 				this->mData = new Char[pCapacity + 1];
-				this->mData[this->mSize] = details::move(FormatTraits<Char>::terminationSpecifier);
+				this->mData[this->mSize] = details::move(details::FormatTraits<Char>::terminationSpecifier);
 			}
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void reallocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
@@ -2034,7 +2071,7 @@ namespace cxxtlib
 					reallocate(this->mCapacity + this->mCapacity / 2);
 				
 				this->mData[this->mSize++] = pChar;
-				this->mData[this->mSize] = (Char)FormatTraits<Char>::terminationSpecifier;
+				this->mData[this->mSize] = details::FormatTraits<Char>::terminationSpecifier;
 			}
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void append(const Char* const pData, details::uint32 pSize) CXXTLIB_FORMAT_NOEXCEPT
@@ -2045,7 +2082,7 @@ namespace cxxtlib
 				for (details::uint32 i = 0; i < pSize; i++)
 					this->mData[this->mSize + i] = pData[i];
 
-				this->mData[this->mSize += pSize] = FormatTraits<Char>::terminationSpecifier;
+				this->mData[this->mSize += pSize] = details::FormatTraits<Char>::terminationSpecifier;
 			}
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* get() CXXTLIB_FORMAT_NOEXCEPT
@@ -2091,7 +2128,7 @@ namespace cxxtlib
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* get() CXXTLIB_FORMAT_NOEXCEPT
 			{
-				this->mData[this->mSize] = FormatTraits<Char>::terminationSpecifier;
+				this->mData[this->mSize] = details::FormatTraits<Char>::terminationSpecifier;
 				return this->mData;
 			}
 		};
@@ -2105,7 +2142,7 @@ namespace cxxtlib
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* format(const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			// Setting up the reader (later referenced as ParserContext).
-			details::uint32 patternLength = details::ascii::length(pPattern);
+			details::uint32 patternLength = details::ascii::length<Char>(pPattern);
 			Reader<Char> reader = Reader<Char>(pPattern, pPattern, pPattern + patternLength);
 			// Setting up the writer (later referenced as FormatterContext).
 			details::uint32 argumentsLength = sizeof...(pArguments);
@@ -2122,7 +2159,7 @@ namespace cxxtlib
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 format(Char* pBuffer, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			// Setting up the reader (later referenced as ParserContext).
-			Reader<Char> reader = Reader<Char>(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
+			Reader<Char> reader = Reader<Char>(pPattern, pPattern, pPattern + details::ascii::length<Char>(pPattern));
 			// Setting up the writer with user defined initial capacity (later referenced as FormatterContext).
 			StackWriter<Char, tSize> writer = StackWriter<Char, tSize>(pBuffer);
 			// Passing reader, writer and arguments to the handle function and returning formatted cstring
@@ -2159,7 +2196,7 @@ namespace cxxtlib
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			Char* formatted = format<Char, Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
-			::fwrite(formatted, sizeof(Char), details::ascii::length(formatted), pStream);
+			::fwrite(formatted, sizeof(Char), details::ascii::length<Char>(formatted), pStream);
 			cleanup<Char>(formatted);
 		}
 	}
@@ -2170,7 +2207,7 @@ namespace cxxtlib
  */
 
 #define IGNORE_ONCE(pContext) \
-for (; *pContext != cxxtlib::format::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); \
+for (; *pContext != cxxtlib::format::details::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); \
 pContext++;
 
 #define CUSTOM_TYPE_OF(Type) \
@@ -2237,17 +2274,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::array<Type, tSize>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::array<Type COMMA tSize>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2277,17 +2314,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::vector<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::vector<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 	
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2317,17 +2354,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::list<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::list<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 	
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2357,17 +2394,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::deque<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::deque<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 	
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2397,17 +2434,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::forward_list<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::forward_list<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2437,17 +2474,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::initializer_list<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::initializer_list<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = pValue.begin() + 1; iterator != pValue.end(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2477,11 +2514,11 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::pair<Key, Value>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Key>::format(pContext, pValue.first);
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 		Formatter<Char, Value>::format(pContext, pValue.second);
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2511,17 +2548,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::set<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::set<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2551,17 +2588,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::unordered_set<Type>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::unordered_set<Type>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, Type>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2591,17 +2628,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::map<Key, Value>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::map<Key COMMA Value>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
@@ -2631,17 +2668,17 @@ public:
 	template<typename FormatterContext>
 	static void format(FormatterContext& pContext, const ::std::unordered_map<Key, Value>& pValue)
 	{
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::leftSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
 
 		CXXTLIB_FORMAT_ALIAS(typename ::std::unordered_map<Key COMMA Value>::const_iterator, ConstIterator);
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<Char, Char>::format(pContext, FormatTraits<Char>::spaceSpecifier);
+			Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::spaceSpecifier);
 			Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *iterator);
 		}
 
-		Formatter<Char, Char>::format(pContext, FormatTraits<Char>::rightSquareBracketSpecifier);
+		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::rightSquareBracketSpecifier);
 	}
 };
 
