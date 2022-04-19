@@ -380,27 +380,11 @@ static constexpr void stressTestForSPRINTF()
 	}
 }
 
-template<typename Type, Type tValue>
-void test(void)
-{
-	std::cout << tValue << '\n';
-}
-
-template<typename Type, typename... Types, Type tValue, Type... tValues>
-void test(void)
-{
-	std::cout << tValue << '\n';
-	test<Types, tValues>();
-}
-
 int main(void)
 {
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
-	test<int, bool, 55, true>();
-
-	/*
 	cprint<char>(stdout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {} {}\n",
 			bool(),
 			char(67),
@@ -471,9 +455,8 @@ int main(void)
 
 	print<ostream, char>(cout, "Press any key to start tests...\n");
 	cin.get();
-	*/
 
-#define STRESS_TEST 0
+#define STRESS_TEST 1
 #if STRESS_TEST == 1
 	const int count = 1000000;
 
