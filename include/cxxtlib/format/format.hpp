@@ -1520,7 +1520,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%d", pValue);
 				
 				if (written >= 0)
@@ -1544,7 +1544,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%u", pValue);
 				
 				if (written >= 0)
@@ -1568,7 +1568,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%d", pValue);
 				
 				if (written >= 0)
@@ -1592,7 +1592,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%u", pValue);
 				
 				if (written >= 0)
@@ -1616,7 +1616,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%d", pValue);
 				
 				if (written >= 0)
@@ -1640,7 +1640,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%u", pValue);
 				
 				if (written >= 0)
@@ -1664,7 +1664,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%lld", pValue);
 				
 				if (written >= 0)
@@ -1688,7 +1688,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%llu", pValue);
 				
 				if (written >= 0)
@@ -1712,7 +1712,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, float pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%f", pValue);
 				
 				if (written >= 0)
@@ -1736,7 +1736,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, double pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%f", pValue);
 				
 				if (written >= 0)
@@ -1760,7 +1760,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::ldouble pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 26u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "%Lf", pValue);
 				
 				if (written >= 0)
@@ -1784,7 +1784,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "0x%p", (void*)pValue);
 				
 				if (written >= 0)
@@ -1808,7 +1808,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, const Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
-				Char buffer[size];
+				Char buffer[size] { };
 				const details::int32 written = ::snprintf(buffer, size, "0x%p", (const void*)pValue);
 				
 				if (written >= 0)
@@ -2032,7 +2032,7 @@ namespace cxxtlib
 			details::uint32 mCapacity;
 
 		public:
-			explicit HeapWriter(details::uint32 pCapacity = 4) CXXTLIB_FORMAT_NOEXCEPT
+			explicit HeapWriter(details::uint32 pCapacity = 4u) CXXTLIB_FORMAT_NOEXCEPT
 				: mData(nullptr), mSize(0), mCapacity(pCapacity)
 			{ allocate(pCapacity); }
 
@@ -2045,13 +2045,13 @@ namespace cxxtlib
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void allocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				this->mCapacity = pCapacity;
-				this->mData = new Char[pCapacity + 1];
+				this->mData = new Char[pCapacity + 1u];
 				this->mData[this->mSize] = details::move(details::FormatTraits<Char>::terminationSpecifier);
 			}
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void reallocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				Char* local = new Char[pCapacity + 1];
+				Char* local = new Char[pCapacity + 1u];
 
 				if (this->mSize > pCapacity)
 					this->mSize = pCapacity;
@@ -2111,7 +2111,7 @@ namespace cxxtlib
 			
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void append(Char pChar) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				if (this->mSize + 1 <= tCapacity)
+				if (this->mSize + 1u <= tCapacity)
 					this->mData[this->mSize++] = pChar;
 			}
 
@@ -2136,7 +2136,7 @@ namespace cxxtlib
 		/**
 		 * Formats a dynamic cstring and returns a pointer to it. Note that neither this methods, nor any underlying structures and funtions deallocate
 		 * this formatted cstring (the result). It is users responsibility to deallocate result cstring after they finish working with it. User can use
-		 * delete[] operator to deallocate memory or store this pointer to formatted cstring inside a smart pointer.
+		 * cleanup<Char>() function to deallocate memory or store this pointer to formatted cstring inside a smart pointer.
 		 */
 		template<typename Char, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* format(const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
