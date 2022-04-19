@@ -385,6 +385,10 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
+	char buffer[42] { };
+	cprint<char>(stdout, "float with a value of 5.2 set to precision format \'1.3f\' is {}\n\n",
+		precision<char, 42>(buffer, -8, 1, 3));
+
 	cprint<char>(stdout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {} {}\n",
 			bool(),
 			char(67),

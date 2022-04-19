@@ -2199,6 +2199,94 @@ namespace cxxtlib
 			::fwrite(formatted, sizeof(Char), details::ascii::length<Char>(formatted), pStream);
 			cleanup<Char>(formatted);
 		}
+
+		template<typename Char, typename Type>
+		struct SpecifierOf
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = ' ';
+		};
+
+		template<typename Char>
+		struct SpecifierOf<Char, details::int8>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
+		};
+
+		template<typename Char>
+		struct SpecifierOf<Char, details::uint8>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'u';
+		};
+
+		template<typename Char>
+		struct SpecifierOf<Char, details::int16>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
+		};
+
+		template<typename Char>
+		struct SpecifierOf<Char, details::uint16>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'u';
+		};
+		
+		template<typename Char>
+		struct SpecifierOf<Char, details::int32>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
+		};
+
+		template<typename Char>
+		struct SpecifierOf<Char, details::uint32>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'u';
+		};
+		
+		template<typename Char>
+		struct SpecifierOf<Char, float>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'f';
+		};
+
+		template<typename Char>
+		struct SpecifierOf<Char, double>
+		{
+		public:
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
+		};
+
+		template<typename Char, details::uint32 tSize, typename Type>
+		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const Char* precision(Char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) CXXTLIB_FORMAT_NOEXCEPT
+		{
+			Char temp[10] { };
+			temp[0] = '%';
+			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
+			temp[++count] = (Char)SpecifierOf<Char, Type>::value;
+
+			if (count <= 0)
+			{
+				return nullptr;
+			}
+
+			const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
+
+			if (written > 0)
+			{
+				return pBuffer;
+			}
+			else
+			{
+				return nullptr;
+			}
+		}
 	}
 }
 
