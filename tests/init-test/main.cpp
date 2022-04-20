@@ -286,7 +286,7 @@ static constexpr void stressTestForFormatterWithHeap()
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
-		auto formatted = format<char>("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nDouble value is : {}\nLongDouble value is : {}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+		auto formatted = format<char>("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -298,8 +298,11 @@ static constexpr void stressTestForFormatterWithHeap()
 			details::int64(),
 			details::uint64(),
 			float(),
+			float(8125.5432),
+			double(2135.354684343565435),
 			double(2135.354684343565435),
 			details::ldouble(),
+			details::ldouble(156.698461),
 			nullptr,
 			7, 8, 9,
 			&vec,
@@ -320,8 +323,8 @@ static constexpr void stressTestForFormatterWithStack()
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
-		char buffer[560];
-		details::uint32 written = format<char, 560>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nDouble value is : {}\nLongDouble value is : {}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+		char buffer[2048];
+		details::uint32 written = format<char, 2048>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -333,8 +336,11 @@ static constexpr void stressTestForFormatterWithStack()
 			details::int64(),
 			details::uint64(),
 			float(),
+			float(8125.5432),
+			double(2135.354684343565435),
 			double(2135.354684343565435),
 			details::ldouble(),
+			details::ldouble(156.698461),
 			nullptr,
 			7, 8, 9,
 			&vec,
@@ -355,7 +361,7 @@ static constexpr void stressTestForSPRINTF()
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
 		char buffer[2048];
-		snprintf(buffer, 2048, "Boolean value is : %d\nChar value is : %c\nInt8 value is : %d\nUInt8 value is : %u\nInt16 value is : %d\nUInt16 value is : %u\nInt32 value is : %d\nUInt32 value is : %u\nLongLong value is : %lld\nULongLong value is : %llu\nFloat value is : %f\nDouble value is : %f\nLongDouble value is : %Lf\nNullptr stringified is : %s\nPoint here goes brrr : [%d %d %d]\nAddressOne value is : %p\nAddressTwo value is : %p\nAddressThree value is : %p\nAddressFour value is : %p\nSome string value is : %s\n",
+		snprintf(buffer, 2048, "Boolean value is : %d\nChar value is : %c\nInt8 value is : %d\nUInt8 value is : %u\nInt16 value is : %d\nUInt16 value is : %u\nInt32 value is : %d\nUInt32 value is : %u\nLongLong value is : %lld\nULongLong value is : %llu\nFloat value is : %f\nFloat value with precision is : %3.5f\nDouble value is : %f\nDouble value with precision is : %3.5f\nLongDouble value is : %Lf\nLongDouble value with precision is : %3.5Lf\nNullptr stringified is : %s\nPoint here goes brrr : [%d %d %d]\nAddressOne value is : %p\nAddressTwo value is : %p\nAddressThree value is : %p\nAddressFour value is : %p\nSome string value is : %s\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -367,8 +373,11 @@ static constexpr void stressTestForSPRINTF()
 			details::int64(),
 			details::uint64(),
 			float(),
+			float(8125.5432),
+			double(2135.354684343565435),
 			double(2135.354684343565435),
 			details::ldouble(),
+			details::ldouble(156.698461),
 			"nullptr",
 			7, 8, 9,
 			&vec,
@@ -377,6 +386,7 @@ static constexpr void stressTestForSPRINTF()
 			&mp,
 			"jejejejejejej"
 			);
+			// 
 	}
 }
 
@@ -384,6 +394,10 @@ int main(void)
 {
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
+
+	char _buffer[10] { };
+	cprint<char>(stdout, "Test : {}\n       {}\n\n", 13.56f, precision<char, 10, float>(_buffer, 13.56f, 3, 5));
+	cin.get();
 
 	char buffer[42] { };
 	cprint<char>(stdout, "float with a value of 5.2 set to precision format \'1.3f\' is {}\n\n",

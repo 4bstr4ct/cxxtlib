@@ -470,14 +470,14 @@ namespace cxxtlib
 				static CXXTLIB_FORMAT_CONSTEXPR const char hexadecimalBaseSpecifier = 'x';
 				static CXXTLIB_FORMAT_CONSTEXPR const char octalBaseSpecifier = 'o';
 
+				static CXXTLIB_FORMAT_CONSTEXPR const char precisionSpecifier = 'p';
+
 				static CXXTLIB_FORMAT_CONSTEXPR const char columnSpecifier = ':';
 				static CXXTLIB_FORMAT_CONSTEXPR const char terminationSpecifier = '\0';
-
-				static CXXTLIB_FORMAT_CONSTEXPR const char xSpecifier = 'x';
-				static CXXTLIB_FORMAT_CONSTEXPR const char zeroSpecifier = '0';
-
 				static CXXTLIB_FORMAT_CONSTEXPR const char spaceSpecifier = ' ';
 				static CXXTLIB_FORMAT_CONSTEXPR const char endLineSpecifier = '\n';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const char percentageSpecifier = '%';
 				static CXXTLIB_FORMAT_CONSTEXPR const char leftSquareBracketSpecifier = '[';
 				static CXXTLIB_FORMAT_CONSTEXPR const char rightSquareBracketSpecifier = ']';
 				static CXXTLIB_FORMAT_CONSTEXPR const char leftCurlyBracketSpecifier = '{';
@@ -497,14 +497,14 @@ namespace cxxtlib
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar hexadecimalBaseSpecifier = L'x';
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar octalBaseSpecifier = L'o';
 
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar precisionSpecifier = L'p';
+
+				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar percentageSpecifier = L'%';
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar columnSpecifier = L':';
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar terminationSpecifier = L'\0';
-
-				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar xSpecifier = L'x';
-				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar zeroSpecifier = L'0';
-
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar spaceSpecifier = L' ';
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar endLineSpecifier = L'\n';
+
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar leftSquareBracketSpecifier = L'[';
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar rightSquareBracketSpecifier = L']';
 				static CXXTLIB_FORMAT_CONSTEXPR const details::wchar leftCurlyBracketSpecifier = L'{';
@@ -1399,16 +1399,20 @@ namespace cxxtlib
 		};
 		
 		template<typename Char>
-		struct FormatterBase
+		struct FormatterHelpers
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void ignoreOnce(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parseIgnore(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				for (; *pContext != details::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++);
 				pContext++;
 			}
 		};
+
+		template<typename Char>
+		struct FormatterBase
+		{ };
 		
 		template<typename Char, typename Type, typename Enable = void>
 		struct Formatter
@@ -1471,14 +1475,14 @@ namespace cxxtlib
 		struct Formatter<Char, bool, FormatterEnabler(bool)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, bool pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, bool pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(
 					pValue ? details::FormatTraits<Char>::trueStringified
@@ -1493,14 +1497,14 @@ namespace cxxtlib
 		struct Formatter<Char, Char, FormatterEnabler(Char)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, Char pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, Char pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue);
 			}
@@ -1510,14 +1514,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::int8, FormatterEnabler(details::int8)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int8 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
 				Char buffer[size] { };
@@ -1534,14 +1538,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::uint8, FormatterEnabler(details::uint8)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint8 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
 				Char buffer[size] { };
@@ -1558,14 +1562,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::int16, FormatterEnabler(details::int16)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int16 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
 				Char buffer[size] { };
@@ -1582,14 +1586,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::uint16, FormatterEnabler(details::uint16)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint16 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
 				Char buffer[size] { };
@@ -1606,14 +1610,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::int32, FormatterEnabler(details::int32)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int32 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
 				Char buffer[size] { };
@@ -1630,14 +1634,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::uint32, FormatterEnabler(details::uint32)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint32 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
 				Char buffer[size] { };
@@ -1654,14 +1658,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::int64, FormatterEnabler(details::int64)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::int64 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
 				Char buffer[size] { };
@@ -1678,14 +1682,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::uint64, FormatterEnabler(details::uint64)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::uint64 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
 				Char buffer[size] { };
@@ -1702,14 +1706,14 @@ namespace cxxtlib
 		struct Formatter<Char, float, FormatterEnabler(float)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, float pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, float pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
 				Char buffer[size] { };
@@ -1726,14 +1730,14 @@ namespace cxxtlib
 		struct Formatter<Char, double, FormatterEnabler(double)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, double pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, double pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
 				Char buffer[size] { };
@@ -1750,14 +1754,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::ldouble, FormatterEnabler(details::ldouble)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::ldouble pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::ldouble pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 26u;
 				Char buffer[size] { };
@@ -1774,14 +1778,14 @@ namespace cxxtlib
 		struct Formatter<Char, Type*, FormatterEnabler(Type*)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
 				Char buffer[size] { };
@@ -1798,14 +1802,14 @@ namespace cxxtlib
 		struct Formatter<Char, const Type*, FormatterEnabler(const Type*)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, const Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
 				Char buffer[size] { };
@@ -1822,14 +1826,14 @@ namespace cxxtlib
 		struct Formatter<Char, details::null, FormatterEnabler(details::null)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, details::null pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::null pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(details::FormatTraits<Char>::nullptrStringified, 7u);
 			}
@@ -1839,14 +1843,14 @@ namespace cxxtlib
 		struct Formatter<Char, const Char*, FormatterEnabler(const Char*)> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, const Char* pValue) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Char* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				if (pValue)
 				{
@@ -1859,14 +1863,14 @@ namespace cxxtlib
 		struct Formatter<Char, const Char[], FormatterEnabler(const Char[])> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, const Char pValue[]) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Char pValue[]) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue, details::ascii::length<Char>(pValue));
 			}
@@ -1876,14 +1880,14 @@ namespace cxxtlib
 		struct Formatter<Char, const Char[tSize], FormatterEnabler(const Char[tSize])> : public FormatterBase<Char>
 		{
 		public:
-			template<typename ParserContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(ParserContext& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				FormatterBase<Char>::template ignoreOnce<ParserContext>(pContext);
+				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
 			}
 
-			template<typename FormatterContext>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(FormatterContext& pContext, const Char pValue[tSize]) CXXTLIB_FORMAT_NOEXCEPT
+			template<typename Context>
+			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Char pValue[tSize]) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue, tSize - 1);
 			}
@@ -2141,10 +2145,10 @@ namespace cxxtlib
 		template<typename Char, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* format(const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
-			// Setting up the reader (later referenced as ParserContext).
+			// Setting up the reader (later referenced as Context).
 			details::uint32 patternLength = details::ascii::length<Char>(pPattern);
 			Reader<Char> reader = Reader<Char>(pPattern, pPattern, pPattern + patternLength);
-			// Setting up the writer (later referenced as FormatterContext).
+			// Setting up the writer (later referenced as Context).
 			details::uint32 argumentsLength = sizeof...(pArguments);
 			HeapWriter<Char> writer = HeapWriter<Char>(patternLength + argumentsLength);
 			// Passing reader, writer and arguments to the handle function and returning formatted cstring
@@ -2158,9 +2162,9 @@ namespace cxxtlib
 		template<typename Char, details::uint32 tSize, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 format(Char* pBuffer, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
-			// Setting up the reader (later referenced as ParserContext).
+			// Setting up the reader (later referenced as Context).
 			Reader<Char> reader = Reader<Char>(pPattern, pPattern, pPattern + details::ascii::length<Char>(pPattern));
-			// Setting up the writer with user defined initial capacity (later referenced as FormatterContext).
+			// Setting up the writer with user defined initial capacity (later referenced as Context).
 			StackWriter<Char, tSize> writer = StackWriter<Char, tSize>(pBuffer);
 			// Passing reader, writer and arguments to the handle function and returning formatted cstring
 			formatHandle<Char, Reader<Char>, StackWriter<Char, tSize>, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
@@ -2323,14 +2327,14 @@ template<typename Char, typename Traits>
 CUSTOM_FORMATTER(Char COMMA ::std::basic_string<Char COMMA Traits>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::basic_string<Char, Traits>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::basic_string<Char, Traits>& pValue)
 	{
 		pContext.append(pValue.data(), (details::uint32)pValue.size()); 
 	}
@@ -2353,14 +2357,14 @@ template<typename Char, typename Type, ::std::size_t tSize>
 CUSTOM_FORMATTER(Char COMMA ::std::array<Type COMMA tSize>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::array<Type, tSize>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::array<Type, tSize>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2393,14 +2397,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::vector<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::vector<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::vector<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2433,14 +2437,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::list<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::list<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::list<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2473,14 +2477,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::deque<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::deque<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::deque<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2513,14 +2517,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::forward_list<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::forward_list<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::forward_list<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2553,14 +2557,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::initializer_list<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::initializer_list<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::initializer_list<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2593,14 +2597,14 @@ template<typename Char, typename Key, typename Value>
 CUSTOM_FORMATTER(Char COMMA ::std::pair<Key COMMA Value>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::pair<Key, Value>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::pair<Key, Value>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Key>::format(pContext, pValue.first);
@@ -2627,14 +2631,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::set<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::set<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::set<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2667,14 +2671,14 @@ template<typename Char, typename Type>
 CUSTOM_FORMATTER(Char COMMA ::std::unordered_set<Type>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::unordered_set<Type>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::unordered_set<Type>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, Type>::format(pContext, *pValue.begin());
@@ -2707,14 +2711,14 @@ template<typename Char, typename Key, typename Value>
 CUSTOM_FORMATTER(Char COMMA ::std::map<Key COMMA Value>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::map<Key, Value>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::map<Key, Value>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
@@ -2747,14 +2751,14 @@ template<typename Char, typename Key, typename Value>
 CUSTOM_FORMATTER(Char COMMA ::std::unordered_map<Key COMMA Value>)
 {
 public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+	template<typename Context>
+	static void parse(Context& pContext)
 	{
 		IGNORE_ONCE(pContext);
 	}
 
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const ::std::unordered_map<Key, Value>& pValue)
+	template<typename Context>
+	static void format(Context& pContext, const ::std::unordered_map<Key, Value>& pValue)
 	{
 		Formatter<Char, Char>::format(pContext, details::FormatTraits<Char>::leftSquareBracketSpecifier);
 		Formatter<Char, ::std::pair<Key, Value>>::format(pContext, *pValue.begin());
