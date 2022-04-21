@@ -1420,53 +1420,28 @@ namespace cxxtlib
 			static_assert(TypeOf<Type>::value != FormatArgumentType::None, "Provided type does not have a formatter!");
 		};
 
-#if CXXTLIB_FORMAT_CPLUSPLUS < 201103L
 		#define FormatterEnabler(Type) typename details::EnableIf \
+		< \
+			details::And \
 			< \
-				details::And \
+				details::BoolConstant \
 				< \
-					details::BoolConstant \
+					details::IntegralConstant \
 					< \
-						details::IntegralConstant \
-						< \
-							FormatArgumentType, \
-							TypeOf<Type>::value \
-						>::value != FormatArgumentType::None \
-					>, \
-					details::BoolConstant \
-					< \
-						details::IntegralConstant \
-						< \
-							FormatArgumentType, \
-							TypeOf<Type>::value \
-						>::value != FormatArgumentType::Custom \
-					> \
-				>::value \
-			>::ValueType
-#else
-			#define FormatterEnabler(Type) typename details::EnableIf \
-			< \
-				details::And \
+						FormatArgumentType, \
+						TypeOf<Type>::value \
+					>::value != FormatArgumentType::None \
+				>, \
+				details::BoolConstant \
 				< \
-					details::BoolConstant \
+					details::IntegralConstant \
 					< \
-						details::IntegralConstant \
-						< \
-							FormatArgumentType, \
-							TypeOf<Type>::value \
-						>::value != FormatArgumentType::None \
-					>, \
-					details::BoolConstant \
-					< \
-						details::IntegralConstant \
-						< \
-							FormatArgumentType, \
-							TypeOf<Type>::value \
-						>::value != FormatArgumentType::Custom \
-					> \
-				>::value \
-			>::ValueType
-#endif
+						FormatArgumentType, \
+						TypeOf<Type>::value \
+					>::value != FormatArgumentType::Custom \
+				> \
+			>::value \
+		>::ValueType
 
 		template<typename Char, typename Type>
 		struct Formatter<Char, Type, FormatterEnabler(Type)>;
@@ -2192,6 +2167,14 @@ namespace cxxtlib
 			pStream << formatted;
 			cleanup<Char>(formatted);
 		}
+
+		template<typename Stream, typename Char, details::uint32 tSize, typename... Arguments>
+		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void print(Stream& pStream, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		{
+			Char formatted[tSize] { };
+			format<Char, tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
+			pStream << formatted;
+		}
 		
 		/**
 		 * Printing method for c-like streams.
@@ -2202,6 +2185,14 @@ namespace cxxtlib
 			Char* formatted = format<Char, Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 			::fwrite(formatted, sizeof(Char), details::ascii::length<Char>(formatted), pStream);
 			cleanup<Char>(formatted);
+		}
+
+		template<typename Char, details::uint32 tSize, typename... Arguments>
+		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const Char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		{
+			Char formatted[tSize] { };
+			format<Char, tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
+			::fwrite(formatted, sizeof(Char), details::ascii::length<Char>(formatted), pStream);
 		}
 
 		template<typename Char, typename Type>
