@@ -20,6 +20,7 @@
 #endif
 
 #include <stdio.h>
+#include <vector>
 
 #ifndef CXXTLIB_CLANG_VERSION
 #	ifndef CXXTLIB_FORMAT_CLANG_VERSION
@@ -540,7 +541,7 @@ namespace cxxtlib
 				}
 
 				template<typename Char>
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(Char* destination, const Char* source) CXXTLIB_FORMAT_NOEXCEPT
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* copy(Char* destination, const Char* source) CXXTLIB_FORMAT_NOEXCEPT
 				{
 					Char* head = destination;
 					while((*destination++ = *source++) != FormatTraits<Char>::terminationSpecifier);
@@ -555,7 +556,7 @@ namespace cxxtlib
 				}
 
 				template<typename Char>
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(Char* destination, const Char* source, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
+				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Char* copy(Char* destination, const Char* source, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
 				{
 					Char* head = destination;
 					for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
@@ -1265,138 +1266,35 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
 		};
 
-		template<>
-		struct TypeOf<bool>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Bool;
-		};
+		#define EMPTY
 
-		template<>
-		struct TypeOf<char>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Char;
-		};
+		#define INTERNAL_TYPE_OF(TTypes, Type, FType) \
+		template<TTypes> \
+		struct TypeOf<Type> \
+		{ \
+		public: \
+			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
+		}
 
-		template<>
-		struct TypeOf<details::int8>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Int8;
-		};
-
-		template<>
-		struct TypeOf<details::uint8>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::UInt8;
-		};
-
-		template<>
-		struct TypeOf<details::int16>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Int16;
-		};
-
-		template<>
-		struct TypeOf<details::uint16>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::UInt16;
-		};
-
-		template<>
-		struct TypeOf<details::int32>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Int32;
-		};
-
-		template<>
-		struct TypeOf<details::uint32>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::UInt32;
-		};
-
-		template<>
-		struct TypeOf<details::int64>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Int64;
-		};
-
-		template<>
-		struct TypeOf<details::uint64>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::UInt64;
-		};
-
-		template<>
-		struct TypeOf<float>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Float;
-		};
-
-		template<>
-		struct TypeOf<double>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Double;
-		};
-
-		template<>
-		struct TypeOf<details::ldouble>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::LDouble;
-		};
-
-		template<typename Type>
-		struct TypeOf<Type*>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Pointer;
-		};
-
-		template<typename Type>
-		struct TypeOf<const Type*>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Pointer;
-		};
-
-		template<>
-		struct TypeOf<details::null>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Pointer;
-		};
-
-		template<>
-		struct TypeOf<const char*>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::CString;
-		};
-
-		template<>
-		struct TypeOf<const char[]>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::CString;
-		};
-		
-		template<details::uint32 tSize>
-		struct TypeOf<const char[tSize]>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::CString;
-		};
+		INTERNAL_TYPE_OF(EMPTY, bool, FormatArgumentType::Bool);
+		INTERNAL_TYPE_OF(EMPTY, char, FormatArgumentType::Char);
+		INTERNAL_TYPE_OF(EMPTY, details::int8, FormatArgumentType::Int8);
+		INTERNAL_TYPE_OF(EMPTY, details::uint8, FormatArgumentType::UInt8);
+		INTERNAL_TYPE_OF(EMPTY, details::int16, FormatArgumentType::Int16);
+		INTERNAL_TYPE_OF(EMPTY, details::uint16, FormatArgumentType::UInt16);
+		INTERNAL_TYPE_OF(EMPTY, details::int32, FormatArgumentType::Int32);
+		INTERNAL_TYPE_OF(EMPTY, details::uint32, FormatArgumentType::UInt32);
+		INTERNAL_TYPE_OF(EMPTY, details::int64, FormatArgumentType::Int64);
+		INTERNAL_TYPE_OF(EMPTY, details::uint64, FormatArgumentType::UInt64);
+		INTERNAL_TYPE_OF(EMPTY, float, FormatArgumentType::Float);
+		INTERNAL_TYPE_OF(EMPTY, double, FormatArgumentType::Double);
+		INTERNAL_TYPE_OF(EMPTY, details::ldouble, FormatArgumentType::LDouble);
+		INTERNAL_TYPE_OF(typename Type, Type*, FormatArgumentType::Pointer);
+		INTERNAL_TYPE_OF(typename Type, const Type*, FormatArgumentType::Pointer);
+		INTERNAL_TYPE_OF(EMPTY, details::null, FormatArgumentType::Pointer);
+		INTERNAL_TYPE_OF(EMPTY, const char*, FormatArgumentType::CString);
+		INTERNAL_TYPE_OF(EMPTY, const char[], FormatArgumentType::CString);
+		INTERNAL_TYPE_OF(typename details::uint32 tSize, const char[tSize], FormatArgumentType::CString);
 		
 		template<typename Char>
 		struct FormatterHelpers

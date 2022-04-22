@@ -45,3 +45,4 @@ int main(void)
 	fmt::cprint(stdout, "Sum of {} is {}.\n", values, sum);
 	return 0;
 }
+
