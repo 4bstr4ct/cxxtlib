@@ -1,13 +1,12 @@
-#define ENABLE_STD_FORMATTERS 0
-#define ENABLE_STD_VECTOR_FORMATTER 0
+#define ENABLE_STD_FORMATTERS 1
 #include <cxxtlib/format/format.hpp>
 
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 
-#define std ::std
-#define fmt ::cxxtlib::format
+namespace fmt = ::cxxtlib::format;
 
 int main(void)
 {
@@ -41,8 +40,12 @@ int main(void)
 	unsigned int sum = 0;
 	for (unsigned int index = 0; index < values.size(); index++) sum += values[index];
 
+	std::array<unsigned int, 10> arr;
+	for (unsigned int index = 0; index < arr.size(); index++)
+		arr[index] = values[index];
+
 	// Printing sum of the values.
-	// fmt::cprint(stdout, "Sum of {} is {}.\n", values, sum);
+	fmt::cprint(stdout, "Sum of {} is {}.\n{}\n", values, sum, arr);
 	return 0;
 }
 

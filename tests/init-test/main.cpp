@@ -1,3 +1,5 @@
+#if 0
+
 #define ENABLE_STD_FORMATTERS 1
 #include <cxxtlib/format/format.hpp>
 
@@ -631,3 +633,5 @@ int main(void)
 
 	return 0;
 }
+
+#endif
