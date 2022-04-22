@@ -1,5 +1,5 @@
 #define ENABLE_STD_FORMATTERS 0
-#define ENABLE_STD_VECTOR_FORMATTER 1
+#define ENABLE_STD_VECTOR_FORMATTER 0
 #include <cxxtlib/format/format.hpp>
 
 #include <iostream>
@@ -42,7 +42,7 @@ int main(void)
 	for (unsigned int index = 0; index < values.size(); index++) sum += values[index];
 
 	// Printing sum of the values.
-	fmt::cprint(stdout, "Sum of {} is {}.\n", values, sum);
+	// fmt::cprint(stdout, "Sum of {} is {}.\n", values, sum);
 	return 0;
 }
 

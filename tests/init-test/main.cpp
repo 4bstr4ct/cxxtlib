@@ -31,7 +31,7 @@ public:
 	template<typename ParserContext>
 	static void parse(ParserContext& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename FormatterContext>

@@ -1266,35 +1266,35 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
 		};
 
-		#define EMPTY
+		#define NONE
 
-		#define INTERNAL_TYPE_OF(TTypes, Type, FType) \
-		template<TTypes> \
+		#define __struct_INTERNAL_TYPE_OF(DTypes, Type, FType) \
+		template<DTypes> \
 		struct TypeOf<Type> \
 		{ \
 		public: \
 			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
 		}
 
-		INTERNAL_TYPE_OF(EMPTY, bool, FormatArgumentType::Bool);
-		INTERNAL_TYPE_OF(EMPTY, char, FormatArgumentType::Char);
-		INTERNAL_TYPE_OF(EMPTY, details::int8, FormatArgumentType::Int8);
-		INTERNAL_TYPE_OF(EMPTY, details::uint8, FormatArgumentType::UInt8);
-		INTERNAL_TYPE_OF(EMPTY, details::int16, FormatArgumentType::Int16);
-		INTERNAL_TYPE_OF(EMPTY, details::uint16, FormatArgumentType::UInt16);
-		INTERNAL_TYPE_OF(EMPTY, details::int32, FormatArgumentType::Int32);
-		INTERNAL_TYPE_OF(EMPTY, details::uint32, FormatArgumentType::UInt32);
-		INTERNAL_TYPE_OF(EMPTY, details::int64, FormatArgumentType::Int64);
-		INTERNAL_TYPE_OF(EMPTY, details::uint64, FormatArgumentType::UInt64);
-		INTERNAL_TYPE_OF(EMPTY, float, FormatArgumentType::Float);
-		INTERNAL_TYPE_OF(EMPTY, double, FormatArgumentType::Double);
-		INTERNAL_TYPE_OF(EMPTY, details::ldouble, FormatArgumentType::LDouble);
-		INTERNAL_TYPE_OF(typename Type, Type*, FormatArgumentType::Pointer);
-		INTERNAL_TYPE_OF(typename Type, const Type*, FormatArgumentType::Pointer);
-		INTERNAL_TYPE_OF(EMPTY, details::null, FormatArgumentType::Pointer);
-		INTERNAL_TYPE_OF(EMPTY, const char*, FormatArgumentType::CString);
-		INTERNAL_TYPE_OF(EMPTY, const char[], FormatArgumentType::CString);
-		INTERNAL_TYPE_OF(typename details::uint32 tSize, const char[tSize], FormatArgumentType::CString);
+		__struct_INTERNAL_TYPE_OF(NONE, bool, FormatArgumentType::Bool);
+		__struct_INTERNAL_TYPE_OF(NONE, char, FormatArgumentType::Char);
+		__struct_INTERNAL_TYPE_OF(NONE, details::int8, FormatArgumentType::Int8);
+		__struct_INTERNAL_TYPE_OF(NONE, details::uint8, FormatArgumentType::UInt8);
+		__struct_INTERNAL_TYPE_OF(NONE, details::int16, FormatArgumentType::Int16);
+		__struct_INTERNAL_TYPE_OF(NONE, details::uint16, FormatArgumentType::UInt16);
+		__struct_INTERNAL_TYPE_OF(NONE, details::int32, FormatArgumentType::Int32);
+		__struct_INTERNAL_TYPE_OF(NONE, details::uint32, FormatArgumentType::UInt32);
+		__struct_INTERNAL_TYPE_OF(NONE, details::int64, FormatArgumentType::Int64);
+		__struct_INTERNAL_TYPE_OF(NONE, details::uint64, FormatArgumentType::UInt64);
+		__struct_INTERNAL_TYPE_OF(NONE, float, FormatArgumentType::Float);
+		__struct_INTERNAL_TYPE_OF(NONE, double, FormatArgumentType::Double);
+		__struct_INTERNAL_TYPE_OF(NONE, details::ldouble, FormatArgumentType::LDouble);
+		__struct_INTERNAL_TYPE_OF(typename Type, Type*, FormatArgumentType::Pointer);
+		__struct_INTERNAL_TYPE_OF(typename Type, const Type*, FormatArgumentType::Pointer);
+		__struct_INTERNAL_TYPE_OF(NONE, details::null, FormatArgumentType::Pointer);
+		__struct_INTERNAL_TYPE_OF(NONE, const char*, FormatArgumentType::CString);
+		__struct_INTERNAL_TYPE_OF(NONE, const char[], FormatArgumentType::CString);
+		__struct_INTERNAL_TYPE_OF(typename details::uint32 tSize, const char[tSize], FormatArgumentType::CString);
 		
 		template<typename Char>
 		struct FormatterHelpers
@@ -1336,25 +1336,46 @@ namespace cxxtlib
 					< \
 						FormatArgumentType, \
 						TypeOf<Type>::value \
-					>::value != FormatArgumentType::Custom \
+					>::value != FormatArgumentType::/*None*/ Custom \
 				> \
 			>::value \
 		>::ValueType
 
-		template<typename Char, typename Type>
-		struct Formatter<Char, Type, FormatterEnabler(Type)>;
+		struct p { };
 
-		template<typename Char>
-		struct Formatter<Char, bool, FormatterEnabler(bool)> : public FormatterBase<Char>
+		__struct_INTERNAL_TYPE_OF(NONE, p, FormatArgumentType::Array);
+
+		template<typename Char, typename Type>
+		struct Formatter<Char, Type, FormatterEnabler(Type)>
 		{
 		public:
-			template<typename Context>
+			using ValueType = Type;
+		};
+
+		template<typename Char>
+		struct Formatter<Char, p, FormatterEnabler(p)> : public FormatterBase<Char>
+		{
+		public:
+
+		};
+
+		#define __struct_INTERNAL_FORMATTER(DTypes, Type, PFunc, FFunc) \
+		template<DTypes> \
+		struct Formatter<Char, Type, FormatterEnabler(Type)> : public FormatterBase<Char> \
+		{ \
+		public: \
+			template<typename Context> \
+			PFunc \
+			 \
+			template<typename Context> \
+			FFunc \
+		}
+
+		__struct_INTERNAL_FORMATTER(typename Char, bool,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, bool pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(
@@ -1364,36 +1385,24 @@ namespace cxxtlib
 						: details::ascii::length<Char>(details::FormatTraits<Char>::falseStringified)
 				);
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, Char, FormatterEnabler(Char)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, Char,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, Char pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue);
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::int8, FormatterEnabler(details::int8)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::int8,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
@@ -1405,19 +1414,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::uint8, FormatterEnabler(details::uint8)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::uint8,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
@@ -1429,19 +1432,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::int16, FormatterEnabler(details::int16)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::int16,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
@@ -1453,19 +1450,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::uint16, FormatterEnabler(details::uint16)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::uint16,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
@@ -1477,19 +1468,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::int32, FormatterEnabler(details::int32)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::int32,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
@@ -1501,19 +1486,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::uint32, FormatterEnabler(details::uint32)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::uint32,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
@@ -1525,19 +1504,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::int64, FormatterEnabler(details::int64)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::int64,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::int64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
@@ -1549,19 +1522,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::uint64, FormatterEnabler(details::uint64)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::uint64,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::uint64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
@@ -1573,19 +1540,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, float, FormatterEnabler(float)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, float,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, float pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
@@ -1597,19 +1558,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, double, FormatterEnabler(double)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, double,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, double pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
@@ -1621,19 +1576,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::ldouble, FormatterEnabler(details::ldouble)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::ldouble,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::ldouble pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 26u;
@@ -1645,19 +1594,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char, typename Type>
-		struct Formatter<Char, Type*, FormatterEnabler(Type*)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char COMMA typename Type, Type*,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
@@ -1669,19 +1612,13 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
-		
-		template<typename Char, typename Type>
-		struct Formatter<Char, const Type*, FormatterEnabler(const Type*)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		);
+
+		__struct_INTERNAL_FORMATTER(typename Char COMMA typename Type, const Type*,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
@@ -1693,78 +1630,58 @@ namespace cxxtlib
 					pContext.append(buffer, written);
 				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, details::null, FormatterEnabler(details::null)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, details::null,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, details::null pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(details::FormatTraits<Char>::nullptrStringified, 7u);
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, const Char*, FormatterEnabler(const Char*)> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, const Char*,
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Char* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				if (pValue)
 				{
 					pContext.append(pValue, details::ascii::length<Char>(pValue));
 				}
+				else
+				{
+					pContext.append(details::FormatTraits<Char>::nullptrStringified, 7u);
+				}
 			}
-		};
+		);
 
-		template<typename Char>
-		struct Formatter<Char, const Char[], FormatterEnabler(const Char[])> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char, const Char[],
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Char pValue[]) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue, details::ascii::length<Char>(pValue));
 			}
-		};
+		);
 
-		template<typename Char, details::uint32 tSize>
-		struct Formatter<Char, const Char[tSize], FormatterEnabler(const Char[tSize])> : public FormatterBase<Char>
-		{
-		public:
-			template<typename Context>
+		__struct_INTERNAL_FORMATTER(typename Char COMMA typename details::uint32 tSize, const Char[tSize],
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				FormatterHelpers<Char>::template parseIgnore<Context>(pContext);
-			}
-
-			template<typename Context>
+			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext, const Char pValue[tSize]) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue, tSize - 1);
 			}
-		};
+		);
 
 		template<typename Char, typename Reader, typename Writer>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) CXXTLIB_FORMAT_NOEXCEPT
@@ -2100,62 +2017,23 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_CONSTEXPR const Char value = ' ';
 		};
 
-		template<typename Char>
-		struct SpecifierOf<Char, details::int8>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
-		};
+		#define __struct_INTERNAL_SPECIFIER_OF(DTypes, Type, Specifier) \
+		template<DTypes> \
+		struct SpecifierOf<Char, Type> \
+		{ \
+		public: \
+			static CXXTLIB_FORMAT_CONSTEXPR const Char value = Specifier; \
+		}
 
-		template<typename Char>
-		struct SpecifierOf<Char, details::uint8>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'u';
-		};
-
-		template<typename Char>
-		struct SpecifierOf<Char, details::int16>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
-		};
-
-		template<typename Char>
-		struct SpecifierOf<Char, details::uint16>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'u';
-		};
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, details::int8, 'd');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, details::uint8, 'u');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, details::int16, 'd');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, details::uint16, 'u');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, details::int32, 'd');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, details::uint32, 'u');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, float, 'f');
+		__struct_INTERNAL_SPECIFIER_OF(typename Char, double, 'f');
 		
-		template<typename Char>
-		struct SpecifierOf<Char, details::int32>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
-		};
-
-		template<typename Char>
-		struct SpecifierOf<Char, details::uint32>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'u';
-		};
-		
-		template<typename Char>
-		struct SpecifierOf<Char, float>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'f';
-		};
-
-		template<typename Char>
-		struct SpecifierOf<Char, double>
-		{
-		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const Char value = 'd';
-		};
-
 		template<typename Char, details::uint32 tSize, typename Type>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const Char* precision(Char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) CXXTLIB_FORMAT_NOEXCEPT
 		{
@@ -2184,10 +2062,12 @@ namespace cxxtlib
 }
 
 /**
- * Helper macros.
+ * Helper macros and cleanup.
  */
 
-#define IGNORE_ONCE(pContext) \
+#undef struct_CUSTOM_FORMATTER
+
+#define PARSE_IGNORE(pContext) \
 for (; *pContext != cxxtlib::format::details::FormatTraits<Char>::rightCurlyBracketSpecifier; pContext++); \
 pContext++;
 
@@ -2219,7 +2099,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2249,7 +2129,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2289,7 +2169,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2329,7 +2209,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2369,7 +2249,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2409,7 +2289,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2449,7 +2329,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2489,7 +2369,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2523,7 +2403,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2563,7 +2443,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2603,7 +2483,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
@@ -2643,7 +2523,7 @@ public:
 	template<typename Context>
 	static void parse(Context& pContext)
 	{
-		IGNORE_ONCE(pContext);
+		PARSE_IGNORE(pContext);
 	}
 
 	template<typename Context>
