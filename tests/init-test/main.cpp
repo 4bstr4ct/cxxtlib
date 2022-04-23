@@ -390,6 +390,10 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
+	// constexpr const char* f = format("Test {}.\n", "one");
+	// static_assert(f != nullptr, "F cannot be null!");
+	// cin.get();
+
 	static char buffer[256] { };
 	format<256>(buffer, "Point with random values is {}\n", Point{ 4, 7, 2 });
 	cout << buffer;

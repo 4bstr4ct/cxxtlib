@@ -438,32 +438,6 @@ namespace cxxtlib
 			 */
 			using ldouble = long double;
 
-			struct FormatTraits
-			{
-			public:
-				static CXXTLIB_FORMAT_CONSTEXPR const char baseSpecifier = 'b';
-				static CXXTLIB_FORMAT_CONSTEXPR const char decimalBaseSpecifier = 'd';
-				static CXXTLIB_FORMAT_CONSTEXPR const char hexadecimalBaseSpecifier = 'x';
-				static CXXTLIB_FORMAT_CONSTEXPR const char octalBaseSpecifier = 'o';
-
-				static CXXTLIB_FORMAT_CONSTEXPR const char precisionSpecifier = 'p';
-
-				static CXXTLIB_FORMAT_CONSTEXPR const char columnSpecifier = ':';
-				static CXXTLIB_FORMAT_CONSTEXPR const char terminationSpecifier = '\0';
-				static CXXTLIB_FORMAT_CONSTEXPR const char spaceSpecifier = ' ';
-				static CXXTLIB_FORMAT_CONSTEXPR const char endLineSpecifier = '\n';
-
-				static CXXTLIB_FORMAT_CONSTEXPR const char percentageSpecifier = '%';
-				static CXXTLIB_FORMAT_CONSTEXPR const char leftSquareBracketSpecifier = '[';
-				static CXXTLIB_FORMAT_CONSTEXPR const char rightSquareBracketSpecifier = ']';
-				static CXXTLIB_FORMAT_CONSTEXPR const char leftCurlyBracketSpecifier = '{';
-				static CXXTLIB_FORMAT_CONSTEXPR const char rightCurlyBracketSpecifier = '}';
-
-				static CXXTLIB_FORMAT_CONSTEXPR const char trueStringified[] = "true";
-				static CXXTLIB_FORMAT_CONSTEXPR const char falseStringified[] = "false";
-				static CXXTLIB_FORMAT_CONSTEXPR const char nullptrStringified[] = "nullptr";
-			};
-
 			namespace ascii
 			{
 				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR uint32 length(const char* pString) CXXTLIB_FORMAT_NOEXCEPT
@@ -1211,14 +1185,14 @@ namespace cxxtlib
 		__struct_INTERNAL_FORMAT_OF(NONE, const char*, FormatArgumentType::CString);
 		__struct_INTERNAL_FORMAT_OF(NONE, const char[], FormatArgumentType::CString);
 		__struct_INTERNAL_FORMAT_OF(typename details::uint32 tSize, const char[tSize], FormatArgumentType::CString);
-		
+
 		struct FormatterHelpers
 		{
 		public:
 			template<typename Context>
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parseIgnore(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				for (; *pContext != details::FormatTraits::rightCurlyBracketSpecifier; pContext++);
+				for (; *pContext != '}'; pContext++);
 				pContext++;
 			}
 		};
@@ -1265,8 +1239,8 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA bool pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				pContext.append(
-					pValue ? details::FormatTraits::trueStringified
-						: details::FormatTraits::falseStringified COMMA
+					pValue ? "true"
+						: "false" COMMA
 					pValue ? 4u : 5u);
 			}
 		);
@@ -1523,7 +1497,7 @@ namespace cxxtlib
 			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::null pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				pContext.append(details::FormatTraits::nullptrStringified COMMA 7u);
+				pContext.append("nullptr" COMMA 7u);
 			}
 		);
 
@@ -1540,7 +1514,7 @@ namespace cxxtlib
 				}
 				else
 				{
-					pContext.append(details::FormatTraits::nullptrStringified COMMA 7u);
+					pContext.append("nullptr" COMMA 7u);
 				}
 			}
 		);
@@ -1578,10 +1552,10 @@ namespace cxxtlib
 		{
 			// Setting pointer to the beggining for this section of pattern
 			const char* previous = pReader.iterator();
-			// Iterating untill next '{' character in pattern is present
-			for (; *pReader != details::FormatTraits::leftCurlyBracketSpecifier && pReader.iterator() != pReader.end(); pReader++);
+			// Iterating until next '{' character in pattern is present
+			for (; *pReader != '{' && pReader.iterator() != pReader.end(); pReader++);
 
-			if (*pReader == details::FormatTraits::leftCurlyBracketSpecifier)
+			if (*pReader == '{')
 			{
 				// Appending text from pattern.
 				pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
@@ -1720,7 +1694,7 @@ namespace cxxtlib
 			{
 				this->mCapacity = pCapacity;
 				this->mData = new char[pCapacity + 1u];
-				this->mData[this->mSize] = details::move(details::FormatTraits::terminationSpecifier);
+				this->mData[this->mSize] = details::move('\0');
 			}
 
 			CXXTLIB_FORMAT_INLINE void reallocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
@@ -1750,7 +1724,7 @@ namespace cxxtlib
 					reallocate(this->mCapacity + this->mCapacity / 2);
 				
 				this->mData[this->mSize++] = pChar;
-				this->mData[this->mSize] = details::FormatTraits::terminationSpecifier;
+				this->mData[this->mSize] = '\0';
 			}
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) CXXTLIB_FORMAT_NOEXCEPT
@@ -1761,7 +1735,7 @@ namespace cxxtlib
 				for (details::uint32 i = 0; i < pSize; i++)
 					this->mData[this->mSize + i] = pData[i];
 
-				this->mData[this->mSize += pSize] = details::FormatTraits::terminationSpecifier;
+				this->mData[this->mSize += pSize] = '\0';
 			}
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* get() CXXTLIB_FORMAT_NOEXCEPT
@@ -1810,7 +1784,7 @@ namespace cxxtlib
 
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* get() CXXTLIB_FORMAT_NOEXCEPT
 			{
-				this->mData[this->mSize] = details::FormatTraits::terminationSpecifier;
+				this->mData[this->mSize] = '\0';
 				return this->mData;
 			}
 		};
@@ -1824,7 +1798,7 @@ namespace cxxtlib
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			// Setting up the reader (later referenced as Context).
-			details::uint32 patternLength = details::ascii::length(pPattern);
+			const details::uint32 patternLength = details::ascii::length(pPattern);
 			Reader reader = Reader(pPattern, pPattern, pPattern + patternLength);
 			// Setting up the writer (later referenced as Context).
 			HeapWriter writer = HeapWriter(patternLength + sizeof...(pArguments) * 2);
@@ -1930,7 +1904,6 @@ namespace cxxtlib
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) CXXTLIB_FORMAT_NOEXCEPT
 		{
 			char temp[10] { };
-			temp[0] = '%';
 			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
 
 			if (count <= 0)
@@ -1938,6 +1911,7 @@ namespace cxxtlib
 				return nullptr;
 			}
 			
+			temp[0] = '%';
 			temp[++count] = SpecifierOf<Type>::value;
 			const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
 
@@ -1962,7 +1936,7 @@ namespace cxxtlib
 #undef __struct_INTERNAL_SPECIFIER_OF
 
 #define PARSE_IGNORE(pContext) \
-for (; *pContext != details::FormatTraits::rightCurlyBracketSpecifier; pContext++); \
+for (; *pContext != '}'; pContext++); \
 pContext++;
 
 #define struct_CUSTOM_FORMAT_OF(Dependencies, Type) \
@@ -2043,17 +2017,17 @@ struct_CUSTOM_FORMATTER(typename Type, ::std::initializer_list<Type>,
 	},
 	static void format(Context& pContext COMMA const ::std::initializer_list<Type>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::initializer_list<Type>::const_iterator;
 		for (ConstIterator iterator = pValue.begin() + 1; iterator != pValue.end(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2079,17 +2053,17 @@ struct_CUSTOM_FORMATTER(typename Type, ::std::forward_list<Type>,
 	},
 	static void format(Context& pContext COMMA const ::std::forward_list<Type>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::forward_list<Type>::const_iterator;
 		for (ConstIterator iterator = ++pValue.begin(); iterator != pValue.end(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2115,17 +2089,17 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename ::std::size_t tSize, ::std:
 	},
 	static void format(Context& pContext COMMA const ::std::array<Type COMMA tSize>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::array<Type COMMA tSize>::const_iterator;
 		for (ConstIterator iterator = pValue.cbegin() + 1; iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2151,17 +2125,17 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::vector<Ty
 	},
 	static void format(Context& pContext COMMA const ::std::vector<Type COMMA Allocator>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::vector<Type COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = pValue.cbegin() + 1; iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2187,17 +2161,17 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::list<Type
 	},
 	static void format(Context& pContext COMMA const ::std::list<Type COMMA Allocator>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::list<Type COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2223,17 +2197,17 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::deque<Typ
 	},
 	static void format(Context& pContext COMMA const ::std::deque<Type COMMA Allocator>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::deque<Type COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = pValue.cbegin() + 1; iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2259,17 +2233,17 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Compare COMMA typename Allo
 	},
 	static void format(Context& pContext COMMA const ::std::set<Type COMMA Compare COMMA Allocator>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::set<Type COMMA Compare COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Type>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2295,17 +2269,17 @@ struct_CUSTOM_FORMATTER(typename Value COMMA typename Hash COMMA typename Predic
 	},
 	static void format(Context& pContext COMMA const ::std::unordered_set<Value COMMA Hash COMMA Predicate COMMA Allocator>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Value>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::unordered_set<Value COMMA Hash COMMA Predicate COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Value>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2331,11 +2305,11 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value, ::std::pair<Key COMMA
 	},
 	static void format(Context& pContext COMMA const ::std::pair<Key COMMA Value>& pValue)
 	{
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Key>::format(pContext COMMA pValue.first);
-		Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+		Formatter<char>::format(pContext COMMA ' ');
 		Formatter<Value>::format(pContext COMMA pValue.second);
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2363,17 +2337,17 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Compare
 	static void format(Context& pContext COMMA const ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>& pValue)
 	{
 		using Pair = typename ::std::pair<Key COMMA Value>;
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Pair>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Pair>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
@@ -2401,17 +2375,17 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Hash CO
 	static void format(Context& pContext COMMA const ::std::unordered_map<Key COMMA Value COMMA Hash COMMA Predicate COMMA Allocator>& pValue)
 	{
 		using Pair = typename ::std::pair<Key COMMA Value>;
-		Formatter<char>::format(pContext COMMA details::FormatTraits::leftSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Pair>::format(pContext COMMA *pValue.begin());
 
 		using ConstIterator = typename ::std::unordered_map<Key COMMA Value COMMA Hash COMMA Predicate COMMA Allocator>::const_iterator;
 		for (ConstIterator iterator = ++pValue.cbegin(); iterator != pValue.cend(); iterator++)
 		{
-			Formatter<char>::format(pContext COMMA details::FormatTraits::spaceSpecifier);
+			Formatter<char>::format(pContext COMMA ' ');
 			Formatter<Pair>::format(pContext COMMA *iterator);
 		}
 	
-		Formatter<char>::format(pContext COMMA details::FormatTraits::rightSquareBracketSpecifier);
+		Formatter<char>::format(pContext COMMA ']');
 	}
 );
 
