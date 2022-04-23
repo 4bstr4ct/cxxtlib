@@ -1,16 +1,19 @@
-#if 0
-
 #define ENABLE_STD_FORMATTERS 1
 #include <cxxtlib/format/format.hpp>
 
 #include <stdio.h>
 #include <iostream>
 #include <initializer_list>
+#include <forward_list>
 #include <vector>
 #include <array>
 #include <deque>
 #include <list>
 #include <map>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
 #include <utility>
 #include <sstream>
 
@@ -23,31 +26,24 @@ public:
 	Type x, y, z;
 };
 
-template<>
-CUSTOM_TYPE_OF(Point);
+struct_CUSTOM_FORMAT_OF(NONE, Point);
 
-template<typename Char>
-CUSTOM_FORMATTER(Char COMMA Point)
-{
-public:
-	template<typename ParserContext>
-	static void parse(ParserContext& pContext)
+struct_CUSTOM_FORMATTER(NONE, Point,
+	static void parse(Context& pContext)
 	{
 		PARSE_IGNORE(pContext);
-	}
-
-	template<typename FormatterContext>
-	static void format(FormatterContext& pContext, const Point& pValue)
+	},
+	static void format(Context& pContext COMMA const Point& pValue)
 	{
-		Formatter<Char, Char>::template format<FormatterContext>(pContext, '[');
-		Formatter<Char, Point::Type>::template format<FormatterContext>(pContext, pValue.x);
-		Formatter<Char, Char>::template format<FormatterContext>(pContext, ' ');
-		Formatter<Char, Point::Type>::template format<FormatterContext>(pContext, pValue.y);
-		Formatter<Char, Char>::template format<FormatterContext>(pContext, ' ');
-		Formatter<Char, Point::Type>::template format<FormatterContext>(pContext, pValue.z);
-		Formatter<Char, Char>::template format<FormatterContext>(pContext, ']');
+		Formatter<char>::template format<Context>(pContext COMMA '[');
+		Formatter<Point::Type>::template format<Context>(pContext COMMA pValue.x);
+		Formatter<char>::template format<Context>(pContext COMMA ' ');
+		Formatter<Point::Type>::template format<Context>(pContext COMMA pValue.y);
+		Formatter<char>::template format<Context>(pContext COMMA ' ');
+		Formatter<Point::Type>::template format<Context>(pContext COMMA pValue.z);
+		Formatter<char>::template format<Context>(pContext COMMA ']');
 	}
-};
+);
 
 #include <chrono>
 #include <functional>
@@ -92,7 +88,7 @@ void testFormatterWithHeapWriter()
 	
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
-		auto formatted = format<char>("{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
+		auto formatted = format("{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -112,7 +108,7 @@ void testFormatterWithHeapWriter()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej"
+			std::string("jejejejejejej")
 		);
 
 		cleanup(formatted);
@@ -127,7 +123,7 @@ void testFormatterWithStackWriter()
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
 		char buffer[450];
-		unsigned int written = format<char, 450>(buffer, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
+		unsigned int written = format<450>(buffer, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -147,10 +143,8 @@ void testFormatterWithStackWriter()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej"
+			std::string("jejejejejejej")
 			);
-
-		// cleanup(formatted);
 	}
 }
 
@@ -182,7 +176,8 @@ void testPrintf()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej");
+			std::string("jejejejejejej").c_str()
+			);
 		delete[] buffer;
 	}
 }
@@ -225,7 +220,7 @@ void testPrint()
 
 	for (int i = 0; i < 100; i++)
 	{
-		print<std::ostream, char>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
+		print<std::ostream>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -245,7 +240,7 @@ void testPrint()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej"
+			std::string("jejejejejejej")
 		);
 	}
 }
@@ -276,7 +271,7 @@ void testCout()
 			&vec <<
 			&lst <<
 			&mp <<
-			"jejejejejejej" << '\n';
+			std::string("jejejejejejej") << '\n';
 	}
 }
 #endif
@@ -288,7 +283,7 @@ static constexpr void stressTestForFormatterWithHeap()
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
-		auto formatted = format<char>("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+		auto formatted = format("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -311,7 +306,7 @@ static constexpr void stressTestForFormatterWithHeap()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej"
+			std::string("jejejejejejej")
 			);
 
 		cleanup(formatted);
@@ -326,7 +321,7 @@ static constexpr void stressTestForFormatterWithStack()
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
 		char buffer[2048];
-		details::uint32 written = format<char, 2048>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
+		details::uint32 written = format<2048>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
 			bool(),
 			char(67),
 			details::int8(1),
@@ -349,9 +344,8 @@ static constexpr void stressTestForFormatterWithStack()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej"
+			std::string("jejejejejejej")
 			);
-		// std::cout << written << '\n';
 	}
 }
 
@@ -386,9 +380,8 @@ static constexpr void stressTestForSPRINTF()
 			&vec,
 			&lst,
 			&mp,
-			"jejejejejejej"
+			std::string("jejejejejejej").c_str()
 			);
-			// 
 	}
 }
 
@@ -397,15 +390,25 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cxxtlib::format;
 
-	char _buffer[10] { };
-	cprint<char>(stdout, "Test : {}\n       {}\n\n", 13.56f, precision<char, 10, float>(_buffer, 13.56f, 3, 5));
+	static char buffer[256] { };
+	format<256>(buffer, "Point with random values is {}\n", Point{ 4, 7, 2 });
+	cout << buffer;
+	cleanup<256>(buffer);
+	format<256>(buffer, "Sum of {}, {}, and {} is {}\n", 2, 4, 7, 2 + 4 + 7);
+	cout << buffer;
 	cin.get();
 
-	char buffer[42] { };
-	cprint<char>(stdout, "float with a value of 5.2 set to precision format \'1.3f\' is {}\n\n",
-		precision<char, 42>(buffer, -8, 1, 3));
+	{
+		char _buffer[10] { };
+		cprint(stdout, "Test : {}\n       {}\n\n", 13.56f, precision<10, float>(_buffer, 13.56f, 3, 5));
+		cin.get();
 
-	cprint<char>(stdout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {} {}\n",
+		char __buffer[42] { };
+		cprint(stdout, "float with a value of 5.2 set to precision format \'1.3f\' is {}\n\n",
+			precision<42>(__buffer, -8, 1, 3));
+	}
+
+	cprint(stdout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(12),
@@ -431,7 +434,7 @@ int main(void)
 			forward_list<int>{ 8, 7, 8, 7, 8, 7, 87, 0 }
 	);
 
-	print<std::ostream, char>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {}\n",
+	print<std::ostream>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {}\n",
 			bool(),
 			char(67),
 			details::int8(12),
@@ -459,21 +462,21 @@ int main(void)
 	cin.get();
 
 	forward_list<int> fl = { 4, 5, 6 };
-	print<ostream, char>(cout, "foraward_list => {}\n", fl);
+	print<ostream>(cout, "foraward_list => {}\n", fl);
 
 	set<int> s = { 4, 5, 6 };
-	print<ostream, char>(cout, "set => {}\n", s);
+	print<ostream>(cout, "set => {}\n", s);
 
 	unordered_set<int> us = { 4, 5, 6 };
-	print<ostream, char>(cout, "unordered_set => {}\n", us);
+	print<ostream>(cout, "unordered_set => {}\n", us);
 
 	map<int, bool> m = { { 4, true }, { 5, false }, { 6, false } };
-	print<ostream, char>(cout, "map => {}\n", m);
+	print<ostream>(cout, "map => {}\n", m);
 
 	unordered_map<int, bool> um = { { 4, true }, { 5, false }, { 6, false } };
-	print<ostream, char>(cout, "unordered_map => {}\n", um);
+	print<ostream>(cout, "unordered_map => {}\n", um);
 
-	print<ostream, char>(cout, "Press any key to start tests...\n");
+	print<ostream>(cout, "Press any key to start tests...\n");
 	cin.get();
 
 #define STRESS_TEST 1
@@ -511,9 +514,8 @@ int main(void)
 	}
 #endif
 
-	/*
 	std::vector<std::vector<int>> mat = { { 0, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1 }, { 1, 0, 1, 1, 0}, { 0, 1, 0, 0, 0 }, { 0, 0, 1, 0, 1 } };
-	print<std::ostream, char>(std::cout, "{} {} {b10} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {\n}\n",
+	print<std::ostream>(std::cout, "{} {} {b10} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {\n}\n",
 			bool(),
 			char(67),
 			details::int8(12),
@@ -534,9 +536,8 @@ int main(void)
 			&lst,
 			&mp,
 			"jejejejejejej",
-			mat
+			9
 	);
-	*/
 
 #define TEST_PRINTING 0
 #if TEST_PRINTING == 1
@@ -563,75 +564,76 @@ int main(void)
 	cout << "\nEnd!\n\n\n";
 #endif
 
-#define TEST_FORMATING 0
+#define TEST_FORMATING 1
 #if TEST_FORMATING == 1
-	const int count = 1000000;
-
-	cout << "\nTesting formatter!\n";
-
-	for (int i = 0; i < 3; i++)
 	{
-		{
-			Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
-			testFormatterWithHeapWriter<count>();
-		}
-	}
-	
-	cout << "Testing sprintf!\n";
+		const int count = 1000000;
 
-	for (int i = 0; i < 3; i++)
-	{
-		{
-			Timer timer = Timer([](long double duration) { std::cout << "Sprintf worked for " << duration << " ms.\n"; });
-			testPrintf<count>();
-		}
-	}
-	
-	cout << "\nTesting formatter!\n";
-	
-	for (int i = 0; i < 3; i++)
-	{
-		{
-			Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
-			testFormatterWithStackWriter<count>();
-		}
-	}
+		cout << "\n+--------------------------------------+\nTesting formatter!\n";
 
-	cout << "\nTesting string stream!\n";
-
-	for (int i = 0; i < 3; i++)
-	{
+		for (int i = 0; i < 3; i++)
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "SStream worked for " << duration << " ms.\n"; });
-			tesSStream<count>();
+			{
+				Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
+				testFormatterWithHeapWriter<count>();
+			}
 		}
+		
+		cout << "\nTesting sprintf!\n";
+
+		for (int i = 0; i < 3; i++)
+		{
+			{
+				Timer timer = Timer([](long double duration) { std::cout << "Sprintf worked for " << duration << " ms.\n"; });
+				testPrintf<count>();
+			}
+		}
+		
+		cout << "\nTesting formatter!\n";
+		
+		for (int i = 0; i < 3; i++)
+		{
+			{
+				Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
+				testFormatterWithStackWriter<count>();
+			}
+		}
+
+		cout << "\nTesting string stream!\n";
+
+		for (int i = 0; i < 3; i++)
+		{
+			{
+				Timer timer = Timer([](long double duration) { std::cout << "SStream worked for " << duration << " ms.\n"; });
+				tesSStream<count>();
+			}
+		}
+
+		cout << "+--------------------------------------+\n";
 	}
 #endif
 
-	/*
 	std::initializer_list<int> ilt = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	std::array<Point, 3> arr = { Point{ 0, 1, 2 }, Point{ 4, 5, 6 }, Point{ 7, 8, 9 } };
 	std::vector<float> vec = { -0, -1, -2, -3, -4 };
 	std::list<double> lst = { 10, 12, 13, 14, 15 };
-	std::vector<std::vector<int>> mat = { { 0, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1 }, { 1, 0, 1, 1, 0}, { 0, 1, 0, 0, 0 }, { 0, 0, 1, 0, 1 } };
 	std::pair<bool, int> par = { true, 59 };
 	std::map<float, bool> pmp = { { 5.0f, true }, { -9.0f, true }, { 1.0f, false} };
 
-	print<ostream, char>(cout, "Mat : \n{\n}\n{}\n{\n}\n\n",
-		mat,
+	print<ostream>(cout, "Mat : \n{\n}\n{}\n{\n}\n\n",
+		par,
+		pmp,
+		lst
+	);
+
+	print<ostream>(cout, "Pattern : {}\n          {}\n          {}\n          {}\n          {}\n          {}\n\n",
+		ilt,
+		arr,
+		vec,
+		lst,
 		par,
 		pmp
 	);
 
-	print<ostream, char>(cout, "Pattern : {}\n          {}\n          {}\n          {}\n\n",
-		ilt,
-		arr,
-		vec,
-		lst
-	);
-	*/
-
 	return 0;
 }
-
-#endif
