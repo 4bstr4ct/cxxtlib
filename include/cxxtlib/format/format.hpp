@@ -1932,13 +1932,13 @@ namespace cxxtlib
 			char temp[10] { };
 			temp[0] = '%';
 			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
-			temp[++count] = SpecifierOf<Type>::value;
 
 			if (count <= 0)
 			{
 				return nullptr;
 			}
-
+			
+			temp[++count] = SpecifierOf<Type>::value;
 			const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
 
 			if (written > 0)
