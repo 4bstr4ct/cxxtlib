@@ -1238,9 +1238,7 @@ namespace cxxtlib
 			},
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA bool pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
-				pContext.append(
-					pValue ? "true"
-						: "false" COMMA
+				pContext.append(pValue ? "true" : "false" COMMA
 					pValue ? 4u : 5u);
 			}
 		);
@@ -1264,7 +1262,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
 				
 				if (written >= 0)
@@ -1282,7 +1280,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint8 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
 				
 				if (written >= 0)
@@ -1300,7 +1298,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
 				
 				if (written >= 0)
@@ -1318,7 +1316,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint16 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
 				
 				if (written >= 0)
@@ -1336,7 +1334,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
 				
 				if (written >= 0)
@@ -1354,7 +1352,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint32 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
 				
 				if (written >= 0)
@@ -1372,7 +1370,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%lld" COMMA pValue);
 				
 				if (written >= 0)
@@ -1390,7 +1388,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint64 pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%llu" COMMA pValue);
 				
 				if (written >= 0)
@@ -1408,7 +1406,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
 				
 				if (written >= 0)
@@ -1426,7 +1424,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
 				
 				if (written >= 0)
@@ -1444,7 +1442,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 26u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%Lf" COMMA pValue);
 				
 				if (written >= 0)
@@ -1462,7 +1460,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "0x%p" COMMA (void*)pValue);
 				
 				if (written >= 0)
@@ -1480,7 +1478,7 @@ namespace cxxtlib
 			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA const Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
-				char buffer[size] { };
+				char buffer[size] = { };
 				const details::int32 written = ::snprintf(buffer COMMA size COMMA "0x%p" COMMA (const void*)pValue);
 				
 				if (written >= 0)
