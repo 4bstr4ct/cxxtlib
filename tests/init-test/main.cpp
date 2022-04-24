@@ -403,7 +403,7 @@ int main(void)
 	cin.get();
 
 	{
-		char _buffer[10] { };
+		char _buffer[12] { };
 		cprint(stdout, "Test : {}\n       {}\n\n", 13.56f, precision<10, float>(_buffer, 13.56f, 3, 5));
 		cin.get();
 

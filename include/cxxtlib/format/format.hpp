@@ -1581,9 +1581,6 @@ namespace cxxtlib
 				: mIterator(pIterator), mBegin(pBegin), mEnd(pEnd)
 			{ }
 
-			~Reader() CXXTLIB_FORMAT_NOEXCEPT
-			{ }
-
 		public:
 			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 size() const CXXTLIB_FORMAT_NOEXCEPT
 			{
@@ -1682,10 +1679,9 @@ namespace cxxtlib
 		public:
 			explicit HeapWriter(details::uint32 pCapacity = 4u) CXXTLIB_FORMAT_NOEXCEPT
 				: mData(nullptr), mSize(0), mCapacity(pCapacity)
-			{ allocate(pCapacity); }
-
-			~HeapWriter() CXXTLIB_FORMAT_NOEXCEPT
-			{ }
+			{
+				allocate(pCapacity);
+			}
 
 		private:
 			CXXTLIB_FORMAT_INLINE void allocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
@@ -1752,9 +1748,6 @@ namespace cxxtlib
 		public:
 			explicit StackWriter(char* pData) CXXTLIB_FORMAT_NOEXCEPT
 				: mData(pData), mSize(0)
-			{ }
-
-			~StackWriter() CXXTLIB_FORMAT_NOEXCEPT
 			{ }
 
 		public:
@@ -1850,7 +1843,7 @@ namespace cxxtlib
 		template<typename Stream, details::uint32 tSize, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
-			char formatted[tSize] { };
+			char formatted[tSize] = { };
 			format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
 			pStream << formatted;
 		}
@@ -1869,7 +1862,7 @@ namespace cxxtlib
 		template<details::uint32 tSize, typename... Arguments>
 		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
 		{
-			char formatted[tSize] { };
+			char formatted[tSize] = { };
 			format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
 			::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
 		}
@@ -1989,7 +1982,7 @@ struct_CUSTOM_FORMATTER(typename Char COMMA typename Traits COMMA typename Alloc
 	},
 	static void format(Context& pContext COMMA const ::std::basic_string<Char COMMA Traits COMMA Allocator>& pValue)
 	{
-		pContext.append(pValue.data() COMMA pValue.size());
+		pContext.append(pValue.data() COMMA static_cast<details::uint32>(pValue.size()));
 	}
 );
 
