@@ -29,11 +29,11 @@ public:
 struct_CUSTOM_FORMAT_OF(NONE, Point);
 
 struct_CUSTOM_FORMATTER(NONE, Point,
-	static void parse(Context& pContext)
+	void parse(Context& pContext)
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const Point& pValue)
+	void format(Context& pContext COMMA const Point& pValue)
 	{
 		Formatter<char>::template format<Context>(pContext COMMA '[');
 		Formatter<Point::Type>::template format<Context>(pContext COMMA pValue.x);

@@ -21,363 +21,186 @@
 
 #include <stdio.h>
 
-#ifndef CXXTLIB_CLANG_VERSION
-#	ifndef CXXTLIB_FORMAT_CLANG_VERSION
-#		if defined(__clang__) && !defined(__ibmxl__)
-#			define CXXTLIB_FORMAT_CLANG_VERSION (__clang_major__ * 100 + __clang_minor__)
-#		else
-#			define CXXTLIB_FORMAT_CLANG_VERSION 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_CLANG_VERSION CXXTLIB_CLANG_VERSION
-#endif
-
-#ifndef CXXTLIB_GCC_VERSION
-#	ifndef CXXTLIB_FORMAT_GCC_VERSION
-#		if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && !defined(__NVCOMPILER)
-#			define CXXTLIB_FORMAT_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
-#		else
-#			define CXXTLIB_FORMAT_GCC_VERSION 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_GCC_VERSION CXXTLIB_GCC_VERSION
-#endif
-
-#ifndef CXXTLIB_GCC_PRAGMA
-#	ifndef CXXTLIB_FORMAT_GCC_PRAGMA
-#		if CXXTLIB_FORMAT_GCC_VERSION >= 504
-#			define CXXTLIB_FORMAT_GCC_PRAGMA(arg) _Pragma(arg)
-#		else
-#			define CXXTLIB_FORMAT_GCC_PRAGMA(arg)
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_GCC_PRAGMA CXXTLIB_GCC_PRAGMA
-#endif
-
-#ifndef CXXTLIB_ICC_VERSION
-#	ifndef CXXTLIB_FORMAT_ICC_VERSION
-#		ifdef __ICL
-#			define CXXTLIB_FORMAT_ICC_VERSION __ICL
-#		elif defined(__INTEL_COMPILER)
-#			define CXXTLIB_FORMAT_ICC_VERSION __INTEL_COMPILER
-#		else
-#			define CXXTLIB_FORMAT_ICC_VERSION 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_ICC_VERSION CXXTLIB_ICC_VERSION
-#endif
-
-#ifndef CXXTLIB_NVCOMPILER_VERSION
-#	ifndef CXXTLIB_FORMAT_NVCOMPILER_VERSION
-#		ifdef __NVCOMPILER
-#			define CXXTLIB_FORMAT_NVCOMPILER_VERSION (__NVCOMPILER_MAJOR__ * 100 + __NVCOMPILER_MINOR__)
-#		else
-#			define CXXTLIB_FORMAT_NVCOMPILER_VERSION 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_NVCOMPILER_VERSION CXXTLIB_NVCOMPILER_VERSION
-#endif
-
-#ifndef CXXTLIB_NVCC
-#	ifndef CXXTLIB_FORMAT_NVCC
-#		ifdef __NVCC__
-#			define CXXTLIB_FORMAT_NVCC __NVCC__
-#		else
-#			define CXXTLIB_FORMAT_NVCC 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_NVCC CXXTLIB_NVCC
-#endif
-
-#ifndef CXXTLIB_MSC_VER
-#	ifndef CXXTLIB_FORMAT_MSC_VER
-#		ifdef _MSC_VER
-#			define CXXTLIB_FORMAT_MSC_VER _MSC_VER
-#		else
-#			define CXXTLIB_FORMAT_MSC_VER 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_MSC_VER CXXTLIB_MSC_VER
-#endif
-
-#ifndef CXXTLIB_MSC_WARNING
-#	ifndef CXXTLIB_FORMAT_MSC_WARNING
-#		ifdef _MSC_VER
-#			define CXXTLIB_FORMAT_MSC_WARNING(...) __pragma(warning(__VA_ARGS__))
-#		else
-#			define CXXTLIB_FORMAT_MSC_WARNING(...)
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_MSC_WARNING CXXTLIB_MSC_WARNING
-#endif
-
-#ifndef CXXTLIB_HAS_FEATURE
-#	ifndef CXXTLIB_FORMAT_HAS_FEATURE
-#		ifdef __has_feature
-#			define CXXTLIB_FORMAT_HAS_FEATURE(x) __has_feature(x)
-#		else
-#			define CXXTLIB_FORMAT_HAS_FEATURE(x) 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_HAS_FEATURE CXXTLIB_HAS_FEATURE
-#endif
-
-#ifndef CXXTLIB_CPLUSPLUS
-#	ifndef CXXTLIB_FORMAT_CPLUSPLUS
-#		ifdef _MSVC_LANG
-#			define CXXTLIB_FORMAT_CPLUSPLUS _MSVC_LANG
-#		else
-#			define CXXTLIB_FORMAT_CPLUSPLUS __cplusplus
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_CPLUSPLUS CXXTLIB_CPLUSPLUS
-#endif
-
-#ifndef CXXTLIB_HAS_CPP_ATTRIBUTE
-#	ifndef CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE
-#		ifdef __has_cpp_attribute
-#			define CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
-#		else
-#			define CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE(x) 0
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE CXXTLIB_HAS_CPP_ATTRIBUTE
-#endif
-
-#ifndef CXXTLIB_HAS_CPP14_ATTRIBUTE
-#	ifndef CXXTLIB_FORMAT_HAS_CPP14_ATTRIBUTE
-#		define CXXTLIB_FORMAT_HAS_CPP14_ATTRIBUTE(attribute) (CXXTLIB_FORMAT_CPLUSPLUS >= 201402L && CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE(attribute))
-#	endif
-#else
-#	define CXXTLIB_FORMAT_HAS_CPP14_ATTRIBUTE CXXTLIB_HAS_CPP14_ATTRIBUTE
-#endif
-
-#ifndef CXXTLIB_HAS_CPP17_ATTRIBUTE
-#	ifndef CXXTLIB_FORMAT_HAS_CPP17_ATTRIBUTE
-#		define CXXTLIB_FORMAT_HAS_CPP17_ATTRIBUTE(attribute) (CXXTLIB_FORMAT_CPLUSPLUS >= 201703L && CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE(attribute))
-#	endif
-#else
-#	define CXXTLIB_FORMAT_HAS_CPP17_ATTRIBUTE CXXTLIB_HAS_CPP17_ATTRIBUTE
-#endif
-
-#ifndef CXXTLIB_MOVE_SEMANTICS_ENABLED
-#	ifndef CXXTLIB_FORMAT_MOVE_SEMANTICS_ENABLED
-#		if defined(CXXTLIB_FORMAT_CLANG_VERSION)
-#			if CXXTLIB_FORMAT_HAS_FEATURE(__cxx_rvalue_references__)
-#				define CXXTLIB_FORMAT_MOVE_SEMANTICS_ENABLED 1
-#			endif
-#		endif
-#		if defined(__GNUC__)
-#			if ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 8)) || (__GNUC__ > 4)
-#				if (CXXTLIB_FORMAT_CPLUSPLUS >= 201103) || defined(__GXX_EXPERIMENTAL_CXX0X__)
-#					define CXXTLIB_FORMAT_MOVE_SEMANTICS_ENABLED 1
-#				endif
-#			endif
-#		endif
-#		if defined(CXXTLIB_FORMAT_MSC_VER) && (CXXTLIB_FORMAT_MSC_VER >= 1700)
-#			define CXXTLIB_FORMAT_MOVE_SEMANTICS_ENABLED 1
-#		endif
-#		if defined(__INTEL_CXX11_MODE__)
-#			if defined(CXXTLIB_FORMAT_ICC_VERSION) && (CXXTLIB_FORMAT_ICC_VERSION >= 1500)
-#				define CXXTLIB_FORMAT_MOVE_SEMANTICS_ENABLED 1
-#			endif
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_MOVE_SEMANTICS_ENABLED CXXTLIB_MOVE_SEMANTICS_ENABLED
-#endif
-
-#ifndef CXXTLIB_USE_CONSTEXPR
-#	ifndef CXXTLIB_FORMAT_USE_CONSTEXPR
-#		define CXXTLIB_FORMAT_USE_CONSTEXPR (CXXTLIB_FORMAT_HAS_FEATURE(cxx_relaxed_constexpr) || CXXTLIB_FORMAT_MSC_VER >= 1912 || (CXXTLIB_FORMAT_GCC_VERSION >= 600 && __cplusplus >= 201402L)) && !CXXTLIB_FORMAT_NVCC && !CXXTLIB_FORMAT_ICC_VERSION
-#	endif
-#else
-#	define CXXTLIB_FORMAT_USE_CONSTEXPR CXXTLIB_USE_CONSTEXPR
-#endif
-
-#ifndef CXXTLIB_USE_CONSTEXPR
-#	ifdef CXXTLIB_FORMAT_USE_CONSTEXPR
-#		if CXXTLIB_FORMAT_USE_CONSTEXPR
-#			define CXXTLIB_FORMAT_CONSTEXPR constexpr
-#			define CXXTLIB_FORMAT_CONSTEXPR_DECL constexpr
-#		else
-#			define CXXTLIB_FORMAT_CONSTEXPR
-#			define CXXTLIB_FORMAT_CONSTEXPR_DECL
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_USE_CONSTEXPR CXXTLIB_USE_CONSTEXPR
-#	if CXXTLIB_USE_CONSTEXPR
-#		define CXXTLIB_FORMAT_CONSTEXPR CXXTLIB_CONSTEXPR
-#		define CXXTLIB_FORMAT_CONSTEXPR_DECL CXXTLIB_CONSTEXPR_DECL
+#ifndef FORMAT_CLANG_VERSION
+#	if defined(__clang__) && !defined(__ibmxl__)
+#		define FORMAT_CLANG_VERSION (__clang_major__ * 100 + __clang_minor__)
 #	else
-#		define CXXTLIB_FORMAT_CONSTEXPR
-#		define CXXTLIB_FORMAT_CONSTEXPR_DECL
+#		define FORMAT_CLANG_VERSION 0
 #	endif
 #endif
 
-#ifndef CXXTLIB_NOEXCEPT
-#	ifndef CXXTLIB_FORMAT_NOEXCEPT
-#		if defined(_MSC_VER) && (_MSC_VER < 1900)
-#			define CXXTLIB_FORMAT_NOEXCEPT _NOEXCEPT
-#		else
-#			define CXXTLIB_FORMAT_NOEXCEPT noexcept
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_NOEXCEPT CXXTLIB_NOEXCEPT
-#endif
-
-#ifndef CXXTLIB_INLINE
-#	ifndef CXXTLIB_FORMAT_INLINE
-#	 	if CXXTLIB_FORMAT_GCC_VERSION || CXXTLIB_FORMAT_CLANG_VERSION
-#			define CXXTLIB_FORMAT_INLINE inline __attribute__((always_inline))
-#		else
-#			define CXXTLIB_FORMAT_INLINE inline
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_INLINE CXXTLIB_INLINE
-#endif
-
-#ifndef CXXTLIB_NOINLINE
-#	ifndef CXXTLIB_FORMAT_NOINLINE
-#		if CXXTLIB_FORMAT_GCC_VERSION || CXXTLIB_FORMAT_CLANG_VERSION
-#			define CXXTLIB_FORMAT_NOINLINE __attribute__((noinline))
-#		else
-#			define CXXTLIB_FORMAT_NOINLINE
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_NOINLINE CXXTLIB_NOINLINE
-#endif
-
-#ifndef CXXTLIB_NORETURN
-#	ifndef CXXTLIB_FORMAT_NORETURN
-#		if CXXTLIB_FORMAT_EXCEPTIONS && CXXTLIB_FORMAT_HAS_CPP_ATTRIBUTE(noreturn) && !CXXTLIB_FORMAT_MSC_VER && !CXXTLIB_FORMAT_NVCC
-#			define CXXTLIB_FORMAT_NORETURN [[noreturn]]
-#		else
-#			define CXXTLIB_FORMAT_NORETURN
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_NORETURN CXXTLIB_NORETURN
-#endif
-
-#ifndef CXXTLIB_NODISCARD
-#	ifndef CXXTLIB_FORMAT_NODISCARD
-#		if CXXTLIB_FORMAT_HAS_CPP17_ATTRIBUTE(nodiscard)
-#			define CXXTLIB_FORMAT_NODISCARD [[nodiscard]]
-#		else
-#			define CXXTLIB_FORMAT_NODISCARD
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_NODISCARD CXXTLIB_NODISCARD
-#endif
-
-#ifndef CXXTLIB_DEPRECATED
-#	ifndef CXXTLIB_FORMAT_DEPRECATED
-#		if CXXTLIB_FORMAT_HAS_CPP14_ATTRIBUTE(deprecated) || CXXTLIB_FORMAT_MSC_VER >= 1900
-#			define CXXTLIB_FORMAT_DEPRECATED [[deprecated]]
-#		else
-#			if (defined(__GNUC__) && !defined(__LCC__)) || defined(__clang__)
-#				define CXXTLIB_FORMAT_DEPRECATED __attribute__((deprecated))
-#			elif CXXTLIB_FORMAT_MSC_VER
-#				define CXXTLIB_FORMAT_DEPRECATED __declspec(deprecated)
-#			else
-#				define CXXTLIB_FORMAT_DEPRECATED /* deprecated */
-#			endif
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_DEPRECATED CXXTLIB_DEPRECATED
-#endif
-
-#ifndef CXXTLIB_DEBUG
-#	ifndef CXXTLIB_FORMAT_DEBUG
-#		if _MSC_VER
-#			define CXXTLIB_FORMAT_DEBUG _DEBUG
-#		else
-#			define CXXTLIB_FORMAT_DEBUG NDEBUG
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_DEBUG CXXTLIB_DEBUG
-#endif
-
-#ifndef CXXTLIB_OS
-#	ifndef CXXTLIB_FORMAT_OS
-#		ifndef CXXTLIB_FORMAT_OS_WINDOWS
-#			if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-#				define CXXTLIB_FORMAT_OS_WINDOWS 1
-#				define CXXTLIB_FORMAT_OS CXXTLIB_FORMAT_OS_WINDOWS
-#			endif
-#			ifdef _WIN64
-#				define CXXTLIB_FORMAT_OS_WINDOWS_X64 1
-#			else
-#				define CXXTLIB_FORMAT_OS_WINDOWS_X32 1
-#			endif
-#		endif
-#		ifndef CXXTLIB_FORMAT_OS_LINUX
-#			if __linux__
-#				define CXXTLIB_FORMAT_OS_LINUX 1
-#				define CXXTLIB_FORMAT_OS CXXTLIB_FORMAT_OS_LINUX
-#			endif
-#		endif
-#		ifndef CXXTLIB_FORMAT_OS_MACOS
-#			if __APPLE__
-#				define CXXTLIB_FORMAT_OS_MACOS 1
-#				define CXXTLIB_FORMAT_OS CXXTLIB_FORMAT_OS_MACOS
-#			endif
-#		endif
-#	endif
-#else
-#	define CXXTLIB_FORMAT_OS CXXTLIB_OS
-#	ifdef CXXTLIB_OS_WINDOWS
-#		define CXXTLIB_FORMAT_OS_WINDOWS CXXTLIB_OS_WINDOWS
+#ifndef FORMAT_GCC_VERSION
+#	if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && !defined(__NVCOMPILER)
+#		define FORMAT_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
 #	else
-#		define CXXTLIB_FORMAT_OS_WINDOWS
-#	endif
-#	ifdef CXXTLIB_OS_LINUX
-#		define CXXTLIB_FORMAT_OS_LINUX CXXTLIB_OS_LINUX
-#	else
-#		define CXXTLIB_FORMAT_OS_LINUX
-#	endif
-#	ifdef CXXTLIB_OS_MACOS
-#		define CXXTLIB_FORMAT_OS_MACOS CXXTLIB_OS_MACOS
-#	else
-#		define CXXTLIB_FORMAT_OS_MACOS
+#		define FORMAT_GCC_VERSION 0
 #	endif
 #endif
 
-#ifndef CXXTLIB_COMMA
-#	ifndef CXXTLIB_FORMAT_COMMA
-#		define CXXTLIB_FORMAT_COMMA ,
+#ifndef FORMAT_GCC_PRAGMA
+#	if FORMAT_GCC_VERSION >= 504
+#		define FORMAT_GCC_PRAGMA(arg) _Pragma(arg)
+#	else
+#		define FORMAT_GCC_PRAGMA(arg)
 #	endif
-#else
-#	define CXXTLIB_FORMAT_COMMA CXXTLIB_COMMA
+#endif
+
+#ifndef FORMAT_ICC_VERSION
+#	ifdef __ICL
+#		define FORMAT_ICC_VERSION __ICL
+#	elif defined(__INTEL_COMPILER)
+#		define FORMAT_ICC_VERSION __INTEL_COMPILER
+#	else
+#		define FORMAT_ICC_VERSION 0
+#	endif
+#endif
+
+#ifndef FORMAT_NVCOMPILER_VERSION
+#	ifdef __NVCOMPILER
+#		define FORMAT_NVCOMPILER_VERSION (__NVCOMPILER_MAJOR__ * 100 + __NVCOMPILER_MINOR__)
+#	else
+#		define FORMAT_NVCOMPILER_VERSION 0
+#	endif
+#endif
+
+#ifndef FORMAT_NVCC
+#	ifdef __NVCC__
+#		define FORMAT_NVCC __NVCC__
+#	else
+#		define FORMAT_NVCC 0
+#	endif
+#endif
+
+#ifndef FORMAT_MSC_VER
+#	ifdef _MSC_VER
+#		define FORMAT_MSC_VER _MSC_VER
+#	else
+#		define FORMAT_MSC_VER 0
+#	endif
+#endif
+
+#ifndef FORMAT_MSC_WARNING
+#	ifdef _MSC_VER
+#		define FORMAT_MSC_WARNING(...) __pragma(warning(__VA_ARGS__))
+#	else
+#		define FORMAT_MSC_WARNING(...)
+#	endif
+#endif
+
+#ifndef FORMAT_HAS_FEATURE
+#	ifdef __has_feature
+#		define FORMAT_HAS_FEATURE(x) __has_feature(x)
+#	else
+#		define FORMAT_HAS_FEATURE(x) 0
+#	endif
+#endif
+
+#ifndef FORMAT_CPLUSPLUS
+#	ifdef _MSVC_LANG
+#		define FORMAT_CPLUSPLUS _MSVC_LANG
+#	else
+#		define FORMAT_CPLUSPLUS __cplusplus
+#	endif
+#endif
+
+#ifndef FORMAT_HAS_CPP_ATTRIBUTE
+#	ifdef __has_cpp_attribute
+#		define FORMAT_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#	else
+#		define FORMAT_HAS_CPP_ATTRIBUTE(x) 0
+#	endif
+#endif
+
+#ifndef FORMAT_HAS_CPP14_ATTRIBUTE
+#	define FORMAT_HAS_CPP14_ATTRIBUTE(attribute) (FORMAT_CPLUSPLUS >= 201402L && FORMAT_HAS_CPP_ATTRIBUTE(attribute))
+#endif
+
+#ifndef FORMAT_HAS_CPP17_ATTRIBUTE
+#	define FORMAT_HAS_CPP17_ATTRIBUTE(attribute) (FORMAT_CPLUSPLUS >= 201703L && FORMAT_HAS_CPP_ATTRIBUTE(attribute))
+#endif
+
+#ifndef FORMAT_USE_CONSTEXPR
+#	define FORMAT_USE_CONSTEXPR (FORMAT_HAS_FEATURE(cxx_relaxed_constexpr) || FORMAT_MSC_VER >= 1912 || (FORMAT_GCC_VERSION >= 600 && __cplusplus >= 201402L)) && !FORMAT_NVCC && !FORMAT_ICC_VERSION
+#endif
+
+#ifdef FORMAT_USE_CONSTEXPR
+#	if FORMAT_USE_CONSTEXPR
+#		define FORMAT_CONSTEXPR constexpr
+#		define FORMAT_CONSTEXPR_DECL constexpr
+#	else
+#		define FORMAT_CONSTEXPR
+#		define FORMAT_CONSTEXPR_DECL
+#	endif
+#endif
+
+#ifndef FORMAT_NOEXCEPT
+#	if defined(_MSC_VER) && (_MSC_VER < 1900)
+#		define FORMAT_NOEXCEPT _NOEXCEPT
+#	else
+#		define FORMAT_NOEXCEPT noexcept
+#	endif
+#endif
+
+#ifndef FORMAT_INLINE
+# 	if FORMAT_GCC_VERSION || FORMAT_CLANG_VERSION
+#		define FORMAT_INLINE inline __attribute__((always_inline))
+#	else
+#		define FORMAT_INLINE inline
+#	endif
+#endif
+
+#ifndef FORMAT_NOINLINE
+#	if FORMAT_GCC_VERSION || FORMAT_CLANG_VERSION
+#		define FORMAT_NOINLINE __attribute__((noinline))
+#	else
+#		define FORMAT_NOINLINE
+#	endif
+#endif
+
+#ifndef FORMAT_NORETURN
+#	if CXXTLIB_FORMAT_EXCEPTIONS && FORMAT_HAS_CPP_ATTRIBUTE(noreturn) && !FORMAT_MSC_VER && !FORMAT_NVCC
+#		define FORMAT_NORETURN [[noreturn]]
+#	else
+#		define FORMAT_NORETURN
+#	endif
+#endif
+
+#ifndef FORMAT_NODISCARD
+#	if FORMAT_HAS_CPP17_ATTRIBUTE(nodiscard)
+#		define FORMAT_NODISCARD [[nodiscard]]
+#	else
+#		define FORMAT_NODISCARD
+#	endif
+#endif
+
+#ifndef FORMAT_DEPRECATED
+#	if FORMAT_HAS_CPP14_ATTRIBUTE(deprecated) || FORMAT_MSC_VER >= 1900
+#		define FORMAT_DEPRECATED [[deprecated]]
+#	else
+#		if (defined(__GNUC__) && !defined(__LCC__)) || defined(__clang__)
+#			define FORMAT_DEPRECATED __attribute__((deprecated))
+#		elif FORMAT_MSC_VER
+#			define FORMAT_DEPRECATED __declspec(deprecated)
+#		else
+#			define FORMAT_DEPRECATED /* deprecated */
+#		endif
+#	endif
+#endif
+
+#ifndef FORMAT_DEBUG
+#	if _MSC_VER
+#		define FORMAT_DEBUG _DEBUG
+#	else
+#		define FORMAT_DEBUG NDEBUG
+#	endif
+#endif
+
+#ifndef FORMAT_COMMA
+#	define FORMAT_COMMA ,
 #endif
 
 #ifndef COMMA
-#	if defined(CXXTLIB_COMMA)
-#		define COMMA CXXTLIB_COMMA
-#	elif defined(CXXTLIB_FORMAT_COMMA)
-#		define COMMA CXXTLIB_FORMAT_COMMA
-#	else
-#		define COMMA ,
-#	endif
+#	define COMMA FORMAT_COMMA
 #endif
 
 #define NONE
@@ -440,35 +263,35 @@ namespace cxxtlib
 
 			namespace ascii
 			{
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR uint32 length(const char* pString) CXXTLIB_FORMAT_NOEXCEPT
+				static FORMAT_INLINE FORMAT_CONSTEXPR uint32 length(const char* pString) FORMAT_NOEXCEPT
 				{
 					uint32 count = 0;
 					while (pString[count]) count++;
 					return count;
 				}
 
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* fill(char* pString, char pValue, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
+				static FORMAT_INLINE FORMAT_CONSTEXPR char* fill(char* pString, char pValue, uint32 pCount) FORMAT_NOEXCEPT
 				{
 					char* head = pString;
 					for (uint32 index = 0; index < pCount; index++) head[index] = pValue;
 					return pString;
 				}
 
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(char* destination, const char* source) CXXTLIB_FORMAT_NOEXCEPT
+				static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source) FORMAT_NOEXCEPT
 				{
 					char* head = destination;
 					while((*destination++ = *source++) != '\0');
 					return head;
 				}
 
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) CXXTLIB_FORMAT_NOEXCEPT
+				static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) FORMAT_NOEXCEPT
 				{
 					char* head = destination;
 					for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
 					return head;
 				}
 
-				static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void reverse(char* pString) CXXTLIB_FORMAT_NOEXCEPT
+				static FORMAT_INLINE FORMAT_CONSTEXPR void reverse(char* pString) FORMAT_NOEXCEPT
 				{
 					uint32 size = length((const char*)pString);
 					
@@ -573,18 +396,11 @@ namespace cxxtlib
 				using ValueType = Type;
 
 			public:
-				static CXXTLIB_FORMAT_CONSTEXPR const Type value = tValue;
+				static FORMAT_CONSTEXPR const Type value = tValue;
 			};
 
-			// Boolean
-#if CXXTLIB_FORMAT_CPLUSPLUS < 201103L
-			template<bool tValue>
-			struct BoolConstant : public IntegralConstant<bool, tValue>
-			{ };
-#else
 			template<bool tValue>
 			using BoolConstant = IntegralConstant<bool, tValue>;
-#endif
 
 			using TrueType = IntegralConstant<bool, true>;
 
@@ -729,7 +545,7 @@ namespace cxxtlib
 			{ };
 
 			// Is final
-#if __cplusplus >= 201402L
+#if FORMAT_CPLUSPLUS >= 201402L
 			template<typename Type>
 			struct IsFinal
 				: public IntegralConstant<bool, __is_final(Type)>
@@ -876,8 +692,8 @@ namespace cxxtlib
 				: public FalseType
 			{ };
 
-			template<typename Type, uint32 size>
-			struct IsArray<Type[size]>
+			template<typename Type, uint32 tSize>
+			struct IsArray<Type[tSize]>
 				: public TrueType
 			{ };
 
@@ -1098,29 +914,29 @@ namespace cxxtlib
 
 			// Forward
 			template<typename Type>
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& type) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& type) FORMAT_NOEXCEPT
 			{
 				return static_cast<Type&&>(type);
 			}
 
 			template<typename Type>
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& type) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& type) FORMAT_NOEXCEPT
 			{
 				return static_cast<Type&&>(type);
 			}
 
 			template<typename Type>
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType type) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType type) FORMAT_NOEXCEPT
 			{
 				return type;
 			}
 
 			template<typename Type>
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& type) CXXTLIB_FORMAT_NOEXCEPT = delete;
+			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& type) FORMAT_NOEXCEPT = delete;
 
 			// Move
 			template<typename Type>
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& type) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& type) FORMAT_NOEXCEPT
 			{
 				return static_cast<typename RemoveReference<Type>::ValueType&&>(type);
 			}
@@ -1155,7 +971,7 @@ namespace cxxtlib
 		struct FormatOf
 		{
 		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
+			static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
 		};
 
 		#define __struct_INTERNAL_FORMAT_OF(Dependencies, Type, FType) \
@@ -1163,7 +979,7 @@ namespace cxxtlib
 		struct FormatOf<Type> \
 		{ \
 		public: \
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
+			static FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
 		}
 
 		__struct_INTERNAL_FORMAT_OF(NONE, bool, FormatArgumentType::Bool);
@@ -1190,15 +1006,12 @@ namespace cxxtlib
 		{
 		public:
 			template<typename Context>
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parseIgnore(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR void parseIgnore(Context& pContext) FORMAT_NOEXCEPT
 			{
 				for (; *pContext != '}'; pContext++);
 				pContext++;
 			}
 		};
-
-		struct FormatterBase
-		{ };
 
 		template<typename Type, typename Enable = void>
 		struct Formatter
@@ -1221,45 +1034,44 @@ namespace cxxtlib
 
 		#define __struct_INTERNAL_FORMATTER(Dependencies, Type, PFunc, FFunc) \
 		template<Dependencies> \
-		struct Formatter<Type, FormatterEnabler<Type>> : public FormatterBase \
+		struct Formatter<Type, FormatterEnabler<Type>> \
 		{ \
 		public: \
 			template<typename Context> \
-			PFunc \
+			static PFunc \
 			 \
 			template<typename Context> \
-			FFunc \
+			static FFunc \
 		}
 
 		__struct_INTERNAL_FORMATTER(NONE, bool,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA bool pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA bool pValue) FORMAT_NOEXCEPT
 			{
-				pContext.append(pValue ? "true" : "false" COMMA
-					pValue ? 4u : 5u);
+				pContext.append(pValue ? "true" : "false" COMMA pValue ? 4u : 5u);
 			}
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, char,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA char pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA char pValue) FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue);
 			}
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::int8,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int8 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int8 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
 				char buffer[size] = { };
@@ -1273,11 +1085,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::uint8,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint8 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint8 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 5u;
 				char buffer[size] = { };
@@ -1291,11 +1103,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::int16,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int16 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int16 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
 				char buffer[size] = { };
@@ -1309,11 +1121,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::uint16,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint16 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint16 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 7u;
 				char buffer[size] = { };
@@ -1327,11 +1139,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::int32,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int32 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int32 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
 				char buffer[size] = { };
@@ -1345,11 +1157,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::uint32,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint32 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint32 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 12u;
 				char buffer[size] = { };
@@ -1363,11 +1175,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::int64,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int64 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int64 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
 				char buffer[size] = { };
@@ -1381,11 +1193,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::uint64,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint64 pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint64 pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 21u;
 				char buffer[size] = { };
@@ -1399,11 +1211,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, float,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
 				char buffer[size] = { };
@@ -1417,11 +1229,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, double,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 25u;
 				char buffer[size] = { };
@@ -1435,11 +1247,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::ldouble,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 26u;
 				char buffer[size] = { };
@@ -1453,11 +1265,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(typename Type, Type*,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA Type* pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
 				char buffer[size] = { };
@@ -1471,11 +1283,11 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(typename Type, const Type*,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA const Type* pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const Type* pValue) FORMAT_NOEXCEPT
 			{
 				const details::uint32 size = 19u;
 				char buffer[size] = { };
@@ -1489,22 +1301,22 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, details::null,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA details::null pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::null pValue) FORMAT_NOEXCEPT
 			{
 				pContext.append("nullptr" COMMA 7u);
 			}
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, const char*,
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA const char* pValue) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char* pValue) FORMAT_NOEXCEPT
 			{
 				if (pValue)
 				{
@@ -1518,35 +1330,35 @@ namespace cxxtlib
 		);
 
 		__struct_INTERNAL_FORMATTER(NONE, const char[],
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[]) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[]) FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue COMMA details::ascii::length(pValue));
 			}
 		);
 
 		__struct_INTERNAL_FORMATTER(typename details::uint32 tSize, const char[tSize],
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void parse(Context& pContext) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 			{
 				FormatterHelpers::template parseIgnore<Context>(pContext);
 			},
-			static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[tSize]) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[tSize]) FORMAT_NOEXCEPT
 			{
 				pContext.append(pValue COMMA tSize - 1);
 			}
 		);
 
 		template<typename Reader, typename Writer>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) FORMAT_NOEXCEPT
 		{
 			pWriter.append(pReader.iterator(), pReader.size());
 		}
 
 		template<typename Reader, typename Writer, typename Argument, typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			// Setting pointer to the beggining for this section of pattern
 			const char* previous = pReader.iterator();
@@ -1577,93 +1389,93 @@ namespace cxxtlib
 			const char* mEnd;
 		
 		public:
-			explicit Reader(const char* pIterator, const char* pBegin, const char* pEnd) CXXTLIB_FORMAT_NOEXCEPT
+			explicit Reader(const char* pIterator, const char* pBegin, const char* pEnd) FORMAT_NOEXCEPT
 				: mIterator(pIterator), mBegin(pBegin), mEnd(pEnd)
 			{ }
 
 		public:
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 size() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
 			{
 				return static_cast<details::uint32>(this->mEnd - this->mIterator);
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const char* iterator() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR const char* iterator() const FORMAT_NOEXCEPT
 			{
 				return this->mIterator;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const char* begin() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR const char* begin() const FORMAT_NOEXCEPT
 			{
 				return this->mBegin;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const char* end() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR const char* end() const FORMAT_NOEXCEPT
 			{
 				return this->mEnd;
 			}
 
 		public:
-			CXXTLIB_FORMAT_INLINE Reader operator +(details::int32 pOffset) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE Reader operator +(details::int32 pOffset) FORMAT_NOEXCEPT
 			{
 				Reader reader = Reader(this->mIterator + pOffset, this->mBegin, this->mEnd);
 				return reader;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Reader& operator +=(details::int32 pOffset) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator +=(details::int32 pOffset) FORMAT_NOEXCEPT
 			{
 				this->mIterator += pOffset;
 				return *this;
 			}
 			
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Reader& operator ++() CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator ++() FORMAT_NOEXCEPT
 			{
 				this->mIterator++;
 				return *this;
 			}
 
-			CXXTLIB_FORMAT_INLINE Reader operator ++(details::int32) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE Reader operator ++(details::int32) FORMAT_NOEXCEPT
 			{
 				Reader reader = Reader(this->mIterator, this->mBegin, this->mEnd);
 				++(*this);
 				return reader;
 			}
 
-			CXXTLIB_FORMAT_INLINE Reader operator -(details::int32 pOffset) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE Reader operator -(details::int32 pOffset) FORMAT_NOEXCEPT
 			{
 				Reader reader = Reader(this->mIterator - pOffset, this->mBegin, this->mEnd);
 				return reader;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Reader& operator -=(details::int32 pOffset) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator -=(details::int32 pOffset) FORMAT_NOEXCEPT
 			{
 				this->mIterator -= pOffset;
 				return *this;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR Reader& operator --() CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator --() FORMAT_NOEXCEPT
 			{
 				this->mIterator--;
 				return *this;
 			}
 
-			CXXTLIB_FORMAT_INLINE Reader operator --(details::int32) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE Reader operator --(details::int32) FORMAT_NOEXCEPT
 			{
 				Reader reader = Reader(this->mIterator, this->mBegin, this->mEnd);
 				--(*this);
 				return reader;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const char& operator *() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR const char& operator *() const FORMAT_NOEXCEPT
 			{
 				return *this->mIterator;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR bool operator ==(const Reader& pOther) const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR bool operator ==(const Reader& pOther) const FORMAT_NOEXCEPT
 			{
 				return this->mIterator == pOther.iterator() && this->mBegin == pOther.begin() && this->mEnd == pOther.end();
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR bool operator !=(const Reader& pOther) const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR bool operator !=(const Reader& pOther) const FORMAT_NOEXCEPT
 			{
 				return !(*this == pOther);
 			}
@@ -1677,21 +1489,21 @@ namespace cxxtlib
 			details::uint32 mCapacity;
 
 		public:
-			explicit HeapWriter(details::uint32 pCapacity = 4u) CXXTLIB_FORMAT_NOEXCEPT
+			explicit HeapWriter(details::uint32 pCapacity = 4u) FORMAT_NOEXCEPT
 				: mData(nullptr), mSize(0), mCapacity(pCapacity)
 			{
 				allocate(pCapacity);
 			}
 
 		private:
-			CXXTLIB_FORMAT_INLINE void allocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE void allocate(details::uint32 pCapacity) FORMAT_NOEXCEPT
 			{
 				this->mCapacity = pCapacity;
 				this->mData = new char[pCapacity + 1u];
 				this->mData[this->mSize] = details::move('\0');
 			}
 
-			CXXTLIB_FORMAT_INLINE void reallocate(details::uint32 pCapacity) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE void reallocate(details::uint32 pCapacity) FORMAT_NOEXCEPT
 			{
 				char* local = new char[pCapacity + 1u];
 
@@ -1707,12 +1519,12 @@ namespace cxxtlib
 			}
 
 		public:
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 size() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
 			{
 				return this->mSize;
 			}
 
-			CXXTLIB_FORMAT_INLINE void CXXTLIB_FORMAT_CONSTEXPR append(char pChar) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE void FORMAT_CONSTEXPR append(char pChar) FORMAT_NOEXCEPT
 			{
 				if (this->mSize + 1 > this->mCapacity)
 					reallocate(this->mCapacity + this->mCapacity / 2);
@@ -1721,7 +1533,7 @@ namespace cxxtlib
 				this->mData[this->mSize] = '\0';
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
 			{
 				if (this->mSize + pSize > this->mCapacity)
 					reallocate(pSize + this->mCapacity + this->mCapacity / 2);
@@ -1732,7 +1544,7 @@ namespace cxxtlib
 				this->mData[this->mSize += pSize] = '\0';
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* get() CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
 			{
 				return this->mData;
 			}
@@ -1746,23 +1558,23 @@ namespace cxxtlib
 			details::uint32 mSize;
 
 		public:
-			explicit StackWriter(char* pData) CXXTLIB_FORMAT_NOEXCEPT
+			explicit StackWriter(char* pData) FORMAT_NOEXCEPT
 				: mData(pData), mSize(0)
 			{ }
 
 		public:
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 size() const CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
 			{
 				return this->mSize;
 			}
 			
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void append(char pChar) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void append(char pChar) FORMAT_NOEXCEPT
 			{
 				if (this->mSize + 1u <= tCapacity)
 					this->mData[this->mSize++] = pChar;
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
 			{
 				if (this->mSize + pSize <= tCapacity)
 				{
@@ -1773,7 +1585,7 @@ namespace cxxtlib
 				}
 			}
 
-			CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* get() CXXTLIB_FORMAT_NOEXCEPT
+			FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
 			{
 				this->mData[this->mSize] = '\0';
 				return this->mData;
@@ -1786,7 +1598,7 @@ namespace cxxtlib
 		 * cleanup() function to deallocate memory or store this pointer to formatted cstring inside a smart pointer.
 		 */
 		template<typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			// Setting up the reader (later referenced as Context).
 			const details::uint32 patternLength = details::ascii::length(pPattern);
@@ -1802,7 +1614,7 @@ namespace cxxtlib
 		 * Returns the length of chars written to the buffer.
 		 */
 		template<details::uint32 tSize, typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR details::uint32 format(char* pBuffer, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 format(char* pBuffer, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			// Setting up the reader (later referenced as Context).
 			Reader reader = Reader(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
@@ -1817,13 +1629,13 @@ namespace cxxtlib
 		 * Should only be used when default format function is used. Default format method creates formatted string on heap
 		 * and returns it. It does not handle memory deallocation of the formatted string. That is handled by this function.
 		 */
-		static CXXTLIB_FORMAT_INLINE void cleanup(char* pFormatted) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
 		{
 			delete[] pFormatted;
 		}
 
 		template<details::uint32 tSize>
-		static CXXTLIB_FORMAT_INLINE void cleanup(char* pFormatted) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
 		{
 			details::ascii::fill(pFormatted, char(), tSize);
 		}
@@ -1833,7 +1645,7 @@ namespace cxxtlib
 		 * itself and deallocates it at the end of the function.
 		 */
 		template<typename Stream, typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 			pStream << formatted;
@@ -1841,7 +1653,7 @@ namespace cxxtlib
 		}
 
 		template<typename Stream, details::uint32 tSize, typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			char formatted[tSize] = { };
 			format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
@@ -1852,7 +1664,7 @@ namespace cxxtlib
 		 * Printing method for c-like streams.
 		 */
 		template<typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 			::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
@@ -1860,7 +1672,7 @@ namespace cxxtlib
 		}
 
 		template<details::uint32 tSize, typename... Arguments>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 		{
 			char formatted[tSize] = { };
 			format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
@@ -1871,7 +1683,7 @@ namespace cxxtlib
 		struct SpecifierOf
 		{
 		public:
-			static CXXTLIB_FORMAT_CONSTEXPR const char value = ' ';
+			static FORMAT_CONSTEXPR const char value = ' ';
 		};
 
 		#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
@@ -1879,7 +1691,7 @@ namespace cxxtlib
 		struct SpecifierOf<Type> \
 		{ \
 		public: \
-			static CXXTLIB_FORMAT_CONSTEXPR const char value = Specifier; \
+			static FORMAT_CONSTEXPR const char value = Specifier; \
 		}
 
 		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
@@ -1892,7 +1704,7 @@ namespace cxxtlib
 		__struct_INTERNAL_SPECIFIER_OF(NONE, double, 'f');
 		
 		template<details::uint32 tSize, typename Type>
-		static CXXTLIB_FORMAT_INLINE CXXTLIB_FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) CXXTLIB_FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) FORMAT_NOEXCEPT
 		{
 			char temp[10] { };
 			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
@@ -1939,7 +1751,7 @@ namespace cxxtlib \
 		struct FormatOf<Type> \
 		{ \
 		public: \
-			static CXXTLIB_FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Custom; \
+			static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Custom; \
 		}; \
 	} \
 }
@@ -1950,14 +1762,14 @@ namespace cxxtlib \
 	namespace format \
 	{ \
 		template<Dependencies> \
-		struct Formatter<Type, FormatterEnabler<Type>> : public FormatterBase \
+		struct Formatter<Type, FormatterEnabler<Type>> \
 		{ \
 		public: \
 			template<typename Context> \
-			PFunc \
+			static PFunc \
 				\
 			template<typename Context> \
-			FFunc \
+			static FFunc \
 		}; \
 	} \
 }
@@ -1976,11 +1788,11 @@ namespace cxxtlib \
 
 struct_CUSTOM_FORMAT_OF(typename Char COMMA typename Traits COMMA typename Allocator, ::std::basic_string<Char COMMA Traits COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Char COMMA typename Traits COMMA typename Allocator, ::std::basic_string<Char COMMA Traits COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::basic_string<Char COMMA Traits COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::basic_string<Char COMMA Traits COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		pContext.append(pValue.data() COMMA static_cast<details::uint32>(pValue.size()));
 	}
@@ -2002,11 +1814,11 @@ struct_CUSTOM_FORMATTER(typename Char COMMA typename Traits COMMA typename Alloc
 
 struct_CUSTOM_FORMAT_OF(typename Type, ::std::initializer_list<Type>);
 struct_CUSTOM_FORMATTER(typename Type, ::std::initializer_list<Type>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::initializer_list<Type>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::initializer_list<Type>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2038,11 +1850,11 @@ struct_CUSTOM_FORMATTER(typename Type, ::std::initializer_list<Type>,
 
 struct_CUSTOM_FORMAT_OF(typename Type, ::std::forward_list<Type>);
 struct_CUSTOM_FORMATTER(typename Type, ::std::forward_list<Type>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::forward_list<Type>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::forward_list<Type>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2074,11 +1886,11 @@ struct_CUSTOM_FORMATTER(typename Type, ::std::forward_list<Type>,
 
 struct_CUSTOM_FORMAT_OF(typename Type COMMA typename ::std::size_t tSize, ::std::array<Type COMMA tSize>);
 struct_CUSTOM_FORMATTER(typename Type COMMA typename ::std::size_t tSize, ::std::array<Type COMMA tSize>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::array<Type COMMA tSize>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::array<Type COMMA tSize>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2110,11 +1922,11 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename ::std::size_t tSize, ::std:
 
 struct_CUSTOM_FORMAT_OF(typename Type COMMA typename Allocator, ::std::vector<Type COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::vector<Type COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::vector<Type COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::vector<Type COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2146,11 +1958,11 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::vector<Ty
 
 struct_CUSTOM_FORMAT_OF(typename Type COMMA typename Allocator, ::std::list<Type COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::list<Type COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::list<Type COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::list<Type COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2182,11 +1994,11 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::list<Type
 
 struct_CUSTOM_FORMAT_OF(typename Type COMMA typename Allocator, ::std::deque<Type COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::deque<Type COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::deque<Type COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::deque<Type COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2218,11 +2030,11 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Allocator, ::std::deque<Typ
 
 struct_CUSTOM_FORMAT_OF(typename Type COMMA typename Compare COMMA typename Allocator, ::std::set<Type COMMA Compare COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Type COMMA typename Compare COMMA typename Allocator, ::std::set<Type COMMA Compare COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::set<Type COMMA Compare COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::set<Type COMMA Compare COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Type>::format(pContext COMMA *pValue.begin());
@@ -2254,11 +2066,11 @@ struct_CUSTOM_FORMATTER(typename Type COMMA typename Compare COMMA typename Allo
 
 struct_CUSTOM_FORMAT_OF(typename Value COMMA typename Hash COMMA typename Predicate COMMA typename Allocator, ::std::unordered_set<Value COMMA Hash COMMA Predicate COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Value COMMA typename Hash COMMA typename Predicate COMMA typename Allocator, ::std::unordered_set<Value COMMA Hash COMMA Predicate COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::unordered_set<Value COMMA Hash COMMA Predicate COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::unordered_set<Value COMMA Hash COMMA Predicate COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Value>::format(pContext COMMA *pValue.begin());
@@ -2290,11 +2102,11 @@ struct_CUSTOM_FORMATTER(typename Value COMMA typename Hash COMMA typename Predic
 
 struct_CUSTOM_FORMAT_OF(typename Key COMMA typename Value, ::std::pair<Key COMMA Value>);
 struct_CUSTOM_FORMATTER(typename Key COMMA typename Value, ::std::pair<Key COMMA Value>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::pair<Key COMMA Value>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::pair<Key COMMA Value>& pValue) FORMAT_NOEXCEPT
 	{
 		Formatter<char>::format(pContext COMMA '[');
 		Formatter<Key>::format(pContext COMMA pValue.first);
@@ -2321,11 +2133,11 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value, ::std::pair<Key COMMA
 
 struct_CUSTOM_FORMAT_OF(typename Key COMMA typename Value COMMA typename Compare COMMA typename Allocator, ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Compare COMMA typename Allocator, ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		using Pair = typename ::std::pair<Key COMMA Value>;
 		Formatter<char>::format(pContext COMMA '[');
@@ -2359,11 +2171,11 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Compare
 
 struct_CUSTOM_FORMAT_OF(typename Key COMMA typename Value COMMA typename Hash COMMA typename Predicate COMMA typename Allocator, ::std::unordered_map<Key COMMA Value COMMA Hash COMMA Predicate COMMA Allocator>);
 struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Hash COMMA typename Predicate COMMA typename Allocator, ::std::unordered_map<Key COMMA Value COMMA Hash COMMA Predicate COMMA Allocator>,
-	static void parse(Context& pContext)
+	FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 	{
 		PARSE_IGNORE(pContext);
 	},
-	static void format(Context& pContext COMMA const ::std::unordered_map<Key COMMA Value COMMA Hash COMMA Predicate COMMA Allocator>& pValue)
+	FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const ::std::unordered_map<Key COMMA Value COMMA Hash COMMA Predicate COMMA Allocator>& pValue) FORMAT_NOEXCEPT
 	{
 		using Pair = typename ::std::pair<Key COMMA Value>;
 		Formatter<char>::format(pContext COMMA '[');
@@ -2383,3 +2195,4 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Hash CO
 #endif
 
 #endif
+ 
