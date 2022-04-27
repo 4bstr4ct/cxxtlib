@@ -203,1529 +203,1474 @@
 #	define COMMA FORMAT_COMMA
 #endif
 
-#define NONE
-
-namespace cxxtlib
-{
-	namespace format
-	{
-		namespace details
-		{
-			/**
-			 * A type represeting null.
-			 */
-			using null = decltype(nullptr);
-
-			/**
-			 * A type representing signed char.
-			 */
-			using int8 = signed char;
-
-			/**
-			 * A type representing unsigned char.
-			 */
-			using uint8 = unsigned char;
-			
-			/**
-			 * A type representing signed short.
-			 */
-			using int16 = signed short;
-
-			/**
-			 * A type representing unsigned short.
-			 */
-			using uint16 = unsigned short;
-
-			/**
-			 * A type representing signed int.
-			 */
-			using int32 = signed int;
-			
-			/**
-			 * A type representing unsigned int.
-			 */
-			using uint32 = unsigned int;
-
-			/**
-			 * A type representing signed long long.
-			 */
-			using int64 = signed long long;
-			
-			/**
-			 * A type representing unsigned long long.
-			 */
-			using uint64 = unsigned long long;
-
-			/**
-			 * A type representing long double.
-			 */
-			using ldouble = long double;
-
-			namespace ascii
-			{
-				static FORMAT_INLINE FORMAT_CONSTEXPR uint32 length(const char* pString) FORMAT_NOEXCEPT
-				{
-					uint32 count = 0;
-					while (pString[count]) count++;
-					return count;
-				}
-
-				static FORMAT_INLINE FORMAT_CONSTEXPR char* fill(char* pString, char pValue, uint32 pCount) FORMAT_NOEXCEPT
-				{
-					char* head = pString;
-					for (uint32 index = 0; index < pCount; index++) head[index] = pValue;
-					return pString;
-				}
-
-				static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source) FORMAT_NOEXCEPT
-				{
-					char* head = destination;
-					while((*destination++ = *source++) != '\0');
-					return head;
-				}
-
-				static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) FORMAT_NOEXCEPT
-				{
-					char* head = destination;
-					for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
-					return head;
-				}
-
-				static FORMAT_INLINE FORMAT_CONSTEXPR void reverse(char* pString) FORMAT_NOEXCEPT
-				{
-					uint32 size = length((const char*)pString);
-					
-					for (int32 i = 0, j = size - 1; i < j; i++, j--)
-					{
-						char a = pString[i];
-						pString[i] = pString[j];
-						pString[j] = a;
-					}
-				}
-			}
-
-			// Add constant
-			template<typename Type>
-			struct AddConst
-			{
-			public:
-				using ValueType = const Type;
-			};
-
-			// Remove constant
-			template<typename Type>
-			struct RemoveConst
-			{
-			public:
-				using ValueType = Type;
-			};
-			
-			template<typename Type>
-			struct RemoveConst<const Type>
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			// Add volatile
-			template<typename Type>
-			struct AddVolatile
-			{
-			public:
-				using ValueType = volatile Type;
-			};
-			
-			// Remove volatile
-			template<typename Type>
-			struct RemoveVolatile
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			template<typename Type>
-			struct RemoveVolatile<volatile Type>
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			// Add constant volatile
-			template<typename Type>
-			struct AddConstVolatile
-			{
-			public:
-				using ValueType = typename AddConst<typename AddVolatile<Type>::ValueType>::ValueType;
-			};
-
-			// Remove constant volatile
-			template<typename Type>
-			struct RemoveConstVolatile
-			{
-			public:
-				using ValueType = typename RemoveConst<typename RemoveVolatile<Type>::ValueType>::ValueType;
-			};
-
-			// Remove reference
-			template<typename Type>
-			struct RemoveReference
-			{
-			public:
-				using ValueType = Type;
-			};
-			
-			template<typename Type>
-			struct RemoveReference<Type&>
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			template<typename Type>
-			struct RemoveReference<Type&&>
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			// Integral constant
-			template<typename Type, Type tValue>
-			struct IntegralConstant
-			{
-			public:
-				using ValueType = Type;
-
-			public:
-				static FORMAT_CONSTEXPR const Type value = tValue;
-			};
-
-			template<bool tValue>
-			using BoolConstant = IntegralConstant<bool, tValue>;
-
-			using TrueType = IntegralConstant<bool, true>;
-
-			using FalseType = IntegralConstant<bool, false>;
-
-			// Meta
-			template<bool, typename, typename>
-			struct Conditional;
-
-			template<typename>
-			struct IsLValueReference;
-
-			template<typename>
-			struct IsRValueReference;
-
-			// Conditional
-			template<bool tCondition, typename IfTrue, typename IfFalse>
-			struct Conditional
-			{
-			public:
-				using ValueType = IfTrue;
-			};
-
-			template<typename IfTrue, typename IfFalse>
-			struct Conditional<false, IfTrue, IfFalse>
-			{
-			public:
-				using ValueType = IfFalse;
-			};
-
-			// Or
-			template<typename...>
-			struct Or;
-
-			template<>
-			struct Or<>
-				: public FalseType
-			{ };
-
-			template<typename First>
-			struct Or<First>
-				: public First
-			{ };
-
-			template<typename First, typename Second>
-			struct Or<First, Second>
-				: public Conditional<First::value, First, Second>::ValueType
-			{ };
-
-			template<typename First, typename Second, typename Third, typename... Other>
-			struct Or<First, Second, Third, Other...>
-				: public Conditional<First::value, First, Or<Second, Third, Other...>>::ValueType
-			{ };
-
-			// And
-			template<typename...>
-			struct And;
-
-			template<>
-			struct And<>
-				: public TrueType
-			{ };
-
-			template<typename First>
-			struct And<First>
-				: public First
-			{ };
-
-			template<typename First, typename Second>
-			struct And<First, Second>
-				: public Conditional<First::value, Second, First>::ValueType
-			{ };
-
-			template<typename First, typename Second, typename Third, typename... Other>
-			struct And<First, Second, Third, Other...>
-				: public Conditional<First::value, And<Second, Third, Other...>, First>::ValueType
-			{ };
-
-			// Not
-			template<typename Type>
-			struct Not
-				: public BoolConstant<!bool(Type::value)>
-			{ };
-
-			// Identity type
-			template<typename Type>
-			struct Identity
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			// Is constant
-			template<typename>
-			struct IsConst
-				: public FalseType
-			{ };
-
-			template<typename Type>
-			struct IsConst<const Type>
-				: public TrueType
-			{ };
-
-			// Is volatile
-			template<typename>
-			struct IsVolatile
-				: public FalseType
-			{ };
-
-			template<typename Type>
-			struct IsVolatile<volatile Type>
-				: public TrueType
-			{ };
-
-			// Is constant volatile
-			template<typename>
-			struct IsConstVolatile
-				: public FalseType
-			{ };
-
-			template<typename Type>
-			struct IsConstVolatile<const volatile Type>
-				: public TrueType
-			{ };
-
-			// Is literal
-			template<typename Type>
-			struct IsLiteral
-				: public IntegralConstant<bool, __is_literal_type(Type)>
-			{ };
-
-			// Is empty
-			template<typename Type>
-			struct IsEmpty
-				: public IntegralConstant<bool, __is_empty(Type)>
-			{ };
-
-			// Is polymorphic
-			template<typename Type>
-			struct IsPolymorphic
-				: public IntegralConstant<bool, __is_polymorphic(Type)>
-			{ };
-
-			// Is final
-#if FORMAT_CPLUSPLUS >= 201402L
-			template<typename Type>
-			struct IsFinal
-				: public IntegralConstant<bool, __is_final(Type)>
-			{ };
+#ifndef NONE
+#	define NONE
 #endif
-			
-			// Is abstract
-			template<typename Type>
-			struct IsAbstract
-				: public IntegralConstant<bool, __is_abstract(Type)>
-			{ };
 
-			// Is void
-			template<typename>
-			struct IsVoidHelper
-				: public FalseType
-			{ };
+namespace cformat
+{
+	namespace details
+	{
+		using null = decltype(nullptr);
 
-			template<>
-			struct IsVoidHelper<void>
-				: public TrueType
-			{ };
+		using int8 = signed char;
 
-			template<typename Type>
-			struct IsVoid
-				: public IsVoidHelper<typename RemoveConstVolatile<Type>::ValueType>
-			{ };
+		using uint8 = unsigned char;
+		
+		using int16 = signed short;
 
-			// Is integral
-			template<typename>
-			struct IsIntegralHelper
-				: public FalseType
-			{ };
+		using uint16 = unsigned short;
 
-			template<>
-			struct IsIntegralHelper<bool> :
-				public TrueType
-			{ };
+		using int32 = signed int;
+		
+		using uint32 = unsigned int;
 
-			template<>
-			struct IsIntegralHelper<char> :
-				public TrueType
-			{ };
+		using int64 = signed long long;
+		
+		using uint64 = unsigned long long;
 
-			template<>
-			struct IsIntegralHelper<signed char>
-				: public TrueType
-			{ };
+		using ldouble = long double;
 
-			template<>
-			struct IsIntegralHelper<unsigned char>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<wchar_t>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<char16_t>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<char32_t>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<signed short>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<unsigned short>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<signed int>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<unsigned int>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<signed long>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<unsigned long>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<signed long long>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsIntegralHelper<unsigned long long>
-				: public TrueType
-			{ };
-
-			template<typename Type>
-			struct IsIntegral
-				: public IsIntegralHelper<typename RemoveConstVolatile<Type>::ValueType>
-			{ };
-
-			// Is floating point
-			template<typename>
-			struct IsFloatingPointHelper
-				: public FalseType
-			{ };
-
-			template<>
-			struct IsFloatingPointHelper<float>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsFloatingPointHelper<double>
-				: public TrueType
-			{ };
-
-			template<>
-			struct IsFloatingPointHelper<long double>
-				: public TrueType
-			{ };
-
-			template<typename Type>
-			struct IsFloatingPoint
-				: public IsFloatingPointHelper<typename RemoveConstVolatile<Type>::ValueType>
-			{ };
-
-			// Is array
-			template<typename>
-			struct IsArray
-				: public FalseType
-			{ };
-
-			template<typename Type, uint32 tSize>
-			struct IsArray<Type[tSize]>
-				: public TrueType
-			{ };
-
-			template<typename Type>
-			struct IsArray<Type[]>
-				: public TrueType
-			{ };
-
-			// Is pointer
-			template<typename>
-			struct IsPointerHelper
-				: public FalseType
-			{ };
-
-			template<typename Type>
-			struct IsPointerHelper<Type*>
-				: public TrueType
-			{ };
-
-			template<typename Type>
-			struct IsPointer
-				: public IsPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
-			{ };
-
-			// Is enum
-			template<typename Type>
-			struct IsEnum
-				: public BoolConstant<__is_enum(Type)>
-			{ };
-
-			// Is union
-			template<typename Type>
-			struct IsUnion
-				: public BoolConstant<__is_union(Type)>
-			{ };
-
-			// Is class
-			template<typename Type>
-			struct IsClass
-				: public BoolConstant<__is_class(Type)>
-			{ };
-
-			// Is function
-			template<typename>
-			struct IsFunction
-				: public FalseType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<Result(Arguments...)>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<Result(Arguments...)&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<Result(Arguments...)&&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<const Result(Arguments...)>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<const Result(Arguments...)&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<const Result(Arguments...)&&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<volatile Result(Arguments...)>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<volatile Result(Arguments...)&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<volatile Result(Arguments...)&&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<const volatile Result(Arguments...)>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<const volatile Result(Arguments...)&>
-				: public TrueType
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsFunction<const volatile Result(Arguments...)&&>
-				: public TrueType
-			{ };
-
-			// Is null pointer
-			template<typename>
-			struct IsNullPointerHelper
-				: public FalseType
-			{ };
-
-			template<>
-			struct IsNullPointerHelper<decltype(nullptr)>
-				: public TrueType
-			{ };
-
-			template<typename Type>
-			struct IsNullPointer
-				: public IsNullPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
-			{ };
-
-			// Is reference
-			template<typename Type>
-			struct IsReference
-				: public Or<IsLValueReference<Type>, IsRValueReference<Type>>
-			{ };
-
-			/// Is object
-			template<typename Type>
-			struct IsObject
-				: public Not<Or<IsFunction<Type>, IsReference<Type>, IsVoid<Type>>>
-			{ };
-
-			// Referenceable
-			template<typename Type>
-			struct IsReferenceable
-				: public Or<IsObject<Type>, IsReference<Type>>
-			{ };
-
-			template<typename Result, typename... Arguments>
-			struct IsReferenceable<Result(Arguments...)>
-				: public TrueType
-			{ };
-
-			// L value
-			template<typename>
-			struct IsLValueReference
-				: public FalseType
-			{ };
-
-			template<typename Type>
-			struct IsLValueReference<Type&>
-				: public TrueType
-			{ };
-
-			template<typename Type, bool = IsReferenceable<Type>::value>
-			struct AddLValueReferenceHelper
+		namespace ascii
+		{
+			static FORMAT_INLINE FORMAT_CONSTEXPR uint32 length(const char* pString) FORMAT_NOEXCEPT
 			{
-			public:
-				using ValueType = Type;
-			};
-
-			template<typename Type>
-			struct AddLValueReferenceHelper<Type, true>
-			{
-			public:
-				using ValueType = Type&;
-			};
-
-			template<typename Type>
-			struct AddLValueReference
-				: public AddLValueReferenceHelper<Type>
-			{ };
-
-			// R value
-			template<typename>
-			struct IsRValueReference
-				: public FalseType
-			{ };
-
-			template<typename Type>
-			struct IsRValueReference<Type&&>
-				: public TrueType
-			{ };
-
-			template<typename Type, bool = IsReferenceable<Type>::value>
-			struct AddRValueReferenceHelper
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			template<typename Type>
-			struct AddRValueReferenceHelper<Type, true>
-			{
-			public:
-				using ValueType = Type&&;
-			};
-
-			template<typename Type>
-			struct AddRValueReference
-				: public AddRValueReferenceHelper<Type>
-			{ };
-
-			// Enable if
-			template<bool, typename Type = void>
-			struct EnableIf { };
-
-			template<typename Type>
-			struct EnableIf<true, Type>
-			{
-			public:
-				using ValueType = Type;
-			};
-
-			// Forward
-			template<typename Type>
-			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& type) FORMAT_NOEXCEPT
-			{
-				return static_cast<Type&&>(type);
+				uint32 count = 0;
+				while (pString[count]) count++;
+				return count;
 			}
 
-			template<typename Type>
-			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& type) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* fill(char* pString, char pValue, uint32 pCount) FORMAT_NOEXCEPT
 			{
-				return static_cast<Type&&>(type);
+				char* head = pString;
+				for (uint32 index = 0; index < pCount; index++) head[index] = pValue;
+				return pString;
 			}
 
-			template<typename Type>
-			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType type) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source) FORMAT_NOEXCEPT
 			{
-				return type;
+				char* head = destination;
+				while((*destination++ = *source++) != '\0');
+				return head;
 			}
 
-			template<typename Type>
-			FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& type) FORMAT_NOEXCEPT = delete;
-
-			// Move
-			template<typename Type>
-			FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& type) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) FORMAT_NOEXCEPT
 			{
-				return static_cast<typename RemoveReference<Type>::ValueType&&>(type);
+				char* head = destination;
+				for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
+				return head;
 			}
 		}
 
-		/**
-		 * Defines types of format arguments.
-		 */
-		enum class FormatArgumentType : details::uint8
+		// Add constant
+		template<typename Type>
+		struct AddConst
 		{
-			None,
-			Bool,
-			Char,
-			Int8,
-			UInt8,
-			Int16,
-			UInt16,
-			Int32,
-			UInt32,
-			Int64,
-			UInt64,
-			Float,
-			Double,
-			LDouble,
-			Pointer,
-			Array,
-			CString,
-			Custom
+		public:
+			using ValueType = const Type;
+		};
+
+		// Remove constant
+		template<typename Type>
+		struct RemoveConst
+		{
+		public:
+			using ValueType = Type;
+		};
+		
+		template<typename Type>
+		struct RemoveConst<const Type>
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		// Add volatile
+		template<typename Type>
+		struct AddVolatile
+		{
+		public:
+			using ValueType = volatile Type;
+		};
+		
+		// Remove volatile
+		template<typename Type>
+		struct RemoveVolatile
+		{
+		public:
+			using ValueType = Type;
 		};
 
 		template<typename Type>
-		struct FormatOf
+		struct RemoveVolatile<volatile Type>
 		{
 		public:
-			static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
+			using ValueType = Type;
 		};
 
-		#define __struct_INTERNAL_FORMAT_OF(Dependencies, Type, FType) \
-		template<Dependencies> \
-		struct FormatOf<Type> \
-		{ \
-		public: \
-			static FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
+		// Add constant volatile
+		template<typename Type>
+		struct AddConstVolatile
+		{
+		public:
+			using ValueType = typename AddConst<typename AddVolatile<Type>::ValueType>::ValueType;
+		};
+
+		// Remove constant volatile
+		template<typename Type>
+		struct RemoveConstVolatile
+		{
+		public:
+			using ValueType = typename RemoveConst<typename RemoveVolatile<Type>::ValueType>::ValueType;
+		};
+
+		// Remove reference
+		template<typename Type>
+		struct RemoveReference
+		{
+		public:
+			using ValueType = Type;
+		};
+		
+		template<typename Type>
+		struct RemoveReference<Type&>
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		template<typename Type>
+		struct RemoveReference<Type&&>
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		// Integral constant
+		template<typename Type, Type tValue>
+		struct IntegralConstant
+		{
+		public:
+			using ValueType = Type;
+
+		public:
+			static FORMAT_CONSTEXPR const Type value = tValue;
+		};
+
+		template<bool tValue>
+		using BoolConstant = IntegralConstant<bool, tValue>;
+
+		using TrueType = IntegralConstant<bool, true>;
+
+		using FalseType = IntegralConstant<bool, false>;
+
+		// Meta
+		template<bool, typename, typename>
+		struct Conditional;
+
+		template<typename>
+		struct IsLValueReference;
+
+		template<typename>
+		struct IsRValueReference;
+
+		// Conditional
+		template<bool tCondition, typename IfTrue, typename IfFalse>
+		struct Conditional
+		{
+		public:
+			using ValueType = IfTrue;
+		};
+
+		template<typename IfTrue, typename IfFalse>
+		struct Conditional<false, IfTrue, IfFalse>
+		{
+		public:
+			using ValueType = IfFalse;
+		};
+
+		// Or
+		template<typename...>
+		struct Or;
+
+		template<>
+		struct Or<>
+			: public FalseType
+		{ };
+
+		template<typename First>
+		struct Or<First>
+			: public First
+		{ };
+
+		template<typename First, typename Second>
+		struct Or<First, Second>
+			: public Conditional<First::value, First, Second>::ValueType
+		{ };
+
+		template<typename First, typename Second, typename Third, typename... Other>
+		struct Or<First, Second, Third, Other...>
+			: public Conditional<First::value, First, Or<Second, Third, Other...>>::ValueType
+		{ };
+
+		// And
+		template<typename...>
+		struct And;
+
+		template<>
+		struct And<>
+			: public TrueType
+		{ };
+
+		template<typename First>
+		struct And<First>
+			: public First
+		{ };
+
+		template<typename First, typename Second>
+		struct And<First, Second>
+			: public Conditional<First::value, Second, First>::ValueType
+		{ };
+
+		template<typename First, typename Second, typename Third, typename... Other>
+		struct And<First, Second, Third, Other...>
+			: public Conditional<First::value, And<Second, Third, Other...>, First>::ValueType
+		{ };
+
+		// Not
+		template<typename Type>
+		struct Not
+			: public BoolConstant<!bool(Type::value)>
+		{ };
+
+		// Identity type
+		template<typename Type>
+		struct Identity
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		// Is constant
+		template<typename>
+		struct IsConst
+			: public FalseType
+		{ };
+
+		template<typename Type>
+		struct IsConst<const Type>
+			: public TrueType
+		{ };
+
+		// Is volatile
+		template<typename>
+		struct IsVolatile
+			: public FalseType
+		{ };
+
+		template<typename Type>
+		struct IsVolatile<volatile Type>
+			: public TrueType
+		{ };
+
+		// Is constant volatile
+		template<typename>
+		struct IsConstVolatile
+			: public FalseType
+		{ };
+
+		template<typename Type>
+		struct IsConstVolatile<const volatile Type>
+			: public TrueType
+		{ };
+
+		// Is literal
+		template<typename Type>
+		struct IsLiteral
+			: public IntegralConstant<bool, __is_literal_type(Type)>
+		{ };
+
+		// Is empty
+		template<typename Type>
+		struct IsEmpty
+			: public IntegralConstant<bool, __is_empty(Type)>
+		{ };
+
+		// Is polymorphic
+		template<typename Type>
+		struct IsPolymorphic
+			: public IntegralConstant<bool, __is_polymorphic(Type)>
+		{ };
+
+		// Is final
+#if FORMAT_CPLUSPLUS >= 201402L
+		template<typename Type>
+		struct IsFinal
+			: public IntegralConstant<bool, __is_final(Type)>
+		{ };
+#endif
+		
+		// Is abstract
+		template<typename Type>
+		struct IsAbstract
+			: public IntegralConstant<bool, __is_abstract(Type)>
+		{ };
+
+		// Is void
+		template<typename>
+		struct IsVoidHelper
+			: public FalseType
+		{ };
+
+		template<>
+		struct IsVoidHelper<void>
+			: public TrueType
+		{ };
+
+		template<typename Type>
+		struct IsVoid
+			: public IsVoidHelper<typename RemoveConstVolatile<Type>::ValueType>
+		{ };
+
+		// Is integral
+		template<typename>
+		struct IsIntegralHelper
+			: public FalseType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<bool> :
+			public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<char> :
+			public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<signed char>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<unsigned char>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<wchar_t>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<char16_t>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<char32_t>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<signed short>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<unsigned short>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<signed int>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<unsigned int>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<signed long>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<unsigned long>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<signed long long>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsIntegralHelper<unsigned long long>
+			: public TrueType
+		{ };
+
+		template<typename Type>
+		struct IsIntegral
+			: public IsIntegralHelper<typename RemoveConstVolatile<Type>::ValueType>
+		{ };
+
+		// Is floating point
+		template<typename>
+		struct IsFloatingPointHelper
+			: public FalseType
+		{ };
+
+		template<>
+		struct IsFloatingPointHelper<float>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsFloatingPointHelper<double>
+			: public TrueType
+		{ };
+
+		template<>
+		struct IsFloatingPointHelper<long double>
+			: public TrueType
+		{ };
+
+		template<typename Type>
+		struct IsFloatingPoint
+			: public IsFloatingPointHelper<typename RemoveConstVolatile<Type>::ValueType>
+		{ };
+
+		// Is array
+		template<typename>
+		struct IsArray
+			: public FalseType
+		{ };
+
+		template<typename Type, uint32 tSize>
+		struct IsArray<Type[tSize]>
+			: public TrueType
+		{ };
+
+		template<typename Type>
+		struct IsArray<Type[]>
+			: public TrueType
+		{ };
+
+		// Is pointer
+		template<typename>
+		struct IsPointerHelper
+			: public FalseType
+		{ };
+
+		template<typename Type>
+		struct IsPointerHelper<Type*>
+			: public TrueType
+		{ };
+
+		template<typename Type>
+		struct IsPointer
+			: public IsPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
+		{ };
+
+		// Is enum
+		template<typename Type>
+		struct IsEnum
+			: public BoolConstant<__is_enum(Type)>
+		{ };
+
+		// Is union
+		template<typename Type>
+		struct IsUnion
+			: public BoolConstant<__is_union(Type)>
+		{ };
+
+		// Is class
+		template<typename Type>
+		struct IsClass
+			: public BoolConstant<__is_class(Type)>
+		{ };
+
+		// Is function
+		template<typename>
+		struct IsFunction
+			: public FalseType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<Result(Arguments...)>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<Result(Arguments...)&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<Result(Arguments...)&&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<const Result(Arguments...)>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<const Result(Arguments...)&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<const Result(Arguments...)&&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<volatile Result(Arguments...)>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<volatile Result(Arguments...)&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<volatile Result(Arguments...)&&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<const volatile Result(Arguments...)>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<const volatile Result(Arguments...)&>
+			: public TrueType
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsFunction<const volatile Result(Arguments...)&&>
+			: public TrueType
+		{ };
+
+		// Is null pointer
+		template<typename>
+		struct IsNullPointerHelper
+			: public FalseType
+		{ };
+
+		template<>
+		struct IsNullPointerHelper<decltype(nullptr)>
+			: public TrueType
+		{ };
+
+		template<typename Type>
+		struct IsNullPointer
+			: public IsNullPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
+		{ };
+
+		// Is reference
+		template<typename Type>
+		struct IsReference
+			: public Or<IsLValueReference<Type>, IsRValueReference<Type>>
+		{ };
+
+		/// Is object
+		template<typename Type>
+		struct IsObject
+			: public Not<Or<IsFunction<Type>, IsReference<Type>, IsVoid<Type>>>
+		{ };
+
+		// Referenceable
+		template<typename Type>
+		struct IsReferenceable
+			: public Or<IsObject<Type>, IsReference<Type>>
+		{ };
+
+		template<typename Result, typename... Arguments>
+		struct IsReferenceable<Result(Arguments...)>
+			: public TrueType
+		{ };
+
+		// L value
+		template<typename>
+		struct IsLValueReference
+			: public FalseType
+		{ };
+
+		template<typename Type>
+		struct IsLValueReference<Type&>
+			: public TrueType
+		{ };
+
+		template<typename Type, bool = IsReferenceable<Type>::value>
+		struct AddLValueReferenceHelper
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		template<typename Type>
+		struct AddLValueReferenceHelper<Type, true>
+		{
+		public:
+			using ValueType = Type&;
+		};
+
+		template<typename Type>
+		struct AddLValueReference
+			: public AddLValueReferenceHelper<Type>
+		{ };
+
+		// R value
+		template<typename>
+		struct IsRValueReference
+			: public FalseType
+		{ };
+
+		template<typename Type>
+		struct IsRValueReference<Type&&>
+			: public TrueType
+		{ };
+
+		template<typename Type, bool = IsReferenceable<Type>::value>
+		struct AddRValueReferenceHelper
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		template<typename Type>
+		struct AddRValueReferenceHelper<Type, true>
+		{
+		public:
+			using ValueType = Type&&;
+		};
+
+		template<typename Type>
+		struct AddRValueReference
+			: public AddRValueReferenceHelper<Type>
+		{ };
+
+		// Enable if
+		template<bool, typename Type = void>
+		struct EnableIf { };
+
+		template<typename Type>
+		struct EnableIf<true, Type>
+		{
+		public:
+			using ValueType = Type;
+		};
+
+		// Forward
+		template<typename Type>
+		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& type) FORMAT_NOEXCEPT
+		{
+			return static_cast<Type&&>(type);
 		}
 
-		__struct_INTERNAL_FORMAT_OF(NONE, bool, FormatArgumentType::Bool);
-		__struct_INTERNAL_FORMAT_OF(NONE, char, FormatArgumentType::Char);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::int8, FormatArgumentType::Int8);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::uint8, FormatArgumentType::UInt8);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::int16, FormatArgumentType::Int16);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::uint16, FormatArgumentType::UInt16);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::int32, FormatArgumentType::Int32);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::uint32, FormatArgumentType::UInt32);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::int64, FormatArgumentType::Int64);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::uint64, FormatArgumentType::UInt64);
-		__struct_INTERNAL_FORMAT_OF(NONE, float, FormatArgumentType::Float);
-		__struct_INTERNAL_FORMAT_OF(NONE, double, FormatArgumentType::Double);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::ldouble, FormatArgumentType::LDouble);
-		__struct_INTERNAL_FORMAT_OF(typename Type, Type*, FormatArgumentType::Pointer);
-		__struct_INTERNAL_FORMAT_OF(typename Type, const Type*, FormatArgumentType::Pointer);
-		__struct_INTERNAL_FORMAT_OF(NONE, details::null, FormatArgumentType::Pointer);
-		__struct_INTERNAL_FORMAT_OF(NONE, const char*, FormatArgumentType::CString);
-		__struct_INTERNAL_FORMAT_OF(NONE, const char[], FormatArgumentType::CString);
-		__struct_INTERNAL_FORMAT_OF(typename details::uint32 tSize, const char[tSize], FormatArgumentType::CString);
-
-		struct FormatterHelpers
+		template<typename Type>
+		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& type) FORMAT_NOEXCEPT
 		{
-		public:
-			template<typename Context>
-			static FORMAT_INLINE FORMAT_CONSTEXPR void parseIgnore(Context& pContext) FORMAT_NOEXCEPT
-			{
-				for (; *pContext != '}'; pContext++);
-				pContext++;
-			}
-		};
-
-		template<typename Type, typename Enable = void>
-		struct Formatter
-		{
-			static_assert(FormatOf<Type>::value != FormatArgumentType::None, "Provided type does not have a formatter!");
-		};
+			return static_cast<Type&&>(type);
+		}
 
 		template<typename Type>
-		using FormatterEnabler = typename details::EnableIf
+		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType type) FORMAT_NOEXCEPT
+		{
+			return type;
+		}
+
+		template<typename Type>
+		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& type) FORMAT_NOEXCEPT = delete;
+
+		// Move
+		template<typename Type>
+		FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& type) FORMAT_NOEXCEPT
+		{
+			return static_cast<typename RemoveReference<Type>::ValueType&&>(type);
+		}
+	}
+
+	enum class FormatArgumentType : details::uint8
+	{
+		None,
+		Bool,
+		Char,
+		Int8,
+		UInt8,
+		Int16,
+		UInt16,
+		Int32,
+		UInt32,
+		Int64,
+		UInt64,
+		Float,
+		Double,
+		LDouble,
+		Pointer,
+		Array,
+		CString,
+		Custom
+	};
+
+	template<typename Type>
+	struct FormatOf
+	{
+	public:
+		static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
+	};
+
+	#define __struct_INTERNAL_FORMAT_OF(Dependencies, Type, FType) \
+	template<Dependencies> \
+	struct FormatOf<Type> \
+	{ \
+	public: \
+		static FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
+	}
+
+	__struct_INTERNAL_FORMAT_OF(NONE, bool, FormatArgumentType::Bool);
+	__struct_INTERNAL_FORMAT_OF(NONE, char, FormatArgumentType::Char);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::int8, FormatArgumentType::Int8);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::uint8, FormatArgumentType::UInt8);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::int16, FormatArgumentType::Int16);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::uint16, FormatArgumentType::UInt16);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::int32, FormatArgumentType::Int32);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::uint32, FormatArgumentType::UInt32);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::int64, FormatArgumentType::Int64);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::uint64, FormatArgumentType::UInt64);
+	__struct_INTERNAL_FORMAT_OF(NONE, float, FormatArgumentType::Float);
+	__struct_INTERNAL_FORMAT_OF(NONE, double, FormatArgumentType::Double);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::ldouble, FormatArgumentType::LDouble);
+	__struct_INTERNAL_FORMAT_OF(typename Type, Type*, FormatArgumentType::Pointer);
+	__struct_INTERNAL_FORMAT_OF(typename Type, const Type*, FormatArgumentType::Pointer);
+	__struct_INTERNAL_FORMAT_OF(NONE, details::null, FormatArgumentType::Pointer);
+	__struct_INTERNAL_FORMAT_OF(NONE, const char*, FormatArgumentType::CString);
+	__struct_INTERNAL_FORMAT_OF(NONE, const char[], FormatArgumentType::CString);
+	__struct_INTERNAL_FORMAT_OF(typename details::uint32 tSize, const char[tSize], FormatArgumentType::CString);
+
+	struct FormatterHelpers
+	{
+	public:
+		template<typename Context>
+		static FORMAT_INLINE FORMAT_CONSTEXPR void parseIgnore(Context& pContext) FORMAT_NOEXCEPT
+		{
+			for (; *pContext != '}'; pContext++);
+			pContext++;
+		}
+	};
+
+	template<typename Type, typename Enable = void>
+	struct Formatter
+	{
+		static_assert(FormatOf<Type>::value != FormatArgumentType::None, "Provided type does not have a formatter!");
+	};
+
+	template<typename Type>
+	using FormatterEnabler = typename details::EnableIf
+	<
+		details::BoolConstant
 		<
-			details::BoolConstant
+			details::IntegralConstant
 			<
-				details::IntegralConstant
-				<
-					FormatArgumentType,
-					FormatOf<Type>::value
-				>::value != FormatArgumentType::None
-			>::value
-		>::ValueType;
+				FormatArgumentType,
+				FormatOf<Type>::value
+			>::value != FormatArgumentType::None
+		>::value
+	>::ValueType;
 
-		#define __struct_INTERNAL_FORMATTER(Dependencies, Type, PFunc, FFunc) \
-		template<Dependencies> \
-		struct Formatter<Type, FormatterEnabler<Type>> \
-		{ \
-		public: \
-			template<typename Context> \
-			static PFunc \
-			 \
-			template<typename Context> \
-			static FFunc \
+	#define __struct_INTERNAL_FORMATTER(Dependencies, Type, PFunc, FFunc) \
+	template<Dependencies> \
+	struct Formatter<Type, FormatterEnabler<Type>> \
+	{ \
+	public: \
+		template<typename Context> \
+		static PFunc \
+			\
+		template<typename Context> \
+		static FFunc \
+	}
+
+	__struct_INTERNAL_FORMATTER(NONE, bool,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA bool pValue) FORMAT_NOEXCEPT
+		{
+			pContext.append(pValue ? "true" : "false" COMMA pValue ? 4u : 5u);
 		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, bool,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, char,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA char pValue) FORMAT_NOEXCEPT
+		{
+			pContext.append(pValue);
+		}
+	);
+
+	__struct_INTERNAL_FORMATTER(NONE, details::int8,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int8 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 5u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA bool pValue) FORMAT_NOEXCEPT
-			{
-				pContext.append(pValue ? "true" : "false" COMMA pValue ? 4u : 5u);
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, char,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::uint8,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint8 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 5u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA char pValue) FORMAT_NOEXCEPT
-			{
-				pContext.append(pValue);
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::int8,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::int16,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int16 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 7u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int8 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 5u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::uint8,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::uint16,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint16 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 7u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint8 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 5u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::int16,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::int32,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int32 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 12u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int16 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 7u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::uint16,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::uint32,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint32 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 12u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint16 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 7u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::int32,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::int64,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int64 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 21u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%lld" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int32 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 12u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::uint32,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::uint64,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint64 pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 21u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%llu" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint32 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 12u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::int64,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, float,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 25u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int64 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 21u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%lld" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::uint64,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, double,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 25u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint64 pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 21u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%llu" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, float,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, details::ldouble,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 26u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%Lf" COMMA pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 25u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, double,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(typename Type, Type*,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA Type* pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 19u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "0x%p" COMMA (void*)pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 25u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(NONE, details::ldouble,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(typename Type, const Type*,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const Type* pValue) FORMAT_NOEXCEPT
+		{
+			const details::uint32 size = 19u;
+			char buffer[size] = { };
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "0x%p" COMMA (const void*)pValue);
+			
+			if (written >= 0)
 			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 26u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "%Lf" COMMA pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
+				pContext.append(buffer COMMA written);
 			}
-		);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(typename Type, Type*,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
-			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA Type* pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 19u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "0x%p" COMMA (void*)pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
-			}
-		);
+	__struct_INTERNAL_FORMATTER(NONE, details::null,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::null pValue) FORMAT_NOEXCEPT
+		{
+			pContext.append("nullptr" COMMA 7u);
+		}
+	);
 
-		__struct_INTERNAL_FORMATTER(typename Type, const Type*,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
-			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const Type* pValue) FORMAT_NOEXCEPT
-			{
-				const details::uint32 size = 19u;
-				char buffer[size] = { };
-				const details::int32 written = ::snprintf(buffer COMMA size COMMA "0x%p" COMMA (const void*)pValue);
-				
-				if (written >= 0)
-				{
-					pContext.append(buffer COMMA written);
-				}
-			}
-		);
-
-		__struct_INTERNAL_FORMATTER(NONE, details::null,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
-			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::null pValue) FORMAT_NOEXCEPT
-			{
-				pContext.append("nullptr" COMMA 7u);
-			}
-		);
-
-		__struct_INTERNAL_FORMATTER(NONE, const char*,
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
-			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char* pValue) FORMAT_NOEXCEPT
-			{
-				if (pValue)
-				{
-					pContext.append(pValue COMMA details::ascii::length(pValue));
-				}
-				else
-				{
-					pContext.append("nullptr" COMMA 7u);
-				}
-			}
-		);
-
-		__struct_INTERNAL_FORMATTER(NONE, const char[],
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
-			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[]) FORMAT_NOEXCEPT
+	__struct_INTERNAL_FORMATTER(NONE, const char*,
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char* pValue) FORMAT_NOEXCEPT
+		{
+			if (pValue)
 			{
 				pContext.append(pValue COMMA details::ascii::length(pValue));
 			}
-		);
-
-		__struct_INTERNAL_FORMATTER(typename details::uint32 tSize, const char[tSize],
-			FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
-			{
-				FormatterHelpers::template parseIgnore<Context>(pContext);
-			},
-			FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[tSize]) FORMAT_NOEXCEPT
-			{
-				pContext.append(pValue COMMA tSize - 1);
-			}
-		);
-
-		template<typename Reader, typename Writer>
-		static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) FORMAT_NOEXCEPT
-		{
-			pWriter.append(pReader.iterator(), pReader.size());
-		}
-
-		template<typename Reader, typename Writer, typename Argument, typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			// Setting pointer to the beggining for this section of pattern
-			const char* previous = pReader.iterator();
-			// Iterating until next '{' character in pattern is present
-			for (; *pReader != '{' && pReader.iterator() != pReader.end(); pReader++);
-
-			if (*pReader == '{')
-			{
-				// Appending text from pattern.
-				pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
-				// Removing references for types and volatiles.
-				using DRefArgument = typename details::RemoveVolatile<typename details::RemoveReference<Argument>::ValueType>::ValueType;
-				// Parsing argument settings / options.
-				Formatter<DRefArgument>::template parse<Reader>(pReader);
-				// Appending stringified value.
-				Formatter<DRefArgument>::template format<Writer>(pWriter, pArgument);
-			}
-
-			// Going onto the next argument
-			formatHandle<Reader, Writer>(pReader, pWriter, pArguments...);
-		}
-
-		class Reader
-		{
-		private:
-			const char* mIterator;
-			const char* mBegin;
-			const char* mEnd;
-		
-		public:
-			explicit Reader(const char* pIterator, const char* pBegin, const char* pEnd) FORMAT_NOEXCEPT
-				: mIterator(pIterator), mBegin(pBegin), mEnd(pEnd)
-			{ }
-
-		public:
-			FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
-			{
-				return static_cast<details::uint32>(this->mEnd - this->mIterator);
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR const char* iterator() const FORMAT_NOEXCEPT
-			{
-				return this->mIterator;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR const char* begin() const FORMAT_NOEXCEPT
-			{
-				return this->mBegin;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR const char* end() const FORMAT_NOEXCEPT
-			{
-				return this->mEnd;
-			}
-
-		public:
-			FORMAT_INLINE Reader operator +(details::int32 pOffset) FORMAT_NOEXCEPT
-			{
-				Reader reader = Reader(this->mIterator + pOffset, this->mBegin, this->mEnd);
-				return reader;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator +=(details::int32 pOffset) FORMAT_NOEXCEPT
-			{
-				this->mIterator += pOffset;
-				return *this;
-			}
-			
-			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator ++() FORMAT_NOEXCEPT
-			{
-				this->mIterator++;
-				return *this;
-			}
-
-			FORMAT_INLINE Reader operator ++(details::int32) FORMAT_NOEXCEPT
-			{
-				Reader reader = Reader(this->mIterator, this->mBegin, this->mEnd);
-				++(*this);
-				return reader;
-			}
-
-			FORMAT_INLINE Reader operator -(details::int32 pOffset) FORMAT_NOEXCEPT
-			{
-				Reader reader = Reader(this->mIterator - pOffset, this->mBegin, this->mEnd);
-				return reader;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator -=(details::int32 pOffset) FORMAT_NOEXCEPT
-			{
-				this->mIterator -= pOffset;
-				return *this;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator --() FORMAT_NOEXCEPT
-			{
-				this->mIterator--;
-				return *this;
-			}
-
-			FORMAT_INLINE Reader operator --(details::int32) FORMAT_NOEXCEPT
-			{
-				Reader reader = Reader(this->mIterator, this->mBegin, this->mEnd);
-				--(*this);
-				return reader;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR const char& operator *() const FORMAT_NOEXCEPT
-			{
-				return *this->mIterator;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR bool operator ==(const Reader& pOther) const FORMAT_NOEXCEPT
-			{
-				return this->mIterator == pOther.iterator() && this->mBegin == pOther.begin() && this->mEnd == pOther.end();
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR bool operator !=(const Reader& pOther) const FORMAT_NOEXCEPT
-			{
-				return !(*this == pOther);
-			}
-		};
-
-		class HeapWriter
-		{
-		private:
-			char* mData;
-			details::uint32 mSize;
-			details::uint32 mCapacity;
-
-		public:
-			explicit HeapWriter(details::uint32 pCapacity = 4u) FORMAT_NOEXCEPT
-				: mData(nullptr), mSize(0), mCapacity(pCapacity)
-			{
-				allocate(pCapacity);
-			}
-
-		private:
-			FORMAT_INLINE void allocate(details::uint32 pCapacity) FORMAT_NOEXCEPT
-			{
-				this->mCapacity = pCapacity;
-				this->mData = new char[pCapacity + 1u];
-				this->mData[this->mSize] = details::move('\0');
-			}
-
-			FORMAT_INLINE void reallocate(details::uint32 pCapacity) FORMAT_NOEXCEPT
-			{
-				char* local = new char[pCapacity + 1u];
-
-				if (this->mSize > pCapacity)
-					this->mSize = pCapacity;
-				
-				for (details::uint32 i = 0; i < this->mSize; i++)
-					local[i] = details::move(this->mData[i]);
-
-				delete[] this->mData;
-				this->mCapacity = pCapacity;
-				this->mData = local;
-			}
-
-		public:
-			FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
-			{
-				return this->mSize;
-			}
-
-			FORMAT_INLINE void FORMAT_CONSTEXPR append(char pChar) FORMAT_NOEXCEPT
-			{
-				if (this->mSize + 1 > this->mCapacity)
-					reallocate(this->mCapacity + this->mCapacity / 2);
-				
-				this->mData[this->mSize++] = pChar;
-				this->mData[this->mSize] = '\0';
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
-			{
-				if (this->mSize + pSize > this->mCapacity)
-					reallocate(pSize + this->mCapacity + this->mCapacity / 2);
-
-				for (details::uint32 i = 0; i < pSize; i++)
-					this->mData[this->mSize + i] = pData[i];
-
-				this->mData[this->mSize += pSize] = '\0';
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
-			{
-				return this->mData;
-			}
-		};
-
-		template<details::uint32 tCapacity>
-		class StackWriter
-		{
-		private:
-			char* mData;
-			details::uint32 mSize;
-
-		public:
-			explicit StackWriter(char* pData) FORMAT_NOEXCEPT
-				: mData(pData), mSize(0)
-			{ }
-
-		public:
-			FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
-			{
-				return this->mSize;
-			}
-			
-			FORMAT_INLINE FORMAT_CONSTEXPR void append(char pChar) FORMAT_NOEXCEPT
-			{
-				if (this->mSize + 1u <= tCapacity)
-					this->mData[this->mSize++] = pChar;
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
-			{
-				if (this->mSize + pSize <= tCapacity)
-				{
-					for (details::uint32 i = 0; i < pSize; i++)
-						this->mData[this->mSize + i] = pData[i];
-					
-					this->mSize += pSize;
-				}
-			}
-
-			FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
-			{
-				this->mData[this->mSize] = '\0';
-				return this->mData;
-			}
-		};
-
-		/**
-		 * Formats a dynamic cstring and returns a pointer to it. Note that neither this methods, nor any underlying structures and funtions deallocate
-		 * this formatted cstring (the result). It is users responsibility to deallocate result cstring after they finish working with it. User can use
-		 * cleanup() function to deallocate memory or store this pointer to formatted cstring inside a smart pointer.
-		 */
-		template<typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			// Setting up the reader (later referenced as Context).
-			const details::uint32 patternLength = details::ascii::length(pPattern);
-			Reader reader = Reader(pPattern, pPattern, pPattern + patternLength);
-			// Setting up the writer (later referenced as Context).
-			HeapWriter writer = HeapWriter(patternLength + sizeof...(pArguments) * 2);
-			// Passing reader, writer and arguments to the handle function and returning formatted cstring
-			formatHandle<Reader, HeapWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
-			return writer.get();
-		}
-
-		/**
-		 * Returns the length of chars written to the buffer.
-		 */
-		template<details::uint32 tSize, typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 format(char* pBuffer, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			// Setting up the reader (later referenced as Context).
-			Reader reader = Reader(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
-			// Setting up the writer with user defined initial capacity (later referenced as Context).
-			StackWriter<tSize> writer = StackWriter<tSize>(pBuffer);
-			// Passing reader, writer and arguments to the handle function and returning formatted cstring
-			formatHandle<Reader, StackWriter<tSize>, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
-			return writer.size();
-		}
-
-		/**
-		 * Should only be used when default format function is used. Default format method creates formatted string on heap
-		 * and returns it. It does not handle memory deallocation of the formatted string. That is handled by this function.
-		 */
-		static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
-		{
-			delete[] pFormatted;
-		}
-
-		template<details::uint32 tSize>
-		static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
-		{
-			details::ascii::fill(pFormatted, char(), tSize);
-		}
-
-		/**
-		 * Formats string and forwards it to any provided stream that supports << operator (cout, ofstream, etc). This method handles formatted cstring
-		 * itself and deallocates it at the end of the function.
-		 */
-		template<typename Stream, typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
-			pStream << formatted;
-			cleanup(formatted);
-		}
-
-		template<typename Stream, details::uint32 tSize, typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			char formatted[tSize] = { };
-			format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
-			pStream << formatted;
-		}
-		
-		/**
-		 * Printing method for c-like streams.
-		 */
-		template<typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
-			::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
-			cleanup(formatted);
-		}
-
-		template<details::uint32 tSize, typename... Arguments>
-		static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
-		{
-			char formatted[tSize] = { };
-			format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
-			::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
-		}
-
-		template<typename Type>
-		struct SpecifierOf
-		{
-		public:
-			static FORMAT_CONSTEXPR const char value = ' ';
-		};
-
-		#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
-		template<Dependencies> \
-		struct SpecifierOf<Type> \
-		{ \
-		public: \
-			static FORMAT_CONSTEXPR const char value = Specifier; \
-		}
-
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint8, 'u');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int16, 'd');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint16, 'u');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int32, 'd');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint32, 'u');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, float, 'f');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, double, 'f');
-		
-		template<details::uint32 tSize, typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) FORMAT_NOEXCEPT
-		{
-			char temp[10] { };
-			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
-
-			if (count <= 0)
-			{
-				return nullptr;
-			}
-			
-			temp[0] = '%';
-			temp[++count] = SpecifierOf<Type>::value;
-			const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
-
-			if (written > 0)
-			{
-				return pBuffer;
-			}
 			else
 			{
-				return nullptr;
+				pContext.append("nullptr" COMMA 7u);
 			}
+		}
+	);
+
+	__struct_INTERNAL_FORMATTER(NONE, const char[],
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[]) FORMAT_NOEXCEPT
+		{
+			pContext.append(pValue COMMA details::ascii::length(pValue));
+		}
+	);
+
+	__struct_INTERNAL_FORMATTER(typename details::uint32 tSize, const char[tSize],
+		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
+		{
+			FormatterHelpers::template parseIgnore<Context>(pContext);
+		},
+		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA const char pValue[tSize]) FORMAT_NOEXCEPT
+		{
+			pContext.append(pValue COMMA tSize - 1);
+		}
+	);
+
+	template<typename Reader, typename Writer>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) FORMAT_NOEXCEPT
+	{
+		pWriter.append(pReader.iterator(), pReader.size());
+	}
+
+	template<typename Reader, typename Writer, typename Argument, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		const char* previous = pReader.iterator();
+		for (; *pReader != '{' && pReader.iterator() != pReader.end(); pReader++);
+
+		if (*pReader == '{')
+		{
+			pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
+			using DRefArgument = typename details::RemoveVolatile<typename details::RemoveReference<Argument>::ValueType>::ValueType;
+			Formatter<DRefArgument>::template parse<Reader>(pReader);
+			Formatter<DRefArgument>::template format<Writer>(pWriter, pArgument);
+		}
+
+		formatHandle<Reader, Writer>(pReader, pWriter, pArguments...);
+	}
+
+	class Reader
+	{
+	private:
+		const char* mIterator;
+		const char* mBegin;
+		const char* mEnd;
+	
+	public:
+		explicit Reader(const char* pIterator, const char* pBegin, const char* pEnd) FORMAT_NOEXCEPT
+			: mIterator(pIterator), mBegin(pBegin), mEnd(pEnd)
+		{ }
+
+	public:
+		FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
+		{
+			return static_cast<details::uint32>(this->mEnd - this->mIterator);
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR const char* iterator() const FORMAT_NOEXCEPT
+		{
+			return this->mIterator;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR const char* begin() const FORMAT_NOEXCEPT
+		{
+			return this->mBegin;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR const char* end() const FORMAT_NOEXCEPT
+		{
+			return this->mEnd;
+		}
+
+	public:
+		FORMAT_INLINE Reader operator +(details::int32 pOffset) FORMAT_NOEXCEPT
+		{
+			Reader reader = Reader(this->mIterator + pOffset, this->mBegin, this->mEnd);
+			return reader;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator +=(details::int32 pOffset) FORMAT_NOEXCEPT
+		{
+			this->mIterator += pOffset;
+			return *this;
+		}
+		
+		FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator ++() FORMAT_NOEXCEPT
+		{
+			this->mIterator++;
+			return *this;
+		}
+
+		FORMAT_INLINE Reader operator ++(details::int32) FORMAT_NOEXCEPT
+		{
+			Reader reader = Reader(this->mIterator, this->mBegin, this->mEnd);
+			++(*this);
+			return reader;
+		}
+
+		FORMAT_INLINE Reader operator -(details::int32 pOffset) FORMAT_NOEXCEPT
+		{
+			Reader reader = Reader(this->mIterator - pOffset, this->mBegin, this->mEnd);
+			return reader;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator -=(details::int32 pOffset) FORMAT_NOEXCEPT
+		{
+			this->mIterator -= pOffset;
+			return *this;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR Reader& operator --() FORMAT_NOEXCEPT
+		{
+			this->mIterator--;
+			return *this;
+		}
+
+		FORMAT_INLINE Reader operator --(details::int32) FORMAT_NOEXCEPT
+		{
+			Reader reader = Reader(this->mIterator, this->mBegin, this->mEnd);
+			--(*this);
+			return reader;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR const char& operator *() const FORMAT_NOEXCEPT
+		{
+			return *this->mIterator;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR bool operator ==(const Reader& pOther) const FORMAT_NOEXCEPT
+		{
+			return this->mIterator == pOther.iterator() && this->mBegin == pOther.begin() && this->mEnd == pOther.end();
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR bool operator !=(const Reader& pOther) const FORMAT_NOEXCEPT
+		{
+			return !(*this == pOther);
+		}
+	};
+
+	class HeapWriter
+	{
+	private:
+		char* mData;
+		details::uint32 mSize;
+		details::uint32 mCapacity;
+
+	public:
+		explicit HeapWriter(details::uint32 pCapacity = 4u) FORMAT_NOEXCEPT
+			: mData(nullptr), mSize(0), mCapacity(pCapacity)
+		{
+			allocate(pCapacity);
+		}
+
+	private:
+		FORMAT_INLINE void allocate(details::uint32 pCapacity) FORMAT_NOEXCEPT
+		{
+			this->mCapacity = pCapacity;
+			this->mData = new char[pCapacity + 1u];
+			this->mData[this->mSize] = details::move('\0');
+		}
+
+		FORMAT_INLINE void reallocate(details::uint32 pCapacity) FORMAT_NOEXCEPT
+		{
+			char* local = new char[pCapacity + 1u];
+
+			if (this->mSize > pCapacity)
+				this->mSize = pCapacity;
+			
+			for (details::uint32 i = 0; i < this->mSize; i++)
+				local[i] = details::move(this->mData[i]);
+
+			delete[] this->mData;
+			this->mCapacity = pCapacity;
+			this->mData = local;
+		}
+
+	public:
+		FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
+		{
+			return this->mSize;
+		}
+
+		FORMAT_INLINE void FORMAT_CONSTEXPR append(char pChar) FORMAT_NOEXCEPT
+		{
+			if (this->mSize + 1 > this->mCapacity)
+				reallocate(this->mCapacity + this->mCapacity / 2);
+			
+			this->mData[this->mSize++] = pChar;
+			this->mData[this->mSize] = '\0';
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
+		{
+			if (this->mSize + pSize > this->mCapacity)
+				reallocate(pSize + this->mCapacity + this->mCapacity / 2);
+
+			for (details::uint32 i = 0; i < pSize; i++)
+				this->mData[this->mSize + i] = pData[i];
+
+			this->mData[this->mSize += pSize] = '\0';
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
+		{
+			return this->mData;
+		}
+	};
+
+	template<details::uint32 tCapacity>
+	class StackWriter
+	{
+	private:
+		char* mData;
+		details::uint32 mSize;
+
+	public:
+		explicit StackWriter(char* pData) FORMAT_NOEXCEPT
+			: mData(pData), mSize(0)
+		{ }
+
+	public:
+		FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
+		{
+			return this->mSize;
+		}
+		
+		FORMAT_INLINE FORMAT_CONSTEXPR void append(char pChar) FORMAT_NOEXCEPT
+		{
+			if (this->mSize + 1u <= tCapacity)
+				this->mData[this->mSize++] = pChar;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
+		{
+			if (this->mSize + pSize <= tCapacity)
+			{
+				for (details::uint32 i = 0; i < pSize; i++)
+					this->mData[this->mSize + i] = pData[i];
+				
+				this->mSize += pSize;
+			}
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
+		{
+			this->mData[this->mSize] = '\0';
+			return this->mData;
+		}
+	};
+
+	/**
+	 * Formats a dynamic cstring and returns a pointer to it. Note that neither this methods, nor any underlying structures and funtions deallocate
+	 * this formatted cstring (the result). It is users responsibility to deallocate result cstring after they finish working with it. User can use
+	 * cleanup() function to deallocate memory or store this pointer to formatted cstring inside a smart pointer.
+	 */
+	template<typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		const details::uint32 patternLength = details::ascii::length(pPattern);
+		Reader reader = Reader(pPattern, pPattern, pPattern + patternLength);
+		HeapWriter writer = HeapWriter(patternLength + sizeof...(pArguments) * 2);
+		formatHandle<Reader, HeapWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
+		return writer.get();
+	}
+
+	/**
+	 * Returns the length of chars written to the buffer.
+	 */
+	template<details::uint32 tSize, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 format(char* pBuffer, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		Reader reader = Reader(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
+		StackWriter<tSize> writer = StackWriter<tSize>(pBuffer);
+		formatHandle<Reader, StackWriter<tSize>, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
+		return writer.size();
+	}
+
+	/**
+	 * Should only be used when default format function is used. Default format method creates formatted string on heap
+	 * and returns it. It does not handle memory deallocation of the formatted string. That is handled by this function.
+	 */
+	static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
+	{
+		delete[] pFormatted;
+	}
+
+ 	/**
+ 	 * Resets every char in the array to termination character - cleans the string.
+	 * Should be mainly used with stack arrays.
+ 	 */
+	template<details::uint32 tSize>
+	static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
+	{
+		details::ascii::fill(pFormatted, char(), tSize);
+	}
+
+	/**
+	 * Formats string and forwards it to any provided stream that supports << operator (cout, ofstream, etc). This method handles formatted cstring
+	 * itself and deallocates it at the end of the function.
+	 */
+	template<typename Stream, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
+		pStream << formatted;
+		cleanup(formatted);
+	}
+
+	template<typename Stream, details::uint32 tSize, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		char formatted[tSize] = { };
+		format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
+		pStream << formatted;
+	}
+	
+	/**
+	 * Printing method for c-like streams.
+	 */
+	template<typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
+		::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
+		cleanup(formatted);
+	}
+
+	template<details::uint32 tSize, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		char formatted[tSize] = { };
+		format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
+		::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
+	}
+
+	template<typename Type>
+	struct SpecifierOf
+	{
+	public:
+		static FORMAT_CONSTEXPR const char value = ' ';
+	};
+
+	#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
+	template<Dependencies> \
+	struct SpecifierOf<Type> \
+	{ \
+	public: \
+		static FORMAT_CONSTEXPR const char value = Specifier; \
+	}
+
+	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint8, 'u');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int16, 'd');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint16, 'u');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int32, 'd');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint32, 'u');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, float, 'f');
+	__struct_INTERNAL_SPECIFIER_OF(NONE, double, 'f');
+	
+	template<details::uint32 tSize, typename Type>
+	static FORMAT_INLINE FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) FORMAT_NOEXCEPT
+	{
+		char temp[10] { };
+		details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
+
+		if (count <= 0)
+		{
+			return nullptr;
+		}
+		
+		temp[0] = '%';
+		temp[++count] = SpecifierOf<Type>::value;
+		const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
+
+		if (written > 0)
+		{
+			return pBuffer;
+		}
+		else
+		{
+			return nullptr;
 		}
 	}
 }
@@ -1733,7 +1678,6 @@ namespace cxxtlib
 /**
  * Helper macros and cleanup.
  */
-
 #undef __struct_INTERNAL_FORMAT_OF
 #undef __struct_INTERNAL_FORMATTER
 #undef __struct_INTERNAL_SPECIFIER_OF
@@ -1743,35 +1687,29 @@ for (; *pContext != '}'; pContext++); \
 pContext++;
 
 #define struct_CUSTOM_FORMAT_OF(Dependencies, Type) \
-namespace cxxtlib \
+namespace cformat \
 { \
-	namespace format \
+	template<Dependencies> \
+	struct FormatOf<Type> \
 	{ \
-		template<Dependencies> \
-		struct FormatOf<Type> \
-		{ \
-		public: \
-			static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Custom; \
-		}; \
-	} \
+	public: \
+		static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Custom; \
+	}; \
 }
 
 #define struct_CUSTOM_FORMATTER(Dependencies, Type, PFunc, FFunc) \
-namespace cxxtlib \
+namespace cformat \
 { \
-	namespace format \
+	template<Dependencies> \
+	struct Formatter<Type, FormatterEnabler<Type>> \
 	{ \
-		template<Dependencies> \
-		struct Formatter<Type, FormatterEnabler<Type>> \
-		{ \
-		public: \
-			template<typename Context> \
-			static PFunc \
-				\
-			template<typename Context> \
-			static FFunc \
-		}; \
-	} \
+	public: \
+		template<typename Context> \
+		static PFunc \
+			\
+		template<typename Context> \
+		static FFunc \
+	}; \
 }
 
 #endif

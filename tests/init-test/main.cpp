@@ -84,7 +84,7 @@ std::map<float, bool> mp = { { 5.0f, true }, { -9.0f, true }, { 1.0f, false} };
 template<int tCount>
 void testFormatterWithHeapWriter()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 	
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
@@ -118,7 +118,7 @@ void testFormatterWithHeapWriter()
 template<int tCount>
 void testFormatterWithStackWriter()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
@@ -151,7 +151,7 @@ void testFormatterWithStackWriter()
 template<int tCount>
 void testPrintf()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
@@ -185,7 +185,7 @@ void testPrintf()
 template<int tCount>
 void tesSStream()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 	using namespace ::std;
 	
 	Point point = Point{ 7, 8, 9 };
@@ -216,7 +216,7 @@ void tesSStream()
 
 void testPrint()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	for (int i = 0; i < 100; i++)
 	{
@@ -247,7 +247,7 @@ void testPrint()
 
 void testCout()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 	using namespace ::std;
 
 	for (int i = 0; i < 100; i++)
@@ -279,7 +279,7 @@ void testCout()
 template<unsigned int tCount>
 static constexpr void stressTestForFormatterWithHeap()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
@@ -316,7 +316,7 @@ static constexpr void stressTestForFormatterWithHeap()
 template<unsigned int tCount>
 static constexpr void stressTestForFormatterWithStack()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
@@ -352,7 +352,7 @@ static constexpr void stressTestForFormatterWithStack()
 template<unsigned int tCount>
 static constexpr void stressTestForSPRINTF()
 {
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	for (details::uint32 i = 0; i < tCount; i++)
 	{
@@ -388,7 +388,7 @@ static constexpr void stressTestForSPRINTF()
 int main(void)
 {
 	using namespace ::std;
-	using namespace ::cxxtlib::format;
+	using namespace ::cformat;
 
 	// constexpr const char* f = format("Test {}.\n", "one");
 	// static_assert(f != nullptr, "F cannot be null!");

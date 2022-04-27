@@ -7,7 +7,7 @@
 #include <vector>
 #include <array>
 
-namespace fmt = ::cxxtlib::format;
+namespace fmt = ::cformat;
 
 int main(void)
 {
