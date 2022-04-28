@@ -188,6 +188,18 @@
 #	endif
 #endif
 
+#if _WIN32
+#	define FORMAT_WINDOWS 1
+#else
+#	define FORMAT_LINUX 1
+#endif
+
+#if FORMAT_WINDOWS
+#	define fitoa _itoa_s
+#else
+#	define fitoa itoa
+#endif
+
 #ifndef FORMAT_DEBUG
 #	if _MSC_VER
 #		define FORMAT_DEBUG _DEBUG
@@ -215,19 +227,15 @@ namespace cformat
 		using null = decltype(nullptr);
 
 		using int8 = signed char;
-
 		using uint8 = unsigned char;
 		
 		using int16 = signed short;
-
 		using uint16 = unsigned short;
 
 		using int32 = signed int;
-		
 		using uint32 = unsigned int;
 
 		using int64 = signed long long;
-		
 		using uint64 = unsigned long long;
 
 		using ldouble = long double;
@@ -750,14 +758,10 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int8 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 5u;
+			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			::fitoa(pValue COMMA buffer COMMA 10);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -768,14 +772,10 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint8 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 5u;
+			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			::fitoa(pValue COMMA buffer COMMA 10);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -786,14 +786,10 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int16 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 7u;
+			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			::fitoa(pValue COMMA buffer COMMA 10);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -804,14 +800,10 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint16 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 7u;
+			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			::fitoa(pValue COMMA buffer COMMA 10);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -822,14 +814,10 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int32 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 12u;
+			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%d" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			::fitoa(pValue COMMA buffer COMMA 10);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -840,14 +828,10 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint32 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 12u;
+			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%u" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			::fitoa(pValue COMMA buffer COMMA 10);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -858,7 +842,7 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::int64 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 21u;
+			const details::uint32 size = 65u;
 			char buffer[size] = { };
 			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%lld" COMMA pValue);
 			
@@ -876,7 +860,7 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::uint64 pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 21u;
+			const details::uint32 size = 65u;
 			char buffer[size] = { };
 			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%llu" COMMA pValue);
 			
@@ -1389,7 +1373,7 @@ namespace cformat
 		}
 		
 		temp[0] = '%';
-		temp[++count] = SpecifierOf<Type>::sValue;
+		temp[++count] = SpecifierOf<Type>::value();
 		const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
 
 		if (written > 0)

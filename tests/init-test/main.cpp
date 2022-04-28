@@ -510,7 +510,7 @@ int main(void)
 		{
 			Timer timer = Timer([](long double duration) { std::cout << "Formatter (heap) worked for " << duration << " ms.\n"; });
 			{
-				for (int i = 0; i < 100000000; i++)
+				for (int i = 0; i < 10000000; i++)
 				{
 					char* formatted = format("{}", int(i));
 					cleanup(formatted);
@@ -523,7 +523,7 @@ int main(void)
 		{
 			Timer timer = Timer([](long double duration) { std::cout << "Formatter (stack) worked for " << duration << " ms.\n"; });
 			{
-				for (int i = 0; i < 100000000; i++)
+				for (int i = 0; i < 10000000; i++)
 				{
 					char formatted[100];
 					format<100>(formatted, "{}", int(i));
@@ -536,7 +536,7 @@ int main(void)
 		{
 			Timer timer = Timer([](long double duration) { std::cout << "Snprintf worked for " << duration << " ms.\n"; });
 			{
-				for (int i = 0; i < 100000000; i++)
+				for (int i = 0; i < 10000000; i++)
 				{
 					char formatted[100];
 					snprintf(formatted, 100, "%d", int(i));
