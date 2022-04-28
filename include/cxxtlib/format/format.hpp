@@ -346,7 +346,7 @@ namespace cformat
 			using ValueType = Type;
 
 		public:
-			static FORMAT_CONSTEXPR const Type value = tValue;
+			static FORMAT_CONSTEXPR const Type sValue = tValue;
 		};
 
 		template<bool tValue>
@@ -394,12 +394,12 @@ namespace cformat
 
 		template<typename First, typename Second>
 		struct Or<First, Second>
-			: public Conditional<First::value, First, Second>::ValueType
+			: public Conditional<First::sValue, First, Second>::ValueType
 		{ };
 
 		template<typename First, typename Second, typename Third, typename... Other>
 		struct Or<First, Second, Third, Other...>
-			: public Conditional<First::value, First, Or<Second, Third, Other...>>::ValueType
+			: public Conditional<First::sValue, First, Or<Second, Third, Other...>>::ValueType
 		{ };
 
 		template<typename...>
@@ -417,17 +417,17 @@ namespace cformat
 
 		template<typename First, typename Second>
 		struct And<First, Second>
-			: public Conditional<First::value, Second, First>::ValueType
+			: public Conditional<First::sValue, Second, First>::ValueType
 		{ };
 
 		template<typename First, typename Second, typename Third, typename... Other>
 		struct And<First, Second, Third, Other...>
-			: public Conditional<First::value, And<Second, Third, Other...>, First>::ValueType
+			: public Conditional<First::sValue, And<Second, Third, Other...>, First>::ValueType
 		{ };
 
 		template<typename Type>
 		struct Not
-			: public BoolConstant<!bool(Type::value)>
+			: public BoolConstant<!bool(Type::sValue)>
 		{ };
 
 		template<typename Type>
@@ -774,7 +774,7 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		template<typename Type, bool = IsReferenceable<Type>::value>
+		template<typename Type, bool = IsReferenceable<Type>::sValue>
 		struct AddLValueReferenceHelper
 		{
 		public:
@@ -803,7 +803,7 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		template<typename Type, bool = IsReferenceable<Type>::value>
+		template<typename Type, bool = IsReferenceable<Type>::sValue>
 		struct AddRValueReferenceHelper
 		{
 		public:
@@ -833,25 +833,25 @@ namespace cformat
 		};
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::sValue, Type&&>::ValueType forward(typename Identity<Type>::ValueType& pValue) FORMAT_NOEXCEPT
 		{
 			return static_cast<Type&&>(pValue);
 		}
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::sValue, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& pValue) FORMAT_NOEXCEPT
 		{
 			return static_cast<Type&&>(pValue);
 		}
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::sValue, Type>::ValueType forward(typename Identity<Type>::ValueType pValue) FORMAT_NOEXCEPT
 		{
 			return pValue;
 		}
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& pValue) FORMAT_NOEXCEPT = delete;
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::sValue, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& pValue) FORMAT_NOEXCEPT = delete;
 
 		template<typename Type>
 		static FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& pValue) FORMAT_NOEXCEPT
@@ -886,7 +886,7 @@ namespace cformat
 	struct FormatOf
 	{
 	public:
-		static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::None;
+		static FORMAT_CONSTEXPR const FormatArgumentType sValue = FormatArgumentType::None;
 	};
 
 	#define __struct_INTERNAL_FORMAT_OF(Dependencies, Type, FType) \
@@ -894,7 +894,7 @@ namespace cformat
 	struct FormatOf<Type> \
 	{ \
 	public: \
-		static FORMAT_CONSTEXPR const FormatArgumentType value = FType; \
+		static FORMAT_CONSTEXPR const FormatArgumentType sValue = FType; \
 	}
 
 	__struct_INTERNAL_FORMAT_OF(NONE, bool, FormatArgumentType::Bool);
@@ -931,7 +931,7 @@ namespace cformat
 	template<typename Type, typename Enable = void>
 	struct Formatter
 	{
-		static_assert(FormatOf<Type>::value != FormatArgumentType::None, "Provided type does not have a formatter!");
+		static_assert(FormatOf<Type>::sValue != FormatArgumentType::None, "Provided type does not have a formatter!");
 	};
 
 	template<typename Type>
@@ -942,9 +942,9 @@ namespace cformat
 			details::IntegralConstant
 			<
 				FormatArgumentType,
-				FormatOf<Type>::value
-			>::value != FormatArgumentType::None
-		>::value
+				FormatOf<Type>::sValue
+			>::sValue != FormatArgumentType::None
+		>::sValue
 	>::ValueType;
 
 	#define __struct_INTERNAL_FORMATTER(Dependencies, Type, PFunc, FFunc) \
@@ -1589,7 +1589,7 @@ namespace cformat
 	struct SpecifierOf
 	{
 	public:
-		static FORMAT_CONSTEXPR const char value = ' ';
+		static FORMAT_CONSTEXPR const char sValue = ' ';
 	};
 
 	#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
@@ -1597,7 +1597,7 @@ namespace cformat
 	struct SpecifierOf<Type> \
 	{ \
 	public: \
-		static FORMAT_CONSTEXPR const char value = Specifier; \
+		static FORMAT_CONSTEXPR const char sValue = Specifier; \
 	}
 
 	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
@@ -1621,7 +1621,7 @@ namespace cformat
 		}
 		
 		temp[0] = '%';
-		temp[++count] = SpecifierOf<Type>::value;
+		temp[++count] = SpecifierOf<Type>::sValue;
 		const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
 
 		if (written > 0)
@@ -1653,7 +1653,7 @@ namespace cformat \
 	struct FormatOf<Type> \
 	{ \
 	public: \
-		static FORMAT_CONSTEXPR const FormatArgumentType value = FormatArgumentType::Custom; \
+		static FORMAT_CONSTEXPR const FormatArgumentType sValue = FormatArgumentType::Custom; \
 	}; \
 }
 
