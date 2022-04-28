@@ -262,7 +262,6 @@ namespace cformat
 			}
 		}
 
-		// Add constant
 		template<typename Type>
 		struct AddConst
 		{
@@ -270,7 +269,6 @@ namespace cformat
 			using ValueType = const Type;
 		};
 
-		// Remove constant
 		template<typename Type>
 		struct RemoveConst
 		{
@@ -285,7 +283,6 @@ namespace cformat
 			using ValueType = Type;
 		};
 
-		// Add volatile
 		template<typename Type>
 		struct AddVolatile
 		{
@@ -293,7 +290,6 @@ namespace cformat
 			using ValueType = volatile Type;
 		};
 		
-		// Remove volatile
 		template<typename Type>
 		struct RemoveVolatile
 		{
@@ -308,7 +304,6 @@ namespace cformat
 			using ValueType = Type;
 		};
 
-		// Add constant volatile
 		template<typename Type>
 		struct AddConstVolatile
 		{
@@ -316,7 +311,6 @@ namespace cformat
 			using ValueType = typename AddConst<typename AddVolatile<Type>::ValueType>::ValueType;
 		};
 
-		// Remove constant volatile
 		template<typename Type>
 		struct RemoveConstVolatile
 		{
@@ -324,7 +318,6 @@ namespace cformat
 			using ValueType = typename RemoveConst<typename RemoveVolatile<Type>::ValueType>::ValueType;
 		};
 
-		// Remove reference
 		template<typename Type>
 		struct RemoveReference
 		{
@@ -346,7 +339,6 @@ namespace cformat
 			using ValueType = Type;
 		};
 
-		// Integral constant
 		template<typename Type, Type tValue>
 		struct IntegralConstant
 		{
@@ -364,7 +356,6 @@ namespace cformat
 
 		using FalseType = IntegralConstant<bool, false>;
 
-		// Meta
 		template<bool, typename, typename>
 		struct Conditional;
 
@@ -374,7 +365,6 @@ namespace cformat
 		template<typename>
 		struct IsRValueReference;
 
-		// Conditional
 		template<bool tCondition, typename IfTrue, typename IfFalse>
 		struct Conditional
 		{
@@ -389,7 +379,6 @@ namespace cformat
 			using ValueType = IfFalse;
 		};
 
-		// Or
 		template<typename...>
 		struct Or;
 
@@ -413,7 +402,6 @@ namespace cformat
 			: public Conditional<First::value, First, Or<Second, Third, Other...>>::ValueType
 		{ };
 
-		// And
 		template<typename...>
 		struct And;
 
@@ -437,13 +425,11 @@ namespace cformat
 			: public Conditional<First::value, And<Second, Third, Other...>, First>::ValueType
 		{ };
 
-		// Not
 		template<typename Type>
 		struct Not
 			: public BoolConstant<!bool(Type::value)>
 		{ };
 
-		// Identity type
 		template<typename Type>
 		struct Identity
 		{
@@ -451,7 +437,6 @@ namespace cformat
 			using ValueType = Type;
 		};
 
-		// Is constant
 		template<typename>
 		struct IsConst
 			: public FalseType
@@ -462,7 +447,6 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		// Is volatile
 		template<typename>
 		struct IsVolatile
 			: public FalseType
@@ -473,7 +457,6 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		// Is constant volatile
 		template<typename>
 		struct IsConstVolatile
 			: public FalseType
@@ -484,39 +467,33 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		// Is literal
 		template<typename Type>
 		struct IsLiteral
 			: public IntegralConstant<bool, __is_literal_type(Type)>
 		{ };
 
-		// Is empty
 		template<typename Type>
 		struct IsEmpty
 			: public IntegralConstant<bool, __is_empty(Type)>
 		{ };
 
-		// Is polymorphic
 		template<typename Type>
 		struct IsPolymorphic
 			: public IntegralConstant<bool, __is_polymorphic(Type)>
 		{ };
 
-		// Is final
 #if FORMAT_CPLUSPLUS >= 201402L
 		template<typename Type>
 		struct IsFinal
 			: public IntegralConstant<bool, __is_final(Type)>
 		{ };
 #endif
-		
-		// Is abstract
+
 		template<typename Type>
 		struct IsAbstract
 			: public IntegralConstant<bool, __is_abstract(Type)>
 		{ };
 
-		// Is void
 		template<typename>
 		struct IsVoidHelper
 			: public FalseType
@@ -532,7 +509,6 @@ namespace cformat
 			: public IsVoidHelper<typename RemoveConstVolatile<Type>::ValueType>
 		{ };
 
-		// Is integral
 		template<typename>
 		struct IsIntegralHelper
 			: public FalseType
@@ -618,7 +594,6 @@ namespace cformat
 			: public IsIntegralHelper<typename RemoveConstVolatile<Type>::ValueType>
 		{ };
 
-		// Is floating point
 		template<typename>
 		struct IsFloatingPointHelper
 			: public FalseType
@@ -644,7 +619,6 @@ namespace cformat
 			: public IsFloatingPointHelper<typename RemoveConstVolatile<Type>::ValueType>
 		{ };
 
-		// Is array
 		template<typename>
 		struct IsArray
 			: public FalseType
@@ -660,7 +634,6 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		// Is pointer
 		template<typename>
 		struct IsPointerHelper
 			: public FalseType
@@ -676,25 +649,21 @@ namespace cformat
 			: public IsPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
 		{ };
 
-		// Is enum
 		template<typename Type>
 		struct IsEnum
 			: public BoolConstant<__is_enum(Type)>
 		{ };
 
-		// Is union
 		template<typename Type>
 		struct IsUnion
 			: public BoolConstant<__is_union(Type)>
 		{ };
 
-		// Is class
 		template<typename Type>
 		struct IsClass
 			: public BoolConstant<__is_class(Type)>
 		{ };
 
-		// Is function
 		template<typename>
 		struct IsFunction
 			: public FalseType
@@ -760,7 +729,6 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		// Is null pointer
 		template<typename>
 		struct IsNullPointerHelper
 			: public FalseType
@@ -776,19 +744,16 @@ namespace cformat
 			: public IsNullPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
 		{ };
 
-		// Is reference
 		template<typename Type>
 		struct IsReference
 			: public Or<IsLValueReference<Type>, IsRValueReference<Type>>
 		{ };
 
-		/// Is object
 		template<typename Type>
 		struct IsObject
 			: public Not<Or<IsFunction<Type>, IsReference<Type>, IsVoid<Type>>>
 		{ };
 
-		// Referenceable
 		template<typename Type>
 		struct IsReferenceable
 			: public Or<IsObject<Type>, IsReference<Type>>
@@ -799,7 +764,6 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		// L value
 		template<typename>
 		struct IsLValueReference
 			: public FalseType
@@ -829,7 +793,6 @@ namespace cformat
 			: public AddLValueReferenceHelper<Type>
 		{ };
 
-		// R value
 		template<typename>
 		struct IsRValueReference
 			: public FalseType
@@ -859,7 +822,6 @@ namespace cformat
 			: public AddRValueReferenceHelper<Type>
 		{ };
 
-		// Enable if
 		template<bool, typename Type = void>
 		struct EnableIf { };
 
@@ -870,33 +832,31 @@ namespace cformat
 			using ValueType = Type;
 		};
 
-		// Forward
 		template<typename Type>
-		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& type) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType& pValue) FORMAT_NOEXCEPT
 		{
-			return static_cast<Type&&>(type);
+			return static_cast<Type&&>(pValue);
 		}
 
 		template<typename Type>
-		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& type) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::value, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& pValue) FORMAT_NOEXCEPT
 		{
-			return static_cast<Type&&>(type);
+			return static_cast<Type&&>(pValue);
 		}
 
 		template<typename Type>
-		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType type) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename Identity<Type>::ValueType pValue) FORMAT_NOEXCEPT
 		{
-			return type;
+			return pValue;
 		}
 
 		template<typename Type>
-		FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& type) FORMAT_NOEXCEPT = delete;
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::value, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& pValue) FORMAT_NOEXCEPT = delete;
 
-		// Move
 		template<typename Type>
-		FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& type) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& pValue) FORMAT_NOEXCEPT
 		{
-			return static_cast<typename RemoveReference<Type>::ValueType&&>(type);
+			return static_cast<typename RemoveReference<Type>::ValueType&&>(pValue);
 		}
 	}
 
