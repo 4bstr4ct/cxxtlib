@@ -390,100 +390,10 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cformat;
 
-	// constexpr const char* f = format("Test {}.\n", "one");
-	// static_assert(f != nullptr, "F cannot be null!");
-	// cin.get();
-
-	static char buffer[256] { };
-	format<256>(buffer, "Point with random values is {}\n", Point{ 4, 7, 2 });
-	cout << buffer;
-	cleanup<256>(buffer);
-	format<256>(buffer, "Sum of {}, {}, and {} is {}\n", 2, 4, 7, 2 + 4 + 7);
-	cout << buffer;
-	cin.get();
-
-	{
-		char _buffer[12] { };
-		cprint(stdout, "Test : {}\n       {}\n\n", 13.56f, precision<10, float>(_buffer, 13.56f, 3, 5));
-		cin.get();
-
-		char __buffer[42] { };
-		cprint(stdout, "float with a value of 5.2 set to precision format \'1.3f\' is {}\n\n",
-			precision<42>(__buffer, -8, 1, 3));
-	}
-
-	cprint(stdout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {} {}\n",
-			bool(),
-			char(67),
-			details::int8(12),
-			details::uint8(16),
-			details::int16(),
-			details::uint16(),
-			details::int32(874525),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			"jejejejejejej",
-			Point{ 5, 8, 7 },
-			std::string("std::string"),
-			forward_list<int>{ 8, 7, 8, 7, 8, 7, 87, 0 }
-	);
-
-	print<std::ostream>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {} {}\n",
-			bool(),
-			char(67),
-			details::int8(12),
-			details::uint8(16),
-			details::int16(),
-			details::uint16(),
-			details::int32(874525),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			"jejejejejejej",
-			Point{ 5, 8, 7 },
-			std::string("std::string")
-	);
-
-	cin.get();
-
-	forward_list<int> fl = { 4, 5, 6 };
-	print<ostream>(cout, "foraward_list => {}\n", fl);
-
-	set<int> s = { 4, 5, 6 };
-	print<ostream>(cout, "set => {}\n", s);
-
-	unordered_set<int> us = { 4, 5, 6 };
-	print<ostream>(cout, "unordered_set => {}\n", us);
-
-	map<int, bool> m = { { 4, true }, { 5, false }, { 6, false } };
-	print<ostream>(cout, "map => {}\n", m);
-
-	unordered_map<int, bool> um = { { 4, true }, { 5, false }, { 6, false } };
-	print<ostream>(cout, "unordered_map => {}\n", um);
-
 	print<ostream>(cout, "Press any key to start tests...\n");
 	cin.get();
 
-#define STRESS_TEST 1
+#define STRESS_TEST 0
 #if STRESS_TEST == 1
 	const int count = 1000000;
 
@@ -518,31 +428,6 @@ int main(void)
 	}
 #endif
 
-	std::vector<std::vector<int>> mat = { { 0, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1 }, { 1, 0, 1, 1, 0}, { 0, 1, 0, 0, 0 }, { 0, 0, 1, 0, 1 } };
-	print<std::ostream>(std::cout, "{} {} {b10} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {} {\n}\n",
-			bool(),
-			char(67),
-			details::int8(12),
-			details::uint8(16),
-			details::int16(),
-			details::uint16(),
-			details::int32(874525),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			"jejejejejejej",
-			9
-	);
-
 #define TEST_PRINTING 0
 #if TEST_PRINTING == 1
 	cout << "\nTesting print!\n";
@@ -568,7 +453,7 @@ int main(void)
 	cout << "\nEnd!\n\n\n";
 #endif
 
-#define TEST_FORMATING 1
+#define TEST_FORMATING 0
 #if TEST_FORMATING == 1
 	{
 		const int count = 1000000;
@@ -617,27 +502,51 @@ int main(void)
 	}
 #endif
 
-	std::initializer_list<int> ilt = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	std::array<Point, 3> arr = { Point{ 0, 1, 2 }, Point{ 4, 5, 6 }, Point{ 7, 8, 9 } };
-	std::vector<float> vec = { -0, -1, -2, -3, -4 };
-	std::list<double> lst = { 10, 12, 13, 14, 15 };
-	std::pair<bool, int> par = { true, 59 };
-	std::map<float, bool> pmp = { { 5.0f, true }, { -9.0f, true }, { 1.0f, false} };
+#define COMPARE 1
+#if COMPARE == 1
+	{
+		cout << "+-------------------+\n";
+		
+		{
+			Timer timer = Timer([](long double duration) { std::cout << "Formatter (heap) worked for " << duration << " ms.\n"; });
+			{
+				for (int i = 0; i < 100000000; i++)
+				{
+					char* formatted = format("{}", int(i));
+					cleanup(formatted);
+				}
+			}
+		}
 
-	print<ostream>(cout, "Mat : \n{\n}\n{}\n{\n}\n\n",
-		par,
-		pmp,
-		lst
-	);
+		cout << "+-------------------+\n";
 
-	print<ostream>(cout, "Pattern : {}\n          {}\n          {}\n          {}\n          {}\n          {}\n\n",
-		ilt,
-		arr,
-		vec,
-		lst,
-		par,
-		pmp
-	);
+		{
+			Timer timer = Timer([](long double duration) { std::cout << "Formatter (stack) worked for " << duration << " ms.\n"; });
+			{
+				for (int i = 0; i < 100000000; i++)
+				{
+					char formatted[100];
+					format<100>(formatted, "{}", int(i));
+				}
+			}
+		}
+
+		cout << "+-------------------+\n";
+
+		{
+			Timer timer = Timer([](long double duration) { std::cout << "Snprintf worked for " << duration << " ms.\n"; });
+			{
+				for (int i = 0; i < 100000000; i++)
+				{
+					char formatted[100];
+					snprintf(formatted, 100, "%d", int(i));
+				}
+			}
+		}
+
+		cout << "+-------------------+\n";
+	}
+#endif
 
 	return 0;
 }

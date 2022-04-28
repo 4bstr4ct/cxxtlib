@@ -19,6 +19,7 @@
 #	pragma once
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #ifndef FORMAT_CLANG_VERSION
@@ -262,91 +263,73 @@ namespace cformat
 			}
 		}
 
-		template<typename Type>
-		struct AddConst
-		{
-		public:
-			using ValueType = const Type;
-		};
-
-		template<typename Type>
+		template<typename OldT>
 		struct RemoveConst
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 		
-		template<typename Type>
-		struct RemoveConst<const Type>
+		template<typename OldT>
+		struct RemoveConst<const OldT>
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type>
-		struct AddVolatile
-		{
-		public:
-			using ValueType = volatile Type;
-		};
-		
-		template<typename Type>
+		template<typename OldT>
 		struct RemoveVolatile
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type>
-		struct RemoveVolatile<volatile Type>
+		template<typename OldT>
+		struct RemoveVolatile<volatile OldT>
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type>
-		struct AddConstVolatile
-		{
-		public:
-			using ValueType = typename AddConst<typename AddVolatile<Type>::ValueType>::ValueType;
-		};
-
-		template<typename Type>
+		template<typename OldT>
 		struct RemoveConstVolatile
 		{
 		public:
-			using ValueType = typename RemoveConst<typename RemoveVolatile<Type>::ValueType>::ValueType;
+			using Type = typename RemoveConst<typename RemoveVolatile<OldT>::Type>::Type;
 		};
 
-		template<typename Type>
+		template<typename OldT>
 		struct RemoveReference
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 		
-		template<typename Type>
-		struct RemoveReference<Type&>
+		template<typename OldT>
+		struct RemoveReference<OldT&>
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type>
-		struct RemoveReference<Type&&>
+		template<typename OldT>
+		struct RemoveReference<OldT&&>
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type, Type tValue>
+		template<typename OldT, OldT tValue>
 		struct IntegralConstant
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 
 		public:
-			static FORMAT_CONSTEXPR const Type sValue = tValue;
+			static FORMAT_CONSTEXPR const OldT sValue = tValue;
+
+			static FORMAT_INLINE FORMAT_CONSTEXPR const OldT value() FORMAT_NOEXCEPT
+			{ return sValue; }
 		};
 
 		template<bool tValue>
@@ -369,14 +352,14 @@ namespace cformat
 		struct Conditional
 		{
 		public:
-			using ValueType = IfTrue;
+			using Type = IfTrue;
 		};
 
 		template<typename IfTrue, typename IfFalse>
 		struct Conditional<false, IfTrue, IfFalse>
 		{
 		public:
-			using ValueType = IfFalse;
+			using Type = IfFalse;
 		};
 
 		template<typename...>
@@ -394,12 +377,12 @@ namespace cformat
 
 		template<typename First, typename Second>
 		struct Or<First, Second>
-			: public Conditional<First::sValue, First, Second>::ValueType
+			: public Conditional<First::sValue, First, Second>::Type
 		{ };
 
 		template<typename First, typename Second, typename Third, typename... Other>
 		struct Or<First, Second, Third, Other...>
-			: public Conditional<First::sValue, First, Or<Second, Third, Other...>>::ValueType
+			: public Conditional<First::sValue, First, Or<Second, Third, Other...>>::Type
 		{ };
 
 		template<typename...>
@@ -417,12 +400,12 @@ namespace cformat
 
 		template<typename First, typename Second>
 		struct And<First, Second>
-			: public Conditional<First::sValue, Second, First>::ValueType
+			: public Conditional<First::sValue, Second, First>::Type
 		{ };
 
 		template<typename First, typename Second, typename Third, typename... Other>
 		struct And<First, Second, Third, Other...>
-			: public Conditional<First::sValue, And<Second, Third, Other...>, First>::ValueType
+			: public Conditional<First::sValue, And<Second, Third, Other...>, First>::Type
 		{ };
 
 		template<typename Type>
@@ -430,69 +413,12 @@ namespace cformat
 			: public BoolConstant<!bool(Type::sValue)>
 		{ };
 
-		template<typename Type>
+		template<typename OldT>
 		struct Identity
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
-
-		template<typename>
-		struct IsConst
-			: public FalseType
-		{ };
-
-		template<typename Type>
-		struct IsConst<const Type>
-			: public TrueType
-		{ };
-
-		template<typename>
-		struct IsVolatile
-			: public FalseType
-		{ };
-
-		template<typename Type>
-		struct IsVolatile<volatile Type>
-			: public TrueType
-		{ };
-
-		template<typename>
-		struct IsConstVolatile
-			: public FalseType
-		{ };
-
-		template<typename Type>
-		struct IsConstVolatile<const volatile Type>
-			: public TrueType
-		{ };
-
-		template<typename Type>
-		struct IsLiteral
-			: public IntegralConstant<bool, __is_literal_type(Type)>
-		{ };
-
-		template<typename Type>
-		struct IsEmpty
-			: public IntegralConstant<bool, __is_empty(Type)>
-		{ };
-
-		template<typename Type>
-		struct IsPolymorphic
-			: public IntegralConstant<bool, __is_polymorphic(Type)>
-		{ };
-
-#if FORMAT_CPLUSPLUS >= 201402L
-		template<typename Type>
-		struct IsFinal
-			: public IntegralConstant<bool, __is_final(Type)>
-		{ };
-#endif
-
-		template<typename Type>
-		struct IsAbstract
-			: public IntegralConstant<bool, __is_abstract(Type)>
-		{ };
 
 		template<typename>
 		struct IsVoidHelper
@@ -506,162 +432,7 @@ namespace cformat
 
 		template<typename Type>
 		struct IsVoid
-			: public IsVoidHelper<typename RemoveConstVolatile<Type>::ValueType>
-		{ };
-
-		template<typename>
-		struct IsIntegralHelper
-			: public FalseType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<bool> :
-			public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<char> :
-			public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<signed char>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<unsigned char>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<wchar_t>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<char16_t>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<char32_t>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<signed short>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<unsigned short>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<signed int>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<unsigned int>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<signed long>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<unsigned long>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<signed long long>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsIntegralHelper<unsigned long long>
-			: public TrueType
-		{ };
-
-		template<typename Type>
-		struct IsIntegral
-			: public IsIntegralHelper<typename RemoveConstVolatile<Type>::ValueType>
-		{ };
-
-		template<typename>
-		struct IsFloatingPointHelper
-			: public FalseType
-		{ };
-
-		template<>
-		struct IsFloatingPointHelper<float>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsFloatingPointHelper<double>
-			: public TrueType
-		{ };
-
-		template<>
-		struct IsFloatingPointHelper<long double>
-			: public TrueType
-		{ };
-
-		template<typename Type>
-		struct IsFloatingPoint
-			: public IsFloatingPointHelper<typename RemoveConstVolatile<Type>::ValueType>
-		{ };
-
-		template<typename>
-		struct IsArray
-			: public FalseType
-		{ };
-
-		template<typename Type, uint32 tSize>
-		struct IsArray<Type[tSize]>
-			: public TrueType
-		{ };
-
-		template<typename Type>
-		struct IsArray<Type[]>
-			: public TrueType
-		{ };
-
-		template<typename>
-		struct IsPointerHelper
-			: public FalseType
-		{ };
-
-		template<typename Type>
-		struct IsPointerHelper<Type*>
-			: public TrueType
-		{ };
-
-		template<typename Type>
-		struct IsPointer
-			: public IsPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
-		{ };
-
-		template<typename Type>
-		struct IsEnum
-			: public BoolConstant<__is_enum(Type)>
-		{ };
-
-		template<typename Type>
-		struct IsUnion
-			: public BoolConstant<__is_union(Type)>
-		{ };
-
-		template<typename Type>
-		struct IsClass
-			: public BoolConstant<__is_class(Type)>
+			: public IsVoidHelper<typename RemoveConstVolatile<Type>::Type>
 		{ };
 
 		template<typename>
@@ -729,21 +500,6 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		template<typename>
-		struct IsNullPointerHelper
-			: public FalseType
-		{ };
-
-		template<>
-		struct IsNullPointerHelper<decltype(nullptr)>
-			: public TrueType
-		{ };
-
-		template<typename Type>
-		struct IsNullPointer
-			: public IsNullPointerHelper<typename RemoveConstVolatile<Type>::ValueType>
-		{ };
-
 		template<typename Type>
 		struct IsReference
 			: public Or<IsLValueReference<Type>, IsRValueReference<Type>>
@@ -774,18 +530,18 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		template<typename Type, bool = IsReferenceable<Type>::sValue>
+		template<typename OldT, bool = IsReferenceable<OldT>::sValue>
 		struct AddLValueReferenceHelper
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type>
-		struct AddLValueReferenceHelper<Type, true>
+		template<typename OldT>
+		struct AddLValueReferenceHelper<OldT, true>
 		{
 		public:
-			using ValueType = Type&;
+			using Type = OldT&;
 		};
 
 		template<typename Type>
@@ -803,18 +559,18 @@ namespace cformat
 			: public TrueType
 		{ };
 
-		template<typename Type, bool = IsReferenceable<Type>::sValue>
+		template<typename OldT, bool = IsReferenceable<OldT>::sValue>
 		struct AddRValueReferenceHelper
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
-		template<typename Type>
-		struct AddRValueReferenceHelper<Type, true>
+		template<typename OldT>
+		struct AddRValueReferenceHelper<OldT, true>
 		{
 		public:
-			using ValueType = Type&&;
+			using Type = OldT&&;
 		};
 
 		template<typename Type>
@@ -822,41 +578,41 @@ namespace cformat
 			: public AddRValueReferenceHelper<Type>
 		{ };
 
-		template<bool, typename Type = void>
+		template<bool, typename OldT = void>
 		struct EnableIf { };
 
-		template<typename Type>
-		struct EnableIf<true, Type>
+		template<typename OldT>
+		struct EnableIf<true, OldT>
 		{
 		public:
-			using ValueType = Type;
+			using Type = OldT;
 		};
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::sValue, Type&&>::ValueType forward(typename Identity<Type>::ValueType& pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::sValue, Type&&>::Type forward(typename Identity<Type>::Type& pValue) FORMAT_NOEXCEPT
 		{
 			return static_cast<Type&&>(pValue);
 		}
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::sValue, Type&&>::ValueType forward(typename Identity<Type>::ValueType&& pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<!IsLValueReference<Type>::sValue, Type&&>::Type forward(typename Identity<Type>::Type&& pValue) FORMAT_NOEXCEPT
 		{
 			return static_cast<Type&&>(pValue);
 		}
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::sValue, Type>::ValueType forward(typename Identity<Type>::ValueType pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::sValue, Type>::Type forward(typename Identity<Type>::Type pValue) FORMAT_NOEXCEPT
 		{
 			return pValue;
 		}
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::sValue, Type>::ValueType forward(typename RemoveReference<Type>::ValueType&& pValue) FORMAT_NOEXCEPT = delete;
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename EnableIf<IsLValueReference<Type>::sValue, Type>::Type forward(typename RemoveReference<Type>::Type&& pValue) FORMAT_NOEXCEPT = delete;
 
 		template<typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::ValueType&& move(Type&& pValue) FORMAT_NOEXCEPT
+		static FORMAT_INLINE FORMAT_CONSTEXPR typename RemoveReference<Type>::Type&& move(Type&& pValue) FORMAT_NOEXCEPT
 		{
-			return static_cast<typename RemoveReference<Type>::ValueType&&>(pValue);
+			return static_cast<typename RemoveReference<Type>::Type&&>(pValue);
 		}
 	}
 
@@ -887,6 +643,9 @@ namespace cformat
 	{
 	public:
 		static FORMAT_CONSTEXPR const FormatArgumentType sValue = FormatArgumentType::None;
+
+		static FORMAT_INLINE FORMAT_CONSTEXPR const FormatArgumentType value() FORMAT_NOEXCEPT
+		{ return sValue; }
 	};
 
 	#define __struct_INTERNAL_FORMAT_OF(Dependencies, Type, FType) \
@@ -895,6 +654,9 @@ namespace cformat
 	{ \
 	public: \
 		static FORMAT_CONSTEXPR const FormatArgumentType sValue = FType; \
+		 \
+		static FORMAT_INLINE FORMAT_CONSTEXPR FormatArgumentType value() FORMAT_NOEXCEPT \
+		{ return sValue; } \
 	}
 
 	__struct_INTERNAL_FORMAT_OF(NONE, bool, FormatArgumentType::Bool);
@@ -928,10 +690,10 @@ namespace cformat
 		}
 	};
 
-	template<typename Type, typename Enable = void>
+	template<typename Type, typename Enabler = void>
 	struct Formatter
 	{
-		static_assert(FormatOf<Type>::sValue != FormatArgumentType::None, "Provided type does not have a formatter!");
+		static_assert(FormatOf<Type>::value() != FormatArgumentType::None, "Provided type does not have a formatter!");
 	};
 
 	template<typename Type>
@@ -942,10 +704,10 @@ namespace cformat
 			details::IntegralConstant
 			<
 				FormatArgumentType,
-				FormatOf<Type>::sValue
-			>::sValue != FormatArgumentType::None
-		>::sValue
-	>::ValueType;
+				FormatOf<Type>::value()
+			>::value() != FormatArgumentType::None
+		>::value()
+	>::Type;
 
 	#define __struct_INTERNAL_FORMATTER(Dependencies, Type, PFunc, FFunc) \
 	template<Dependencies> \
@@ -1281,7 +1043,7 @@ namespace cformat
 		if (*pReader == '{')
 		{
 			pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
-			using DRefArgument = typename details::RemoveVolatile<typename details::RemoveReference<Argument>::ValueType>::ValueType;
+			using DRefArgument = typename details::RemoveVolatile<typename details::RemoveReference<Argument>::Type>::Type;
 			Formatter<DRefArgument>::template parse<Reader>(pReader);
 			Formatter<DRefArgument>::template format<Writer>(pWriter, pArgument);
 		}
@@ -1590,6 +1352,9 @@ namespace cformat
 	{
 	public:
 		static FORMAT_CONSTEXPR const char sValue = ' ';
+
+		static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT
+		{ return sValue; }
 	};
 
 	#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
@@ -1598,6 +1363,9 @@ namespace cformat
 	{ \
 	public: \
 		static FORMAT_CONSTEXPR const char sValue = Specifier; \
+		 \
+		static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT \
+		{ return sValue; } \
 	}
 
 	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
@@ -1654,6 +1422,9 @@ namespace cformat \
 	{ \
 	public: \
 		static FORMAT_CONSTEXPR const FormatArgumentType sValue = FormatArgumentType::Custom; \
+		 \
+		static FORMAT_INLINE FORMAT_CONSTEXPR const FormatArgumentType value() FORMAT_NOEXCEPT \
+		{ return sValue; } \
 	}; \
 }
 
