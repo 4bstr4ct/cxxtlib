@@ -194,11 +194,13 @@
 #	define FORMAT_LINUX 1
 #endif
 
+/*
 #if FORMAT_WINDOWS
 #	define fitoa _itoa_s
 #else
-#	define fitoa itoa
+#	define fitoa details::ascii::itoa
 #endif
+*/
 
 #ifndef FORMAT_DEBUG
 #	if _MSC_VER
@@ -256,18 +258,68 @@ namespace cformat
 				return pString;
 			}
 
-			static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* pDestination, const char* pSource) FORMAT_NOEXCEPT
 			{
-				char* head = destination;
-				while((*destination++ = *source++) != '\0');
+				char* head = pDestination;
+				while((*pDestination++ = *pSource++) != '\0');
 				return head;
 			}
 
-			static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* destination, const char* source, uint32 pCount) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* copy(char* pDestination, const char* pSource, uint32 pCount) FORMAT_NOEXCEPT
 			{
-				char* head = destination;
-				for (uint32 index = 0; index < pCount; index++) destination[index] = source[index];
+				char* head = pDestination;
+				for (uint32 index = 0; index < pCount; index++) pDestination[index] = pSource[index];
 				return head;
+			}
+
+			static FORMAT_INLINE FORMAT_CONSTEXPR void reverse(char* pString, uint32 pLength) FORMAT_NOEXCEPT
+			{
+				int32 start = 0;
+				int32 end = pLength - 1u;
+
+				while (start < end)
+				{
+					char temp = pString[start];
+					pString[start++] = pString[end];
+					pString[end--] = temp;
+					/*
+					start++;
+					end--;
+					*/
+				}
+			}
+
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* itoa(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
+			{
+				uint32 index = 0;
+				bool isNegative = false;
+
+				if (pValue == 0)
+				{
+					pString[index++] = '0';
+					pString[index] = '\0';
+					return pString;
+				}
+			
+				if (pValue < 0 && pBase == 10)
+				{
+					isNegative = true;
+					pValue = -pValue;
+				}
+			
+				while (pValue != 0)
+				{
+					int32 remainder = pValue % pBase;
+					pString[index++] = (remainder > 9)? (remainder - 10u) + 'a' : remainder + '0';
+					pValue /= pBase;
+				}
+			
+				if (isNegative)
+					pString[index++] = '-';
+			
+				pString[index] = '\0';
+				reverse(pString, index);
+				return pString;
 			}
 		}
 
@@ -760,7 +812,7 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			::fitoa(pValue COMMA buffer COMMA 10);
+			details::ascii::itoa(pValue COMMA buffer COMMA 10);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
@@ -774,7 +826,7 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			::fitoa(pValue COMMA buffer COMMA 10);
+			details::ascii::itoa(pValue COMMA buffer COMMA 10);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
@@ -788,7 +840,7 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			::fitoa(pValue COMMA buffer COMMA 10);
+			details::ascii::itoa(pValue COMMA buffer COMMA 10);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
@@ -802,7 +854,7 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			::fitoa(pValue COMMA buffer COMMA 10);
+			details::ascii::itoa(pValue COMMA buffer COMMA 10);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
@@ -816,7 +868,7 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			::fitoa(pValue COMMA buffer COMMA 10);
+			details::ascii::itoa(pValue COMMA buffer COMMA 10);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
@@ -830,7 +882,7 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			::fitoa(pValue COMMA buffer COMMA 10);
+			details::ascii::itoa(pValue COMMA buffer COMMA 10);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
@@ -1164,8 +1216,8 @@ namespace cformat
 			if (this->mSize > pCapacity)
 				this->mSize = pCapacity;
 			
-			for (details::uint32 i = 0; i < this->mSize; i++)
-				local[i] = details::move(this->mData[i]);
+			for (details::uint32 index = 0; index < this->mSize; index++)
+				local[index] = details::move(this->mData[index]);
 
 			delete[] this->mData;
 			this->mCapacity = pCapacity;
@@ -1192,8 +1244,8 @@ namespace cformat
 			if (this->mSize + pSize > this->mCapacity)
 				reallocate(pSize + this->mCapacity + this->mCapacity / 2);
 
-			for (details::uint32 i = 0; i < pSize; i++)
-				this->mData[this->mSize + i] = pData[i];
+			for (details::uint32 index = 0; index < pSize; index++)
+				this->mData[this->mSize + index] = pData[index];
 
 			this->mData[this->mSize += pSize] = '\0';
 		}
@@ -1232,8 +1284,8 @@ namespace cformat
 		{
 			if (this->mSize + pSize <= tCapacity)
 			{
-				for (details::uint32 i = 0; i < pSize; i++)
-					this->mData[this->mSize + i] = pData[i];
+				for (details::uint32 index = 0; index < pSize; index++)
+					this->mData[this->mSize + index] = pData[index];
 				
 				this->mSize += pSize;
 			}

@@ -390,10 +390,10 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cformat;
 
-	print<ostream>(cout, "Press any key to start tests...\n");
-	cin.get();
+	// print<ostream>(cout, "Press any key to start tests...\n");
+	// cin.get();
 
-#define STRESS_TEST 0
+#define STRESS_TEST 1
 #if STRESS_TEST == 1
 	const int count = 1000000;
 
@@ -453,7 +453,7 @@ int main(void)
 	cout << "\nEnd!\n\n\n";
 #endif
 
-#define TEST_FORMATING 0
+#define TEST_FORMATING 1
 #if TEST_FORMATING == 1
 	{
 		const int count = 1000000;
