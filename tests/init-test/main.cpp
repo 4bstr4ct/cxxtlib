@@ -76,477 +76,370 @@ public:
 	}
 };
 
-#if 1
-std::vector<float> vec = { -0, -1, -2, -3, -4 };
-std::list<double> lst = { 10, 12, 13, 14, 15 };
-std::map<float, bool> mp = { { 5.0f, true }, { -9.0f, true }, { 1.0f, false} };
-
-template<int tCount>
-void testFormatterWithHeapWriter()
-{
-	using namespace ::cformat;
-	
-	for (details::uint32 i = 0; i < tCount; i++)
-	{
-		auto formatted = format("{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej")
-		);
-
-		cleanup(formatted);
-	}
-}
-
-template<int tCount>
-void testFormatterWithStackWriter()
-{
-	using namespace ::cformat;
-
-	for (details::uint32 i = 0; i < tCount; i++)
-	{
-		char buffer[450];
-		unsigned int written = format<450>(buffer, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej")
-			);
-	}
-}
-
-template<int tCount>
-void testPrintf()
-{
-	using namespace ::cformat;
-
-	for (details::uint32 i = 0; i < tCount; i++)
-	{
-		char* buffer = new char[1024];
-		sprintf(buffer,
-		"%d %c %d %u %d %u %d %u %lld %llu %f %f %Lf nullptr [%d %d %d] %p %p %p %p %s",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej").c_str()
-			);
-		delete[] buffer;
-	}
-}
-
-template<int tCount>
-void tesSStream()
-{
-	using namespace ::cformat;
-	using namespace ::std;
-	
-	Point point = Point{ 7, 8, 9 };
-
-	for (int i = 0; i < tCount; i++)
-	{
-		std::stringstream stream;
-		stream << bool(0) << 
-			char(67) <<
-			details::int8(1) <<
-			details::uint8(0) <<
-			details::int16(0) <<
-			details::uint16(0) <<
-			details::int32(0) <<
-			details::uint32(0) <<
-			details::int64(0) <<
-			details::uint64(0) <<
-			float(0) <<
-			double(2135.354684343565435) <<
-			details::ldouble(0) << "nullptr" << '[' << point.x << ' ' << point.y << ' ' << point.z << ']' <<
-			&vec <<
-			&vec <<
-			&lst <<
-			&mp <<
-			std::string("jejejejejejej") << '\n';
-	}
-}
-
-void testPrint()
-{
-	using namespace ::cformat;
-
-	for (int i = 0; i < 100; i++)
-	{
-		print<std::ostream>(std::cout, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {} {} {} {} {}\n",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			double(2135.354684343565435),
-			details::ldouble(),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej")
-		);
-	}
-}
-
-void testCout()
-{
-	using namespace ::cformat;
-	using namespace ::std;
-
-	for (int i = 0; i < 100; i++)
-	{
-		cout << bool() <<
-			char(67) <<
-			details::int8(1) <<
-			details::uint8() <<
-			details::int16() <<
-			details::uint16() <<
-			details::int32() <<
-			details::uint32() <<
-			details::int64() <<
-			details::uint64() <<
-			float() <<
-			double(2135.354684343565435) <<
-			details::ldouble() <<
-			"nullptr" <<
-			'[' << 7 << ' ' << 8 << ' ' << 9 << ']' <<
-			&vec <<
-			&vec <<
-			&lst <<
-			&mp <<
-			std::string("jejejejejejej") << '\n';
-	}
-}
-#endif
-
-template<unsigned int tCount>
-static constexpr void stressTestForFormatterWithHeap()
-{
-	using namespace ::cformat;
-
-	for (details::uint32 i = 0; i < tCount; i++)
-	{
-		auto formatted = format("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			float(8125.5432),
-			double(2135.354684343565435),
-			double(2135.354684343565435),
-			details::ldouble(),
-			details::ldouble(156.698461),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej")
-			);
-
-		cleanup(formatted);
-	}
-}
-
-template<unsigned int tCount>
-static constexpr void stressTestForFormatterWithStack()
-{
-	using namespace ::cformat;
-
-	for (details::uint32 i = 0; i < tCount; i++)
-	{
-		char buffer[2048];
-		details::uint32 written = format<2048>(buffer, "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nAddressOne value is : {}\nAddressTwo value is : {}\nAddressThree value is : {}\nAddressFour value is : {}\nSome string value is : {}\n",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			float(8125.5432),
-			double(2135.354684343565435),
-			double(2135.354684343565435),
-			details::ldouble(),
-			details::ldouble(156.698461),
-			nullptr,
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej")
-			);
-	}
-}
-
-template<unsigned int tCount>
-static constexpr void stressTestForSPRINTF()
-{
-	using namespace ::cformat;
-
-	for (details::uint32 i = 0; i < tCount; i++)
-	{
-		char buffer[2048];
-		snprintf(buffer, 2048, "Boolean value is : %d\nChar value is : %c\nInt8 value is : %d\nUInt8 value is : %u\nInt16 value is : %d\nUInt16 value is : %u\nInt32 value is : %d\nUInt32 value is : %u\nLongLong value is : %lld\nULongLong value is : %llu\nFloat value is : %f\nFloat value with precision is : %3.5f\nDouble value is : %f\nDouble value with precision is : %3.5f\nLongDouble value is : %Lf\nLongDouble value with precision is : %3.5Lf\nNullptr stringified is : %s\nPoint here goes brrr : [%d %d %d]\nAddressOne value is : %p\nAddressTwo value is : %p\nAddressThree value is : %p\nAddressFour value is : %p\nSome string value is : %s\n",
-			bool(),
-			char(67),
-			details::int8(1),
-			details::uint8(),
-			details::int16(),
-			details::uint16(),
-			details::int32(),
-			details::uint32(),
-			details::int64(),
-			details::uint64(),
-			float(),
-			float(8125.5432),
-			double(2135.354684343565435),
-			double(2135.354684343565435),
-			details::ldouble(),
-			details::ldouble(156.698461),
-			"nullptr",
-			7, 8, 9,
-			&vec,
-			&vec,
-			&lst,
-			&mp,
-			std::string("jejejejejejej").c_str()
-			);
-	}
+#define TEST_OPERATION(title, Operation) \
+{ \
+	cprint(stdout COMMA title); \
+	Timer timer = Timer([](long double duration) { std::cout << "Operation worked for " << duration << " ms.\n\n"; }); \
+	{ \
+		Operation \
+	} \
 }
 
 int main(void)
 {
 	using namespace ::std;
 	using namespace ::cformat;
+	using namespace ::cformat::details;
 
-	// print<ostream>(cout, "Press any key to start tests...\n");
-	// cin.get();
+	cprint(stdout, "+----------------------------------+\nEnter any key to start usage tests:\n");
+	cin.get();
 
-#define STRESS_TEST 1
-#if STRESS_TEST == 1
-	const int count = 1000000;
-
-	cout << "\nTesting formatter with heap!\n";
-
-	for (int i = 0; i < 3; i++)
-	{
+	TEST_OPERATION("Testing FORMATTER with dynamic chars buffer:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Formatter with heap worked for " << duration << " ms.\n"; });
-			stressTestForFormatterWithHeap<count>();
+			char* buffer = format("{} + {} = {} and it is {} operation.\n" COMMA 3 COMMA 5 COMMA 8 COMMA "mathematical");
+			cout << buffer;
+			print(cout COMMA buffer);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
 		}
-	}
+	);
 
-	cout << "\nTesting SPRINTF!\n";
-
-	for (int i = 0; i < 3; i++)
-	{
+	TEST_OPERATION("Testing FORMATTER with static chars buffer:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "SPRINTF worked for " << duration << " ms.\n"; });
-			stressTestForSPRINTF<count>();
+			char buffer[256] = { };
+			unsigned int length = formatTo<256>(buffer COMMA "{} + {} = {} and it is {} operation.\n" COMMA 3 COMMA 5 COMMA 8 COMMA "mathematical");
+			cout << buffer;
+			print(cout COMMA buffer);
+			cprint(stdout COMMA buffer);
 		}
-	}
+	);
 
-	cout << "\nTesting formatter with stack!\n";
+	cprint(stdout, "+----------------------------------+\nEnter any key to start std tests:\n");
+	cin.get();
 
-	for (int i = 0; i < 3; i++)
-	{
+	TEST_OPERATION("Testing FORMATTER with std::string:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Formatter with stack worked for " << duration << " ms.\n"; });
-			stressTestForFormatterWithStack<count>();
+			string container = "std string label as text";
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
 		}
-	}
-#endif
+	);
 
-#define TEST_PRINTING 0
-#if TEST_PRINTING == 1
-	cout << "\nTesting print!\n";
-
-	for (int i = 0; i < 10; i++)
-	{
+	TEST_OPERATION("Testing FORMATTER with std::array:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Print worked for " << duration << " ms.\n"; });
-			testPrint();
+			array<int COMMA 5> container = { 1 COMMA 2 COMMA 3 COMMA 4 COMMA 5 };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
 		}
-	}
+	);
 
-	cout << "\nTesting cout!\n";
-
-	for (int i = 0; i < 10; i++)
-	{
+	TEST_OPERATION("Testing FORMATTER with std::vector:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Cout worked for " << duration << " ms.\n"; });
-			testCout();
+			vector<int> container = { 1 COMMA 2 COMMA 3 COMMA 4 COMMA 5 };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
 		}
-	}
+	);
+
+	TEST_OPERATION("Testing FORMATTER with std::list:\n",
+		{
+			list<int> container = { 1 COMMA 2 COMMA 3 COMMA 4 COMMA 5 };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
+
+	TEST_OPERATION("Testing FORMATTER with std::deque:\n",
+		{
+			deque<int> container = { 1 COMMA 2 COMMA 3 COMMA 4 COMMA 5 };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
+
+	TEST_OPERATION("Testing FORMATTER with std::set:\n",
+		{
+			set<int> container = { 1 COMMA 2 COMMA 3 COMMA 4 COMMA 5 };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
+
+	TEST_OPERATION("Testing FORMATTER with std::unordered_set:\n",
+		{
+			unordered_set<int> container = { 1 COMMA 2 COMMA 3 COMMA 4 COMMA 5 };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
+
+	TEST_OPERATION("Testing FORMATTER with std::pair:\n",
+		{
+			pair<int COMMA bool> container = { 1 COMMA false };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
 	
-	cout << "\nEnd!\n\n\n";
-#endif
-
-#define TEST_FORMATING 1
-#if TEST_FORMATING == 1
-	{
-		const int count = 1000000;
-
-		cout << "\n+--------------------------------------+\nTesting formatter!\n";
-
-		for (int i = 0; i < 3; i++)
+	TEST_OPERATION("Testing FORMATTER with std::map:\n",
 		{
+			map<int COMMA bool> container = { { 1 COMMA true } COMMA { 2 COMMA true } COMMA { 3 COMMA true } COMMA { 4 COMMA true } COMMA { 5 COMMA false } };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
+
+	TEST_OPERATION("Testing FORMATTER with std::unordered_map:\n",
+		{
+			unordered_map<int COMMA bool> container = { { 1 COMMA true } COMMA { 2 COMMA true } COMMA { 3 COMMA true } COMMA { 4 COMMA true } COMMA { 5 COMMA false } };
+			char* buffer = format("Container: {}.\n" COMMA container);
+			cprint(stdout COMMA buffer);
+			delete[] buffer;
+		}
+	);
+
+	cprint(stdout, "+----------------------------------+\nEnter any key to start performance tests:\n");
+	cin.get();
+
+	const unsigned int count = 10000000u;
+
+	TEST_OPERATION("Testing FORMATTER using heap:\n",
+		{
+			for (uint32 i = 0; i < count; i++)
 			{
-				Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
-				testFormatterWithHeapWriter<count>();
+				auto formatted = format("Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nSome string value is : {}\n" COMMA
+					bool() COMMA
+					char(67) COMMA
+					int8(1) COMMA
+					uint8() COMMA
+					int16() COMMA
+					uint16() COMMA
+					int32() COMMA
+					uint32() COMMA
+					int64() COMMA
+					uint64() COMMA
+					float() COMMA
+					float(8125.5432) COMMA
+					double(2135.354684343565435) COMMA
+					double(2135.354684343565435) COMMA
+					ldouble() COMMA
+					ldouble(156.698461) COMMA
+					nullptr COMMA
+					7 COMMA 8 COMMA 9 COMMA
+					std::string("jejejejejejej")
+				);
+				delete[] formatted;
 			}
 		}
-		
-		cout << "\nTesting sprintf!\n";
+	);
 
-		for (int i = 0; i < 3; i++)
+	TEST_OPERATION("Testing FORMATTER using stack:\n",
 		{
+			for (uint32 i = 0; i < count; i++)
 			{
-				Timer timer = Timer([](long double duration) { std::cout << "Sprintf worked for " << duration << " ms.\n"; });
-				testPrintf<count>();
+				char buffer[2048];
+				uint32 written = formatTo<2048>(buffer COMMA "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nSome string value is : {}\n" COMMA
+					bool() COMMA
+					char(67) COMMA
+					int8(1) COMMA
+					uint8() COMMA
+					int16() COMMA
+					uint16() COMMA
+					int32() COMMA
+					uint32() COMMA
+					int64() COMMA
+					uint64() COMMA
+					float() COMMA
+					float(8125.5432) COMMA
+					double(2135.354684343565435) COMMA
+					double(2135.354684343565435) COMMA
+					ldouble() COMMA
+					ldouble(156.698461) COMMA
+					nullptr COMMA
+					7 COMMA 8 COMMA 9 COMMA
+					std::string("jejejejejejej")
+				);
 			}
 		}
-		
-		cout << "\nTesting formatter!\n";
-		
-		for (int i = 0; i < 3; i++)
+	);
+
+	TEST_OPERATION("Testing SNPRINTF:\n",
 		{
+			for (uint32 i = 0; i < count; i++)
 			{
-				Timer timer = Timer([](long double duration) { std::cout << "Formatter worked for " << duration << " ms.\n"; });
-				testFormatterWithStackWriter<count>();
+				char buffer[2048];
+				snprintf(buffer COMMA 2048 COMMA "Boolean value is : %d\nChar value is : %c\nInt8 value is : %d\nUInt8 value is : %u\nInt16 value is : %d\nUInt16 value is : %u\nInt32 value is : %d\nUInt32 value is : %u\nLongLong value is : %lld\nULongLong value is : %llu\nFloat value is : %f\nFloat value with precision is : %3.5f\nDouble value is : %f\nDouble value with precision is : %3.5f\nLongDouble value is : %Lf\nLongDouble value with precision is : %3.5Lf\nNullptr stringified is : %s\nPoint here goes brrr : [%d %d %d]\nSome string value is : %s\n" COMMA
+					bool() COMMA
+					char(67) COMMA
+					int8(1) COMMA
+					uint8() COMMA
+					int16() COMMA
+					uint16() COMMA
+					int32() COMMA
+					uint32() COMMA
+					int64() COMMA
+					uint64() COMMA
+					float() COMMA
+					float(8125.5432) COMMA
+					double(2135.354684343565435) COMMA
+					double(2135.354684343565435) COMMA
+					ldouble() COMMA
+					ldouble(156.698461) COMMA
+					"nullptr" COMMA
+					7 COMMA 8 COMMA 9 COMMA
+					std::string("jejejejejejej").c_str()
+				);
 			}
 		}
+	);
 
-		cout << "\nTesting string stream!\n";
-
-		for (int i = 0; i < 3; i++)
+	TEST_OPERATION("Testing FORMATTER using heap:\n",
 		{
+			for (uint32 i = 0; i < count; i++)
 			{
-				Timer timer = Timer([](long double duration) { std::cout << "SStream worked for " << duration << " ms.\n"; });
-				tesSStream<count>();
+				auto formatted = format("{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {}\n" COMMA
+					bool() COMMA
+					char(67) COMMA
+					int8(1) COMMA
+					uint8() COMMA
+					int16() COMMA
+					uint16() COMMA
+					int32() COMMA
+					uint32() COMMA
+					int64() COMMA
+					uint64() COMMA
+					float() COMMA
+					double(2135.354684343565435) COMMA
+					ldouble() COMMA
+					nullptr COMMA
+					7 COMMA 8 COMMA 9 COMMA
+					std::string("jejejejejejej")
+				);
+
+				delete[] formatted;
 			}
 		}
+	);
 
-		cout << "+--------------------------------------+\n";
-	}
-#endif
-
-#define COMPARE 1
-#if COMPARE == 1
-	{
-		cout << "+-------------------+\n";
-		
+	TEST_OPERATION("Testing FORMATTER using stack:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Formatter (heap) worked for " << duration << " ms.\n"; });
+			for (uint32 i = 0; i < count; i++)
 			{
-				for (int i = 0; i < 10000000; i++)
-				{
-					char* formatted = format("{}", int(i));
-					cleanup(formatted);
-				}
+				char buffer[450];
+				unsigned int written = formatTo<450>(buffer COMMA "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {}\n" COMMA
+					bool() COMMA
+					char(67) COMMA
+					int8(1) COMMA
+					uint8() COMMA
+					int16() COMMA
+					uint16() COMMA
+					int32() COMMA
+					uint32() COMMA
+					int64() COMMA
+					uint64() COMMA
+					float() COMMA
+					double(2135.354684343565435) COMMA
+					ldouble() COMMA
+					nullptr COMMA
+					7 COMMA 8 COMMA 9 COMMA
+					std::string("jejejejejejej")
+				);
 			}
 		}
+	);
 
-		cout << "+-------------------+\n";
-
+	TEST_OPERATION("Testing SNPRINTF:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Formatter (stack) worked for " << duration << " ms.\n"; });
+			for (uint32 i = 0; i < count; i++)
 			{
-				for (int i = 0; i < 10000000; i++)
-				{
-					char formatted[100];
-					format<100>(formatted, "{}", int(i));
-				}
+				char* buffer = new char[1024];
+				snprintf(buffer COMMA 1024 COMMA
+				"%d %c %d %u %d %u %d %u %lld %llu %f %f %Lf nullptr [%d %d %d] %s" COMMA
+					bool() COMMA
+					char(67) COMMA
+					int8(1) COMMA
+					uint8() COMMA
+					int16() COMMA
+					uint16() COMMA
+					int32() COMMA
+					uint32() COMMA
+					int64() COMMA
+					uint64() COMMA
+					float() COMMA
+					double(2135.354684343565435) COMMA
+					ldouble() COMMA
+					7 COMMA 8 COMMA 9 COMMA
+					std::string("jejejejejejej").c_str()
+				);
+				delete[] buffer;
 			}
 		}
+	);
 
-		cout << "+-------------------+\n";
-
+	TEST_OPERATION("Testing STRING STREAM:\n",
 		{
-			Timer timer = Timer([](long double duration) { std::cout << "Snprintf worked for " << duration << " ms.\n"; });
+			Point point = Point{ 7 COMMA 8 COMMA 9 };
+			for (int i = 0; i < count; i++)
 			{
-				for (int i = 0; i < 10000000; i++)
-				{
-					char formatted[100];
-					snprintf(formatted, 100, "%d", int(i));
-				}
+				std::stringstream stream;
+				stream << bool(0) << 
+					char(67) <<
+					int8(1) <<
+					uint8(0) <<
+					int16(0) <<
+					uint16(0) <<
+					int32(0) <<
+					uint32(0) <<
+					int64(0) <<
+					uint64(0) <<
+					float(0) <<
+					double(2135.354684343565435) <<
+					ldouble(0) << "nullptr" << '[' << point.x << ' ' << point.y << ' ' << point.z << ']' <<
+					std::string("jejejejejejej") << '\n';
 			}
 		}
+	);
 
-		cout << "+-------------------+\n";
-	}
-#endif
+	const unsigned int stressCount = 100000000u;
+
+	TEST_OPERATION("Testing FORMATTER using heap:\n",
+		{
+			for (int i = 0; i < stressCount; i++)
+			{
+				char* formatted = format("{}" COMMA int(i));
+				delete[] formatted;
+			}
+		}
+	);
+
+	TEST_OPERATION("Testing FORMATTER using stack:\n",
+		{
+			for (int i = 0; i < stressCount; i++)
+			{
+				char formatted[100];
+				formatTo<100>(formatted, "{}", int(i));
+			}
+		}
+	);
+
+	TEST_OPERATION("Testing SNPRINTF:\n",
+		{
+			for (int i = 0; i < stressCount; i++)
+			{
+				char formatted[100];
+				snprintf(formatted, 100, "%d", int(i));
+			}
+		}
+	);
 
 	return 0;
 }

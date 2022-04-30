@@ -282,10 +282,6 @@ namespace cformat
 					char temp = pString[start];
 					pString[start++] = pString[end];
 					pString[end--] = temp;
-					/*
-					start++;
-					end--;
-					*/
 				}
 			}
 
@@ -1313,35 +1309,31 @@ namespace cformat
 		return writer.get();
 	}
 
+	template<class Result, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR Result sformat(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	{
+		const details::uint32 patternLength = details::ascii::length(pPattern);
+		Reader reader = Reader(pPattern, pPattern, pPattern + patternLength);
+		HeapWriter writer = HeapWriter(patternLength + sizeof...(pArguments) * 2);
+		
+		formatHandle<Reader, HeapWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
+		char* buffer = writer.get();
+		Result result = Result(buffer);
+		
+		delete[] buffer;
+		return result;
+	}
+
 	/**
 	 * Returns the length of chars written to the buffer.
 	 */
 	template<details::uint32 tSize, typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 format(char* pBuffer, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 formatTo(char pBuffer[tSize], const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		Reader reader = Reader(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
 		StackWriter<tSize> writer = StackWriter<tSize>(pBuffer);
 		formatHandle<Reader, StackWriter<tSize>, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
 		return writer.size();
-	}
-
-	/**
-	 * Should only be used when default format function is used. Default format method creates formatted string on heap
-	 * and returns it. It does not handle memory deallocation of the formatted string. That is handled by this function.
-	 */
-	static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
-	{
-		delete[] pFormatted;
-	}
-
- 	/**
- 	 * Resets every char in the array to termination character - cleans the string.
-	 * Should be mainly used with stack arrays.
- 	 */
-	template<details::uint32 tSize>
-	static FORMAT_INLINE void cleanup(char* pFormatted) FORMAT_NOEXCEPT
-	{
-		details::ascii::fill(pFormatted, char(), tSize);
 	}
 
 	/**
@@ -1353,34 +1345,27 @@ namespace cformat
 	{
 		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 		pStream << formatted;
-		cleanup(formatted);
+		delete[] formatted;
 	}
 
-	template<typename Stream, details::uint32 tSize, typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	template<typename Stream, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pString) FORMAT_NOEXCEPT
 	{
-		char formatted[tSize] = { };
-		format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
-		pStream << formatted;
+		pStream << pString;
 	}
-	
-	/**
-	 * Printing method for c-like streams.
-	 */
-	template<typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+
+	template<typename Stream, typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 		::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
-		cleanup(formatted);
+		delete[] formatted;
 	}
 
-	template<details::uint32 tSize, typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	template<typename... Arguments>
+	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pString) FORMAT_NOEXCEPT
 	{
-		char formatted[tSize] = { };
-		format<tSize, Arguments...>(formatted, pPattern, details::forward<Arguments>(pArguments)...);
-		::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
+		::fwrite(pString, sizeof(char), details::ascii::length(pString), pStream);
 	}
 
 	template<typename Type>
@@ -1833,7 +1818,6 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value, ::std::pair<Key COMMA
 #ifndef STD_MAP_FORMATTER
 #define STD_MAP_FORMATTER
 
-#include <utility>
 #include <map>
 
 struct_CUSTOM_FORMAT_OF(typename Key COMMA typename Value COMMA typename Compare COMMA typename Allocator, ::std::map<Key COMMA Value COMMA Compare COMMA Allocator>);
@@ -1900,4 +1884,3 @@ struct_CUSTOM_FORMATTER(typename Key COMMA typename Value COMMA typename Hash CO
 #endif
 
 #endif
- 
