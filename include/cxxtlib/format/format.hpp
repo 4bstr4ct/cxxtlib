@@ -19,8 +19,8 @@
 #	pragma once
 #endif
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #ifndef FORMAT_CLANG_VERSION
 #	if defined(__clang__) && !defined(__ibmxl__)
@@ -285,6 +285,38 @@ namespace cformat
 				}
 			}
 
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* itoar(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
+			{
+				uint32 index = 0;
+				bool isNegative = false;
+
+				if (pValue == 0)
+				{
+					pString[index++] = '0';
+					pString[index] = '\0';
+					return pString;
+				}
+			
+				if (pValue < 0 && pBase == 10)
+				{
+					isNegative = true;
+					pValue = -pValue;
+				}
+			
+				while (pValue != 0)
+				{
+					int32 remainder = pValue % pBase;
+					pString[index++] = (remainder > 9)? (remainder - 10u) + 'a' : remainder + '0';
+					pValue /= pBase;
+				}
+			
+				if (isNegative)
+					pString[index++] = '-';
+			
+				pString[index] = '\0';
+				return pString;
+			}
+
 			static FORMAT_INLINE FORMAT_CONSTEXPR char* itoa(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
 			{
 				uint32 index = 0;
@@ -315,6 +347,108 @@ namespace cformat
 			
 				pString[index] = '\0';
 				reverse(pString, index);
+				return pString;
+			}
+
+			static FORMAT_INLINE FORMAT_CONSTEXPR char* dtoa(double pValue, char* pString, uint32 pPrecision) FORMAT_NOEXCEPT
+			{
+				if (pValue == 0.0)
+				{
+					copy(pString, "0");
+				}
+				else
+				{
+					int32 digit = 0, m = 0, m1 = 0;
+					char* iterator = pString;
+					int32 negate = (pValue < 0);
+
+					if (negate)
+					{
+						pValue = -pValue;
+					}
+
+					m = ::log10(pValue);
+					int32 useExponent = (m >= 14 || (negate && m >= 9) || m <= -9);
+
+					if (negate)
+					{
+						*(iterator++) = '-';
+					}
+
+					if (useExponent)
+					{
+						if (m < 0)
+						{
+							m -= 1.0;
+						}
+
+						pValue = pValue / ::pow(10.0, m);
+						m1 = m;
+						m = 0;
+					}
+
+					if (m < 1.0)
+					{
+						m = 0;
+					}
+
+					while (pValue > pPrecision || m >= 0) 
+					{
+						double weight = ::pow(10.0, m);
+						
+						if (weight > 0 && !::isinf(weight))
+						{
+							digit = floor(pValue / weight);
+							pValue -= (digit * weight);
+							*(iterator++) = '0' + digit;
+						}
+
+						if (m == 0 && pValue > 0)
+						{
+							*(iterator++) = '.';
+						}
+
+						m--;
+					}
+
+					if (useExponent)
+					{
+						*(iterator++) = 'e';
+
+						if (m1 > 0)
+						{
+							*(iterator++) = '+';
+						}
+						else
+						{
+							*(iterator++) = '-';
+							m1 = -m1;
+						}
+
+						m = 0;
+
+						while (m1 > 0)
+						{
+							*(iterator++) = '0' + m1 % 10;
+							m1 /= 10;
+							m++;
+						}
+
+						iterator -= m;
+						
+						for (uint32 i = 0, j = m - 1u; i < j; i++, j--)
+						{
+							iterator[i] ^= iterator[j];
+							iterator[j] ^= iterator[i];
+							iterator[i] ^= iterator[j];
+						}
+
+						iterator += m;
+					}
+					
+					*(iterator) = '\0';
+				}
+
 				return pString;
 			}
 		}
@@ -808,8 +942,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoa(pValue COMMA buffer COMMA 10);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -822,8 +956,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoa(pValue COMMA buffer COMMA 10);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -836,8 +970,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoa(pValue COMMA buffer COMMA 10);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -850,8 +984,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoa(pValue COMMA buffer COMMA 10);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -864,8 +998,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoa(pValue COMMA buffer COMMA 10);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -878,8 +1012,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoa(pValue COMMA buffer COMMA 10);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -892,12 +1026,8 @@ namespace cformat
 		{
 			const details::uint32 size = 65u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%lld" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -910,12 +1040,8 @@ namespace cformat
 		{
 			const details::uint32 size = 65u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%llu" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -926,14 +1052,11 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 25u;
+			const details::uint32 size = 65u;
+			const details::uint32 precision = 5u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			details::ascii::dtoa(static_cast<double>(pValue) COMMA buffer COMMA precision);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -944,14 +1067,11 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 25u;
+			const details::uint32 size = 65u;
+			const details::uint32 precision = 5u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			details::ascii::dtoa(pValue COMMA buffer COMMA precision);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -962,14 +1082,11 @@ namespace cformat
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) FORMAT_NOEXCEPT
 		{
-			const details::uint32 size = 26u;
+			const details::uint32 size = 65u;
+			const details::uint32 precision = 5u;
 			char buffer[size] = { };
-			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%Lf" COMMA pValue);
-			
-			if (written >= 0)
-			{
-				pContext.append(buffer COMMA written);
-			}
+			details::ascii::dtoa(static_cast<double>(pValue) COMMA buffer COMMA precision);
+			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
 	);
 
@@ -1246,6 +1363,17 @@ namespace cformat
 			this->mData[this->mSize += pSize] = '\0';
 		}
 
+		FORMAT_INLINE FORMAT_CONSTEXPR void appendReversed(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
+		{
+			if (this->mSize + pSize > this->mCapacity)
+				reallocate(pSize + this->mCapacity + this->mCapacity / 2);
+
+			for (details::uint32 index = 0; index < pSize; index++)
+				this->mData[this->mSize + index] = pData[pSize - index - 1u];
+
+			this->mData[this->mSize += pSize] = '\0';
+		}
+
 		FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
 		{
 			return this->mData;
@@ -1282,6 +1410,17 @@ namespace cformat
 			{
 				for (details::uint32 index = 0; index < pSize; index++)
 					this->mData[this->mSize + index] = pData[index];
+				
+				this->mSize += pSize;
+			}
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR void appendReversed(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
+		{
+			if (this->mSize + pSize <= tCapacity)
+			{
+				for (details::uint32 index = 0; index < pSize; index++)
+					this->mData[this->mSize + index] = pData[pSize - index - 1u];
 				
 				this->mSize += pSize;
 			}
@@ -1336,7 +1475,7 @@ namespace cformat
 		delete[] formatted;
 	}
 
-	template<typename Stream, typename... Arguments>
+	template<typename Stream>
 	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pString) FORMAT_NOEXCEPT
 	{
 		pStream << pString;
@@ -1350,7 +1489,6 @@ namespace cformat
 		delete[] formatted;
 	}
 
-	template<typename... Arguments>
 	static FORMAT_INLINE FORMAT_CONSTEXPR void cprint(::FILE* pStream, const char* const pString) FORMAT_NOEXCEPT
 	{
 		::fwrite(pString, sizeof(char), details::ascii::length(pString), pStream);
