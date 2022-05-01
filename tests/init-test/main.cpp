@@ -114,6 +114,15 @@ int main(void)
 		}
 	);
 
+	TEST_OPERATION("Testing FORMATTER with std::string:\n",
+		{
+			string formatted = sformat<string>("{} + {} = {} and it is {} operation.\n" COMMA 3 COMMA 5 COMMA 8 COMMA "mathematical");
+			cout << formatted.c_str();
+			print(cout COMMA formatted.c_str());
+			cprint(stdout COMMA formatted.c_str());
+		}
+	);
+
 	cprint(stdout, "+----------------------------------+\nEnter any key to start std tests:\n");
 	cin.get();
 
@@ -387,7 +396,6 @@ int main(void)
 
 	TEST_OPERATION("Testing STRING STREAM:\n",
 		{
-			Point point = Point{ 7 COMMA 8 COMMA 9 };
 			for (int i = 0; i < count; i++)
 			{
 				std::stringstream stream;
@@ -403,7 +411,7 @@ int main(void)
 					uint64(0) <<
 					float(0) <<
 					double(2135.354684343565435) <<
-					ldouble(0) << "nullptr" << '[' << point.x << ' ' << point.y << ' ' << point.z << ']' <<
+					ldouble(0) << "nullptr" << '[' << 7 << ' ' << 8 << ' ' << 9 << ']' <<
 					std::string("jejejejejejej") << '\n';
 			}
 		}

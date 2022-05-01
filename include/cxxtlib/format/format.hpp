@@ -1294,11 +1294,6 @@ namespace cformat
 		}
 	};
 
-	/**
-	 * Formats a dynamic cstring and returns a pointer to it. Note that neither this methods, nor any underlying structures and funtions deallocate
-	 * this formatted cstring (the result). It is users responsibility to deallocate result cstring after they finish working with it. User can use
-	 * cleanup() function to deallocate memory or store this pointer to formatted cstring inside a smart pointer.
-	 */
 	template<typename... Arguments>
 	static FORMAT_INLINE FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
@@ -1324,9 +1319,6 @@ namespace cformat
 		return result;
 	}
 
-	/**
-	 * Returns the length of chars written to the buffer.
-	 */
 	template<details::uint32 tSize, typename... Arguments>
 	static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 formatTo(char pBuffer[tSize], const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
@@ -1336,10 +1328,6 @@ namespace cformat
 		return writer.size();
 	}
 
-	/**
-	 * Formats string and forwards it to any provided stream that supports << operator (cout, ofstream, etc). This method handles formatted cstring
-	 * itself and deallocates it at the end of the function.
-	 */
 	template<typename Stream, typename... Arguments>
 	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
