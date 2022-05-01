@@ -105,12 +105,12 @@ public:
 		if (input == 'y') \
 		{ \
 			system(CLEAR); \
-			cprint(stdout, "+----------------------------------+\n{}", label); \
+			cprint(stdout, "+----------------------------------+\n{}\n", label); \
 			break; \
 		} \
 		else if (input == 'n') \
 		{ \
-			cprint(stdout, "+----------------------------------+\n{}", label); \
+			cprint(stdout, "+----------------------------------+\n{}\n", label); \
 			break; \
 		} \
 		else \
@@ -129,7 +129,7 @@ int main(void)
 	using namespace ::cformat;
 	using namespace ::cformat::details;
 
-	TO_NEXT("Enter any key to start reversed appender tests:\n");
+	TO_NEXT("Starting reversed appender tests:\n");
 	
 	TEST_OPERATION("Testing int32 FORMATTER with reversed appender:\n",
 		{
@@ -171,7 +171,7 @@ int main(void)
 		}
 	);
 	
-	TO_NEXT("Enter any key to start usage tests:\n");
+	TO_NEXT("Starting usage tests:\n");
 
 	TEST_OPERATION("Testing FORMATTER with dynamic chars buffer:\n",
 		{
@@ -202,7 +202,7 @@ int main(void)
 		}
 	);
 
-	TO_NEXT("Enter any key to start std tests:\n");
+	TO_NEXT("Starting std tests:\n");
 
 	TEST_OPERATION("Testing FORMATTER with std::string:\n",
 		{
@@ -294,7 +294,7 @@ int main(void)
 		}
 	);
 
-	TO_NEXT("Enter any key to start big string tests:\n");
+	TO_NEXT("Starting big string tests:\n");
 
 	TEST_OPERATION("Testing FORMATTER using heap:\n",
 		{
@@ -432,7 +432,7 @@ int main(void)
 		}
 	);
 
-	TO_NEXT("Enter any key to start small string tests:\n");
+	TO_NEXT("Starting small string tests:\n");
 
 	TEST_OPERATION("Testing FORMATTER using heap:\n",
 		{
@@ -540,7 +540,7 @@ int main(void)
 		}
 	);
 
-	TO_NEXT("Enter any key to start stress tests:\n");
+	TO_NEXT("Starting stress tests:\n");
 
 	TEST_OPERATION("Testing FORMATTER using heap:\n",
 		{

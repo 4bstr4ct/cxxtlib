@@ -285,7 +285,7 @@ namespace cformat
 				}
 			}
 
-			static FORMAT_INLINE FORMAT_CONSTEXPR char* itoar(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR uint32 itoar(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
 			{
 				uint32 index = 0;
 				bool isNegative = false;
@@ -294,10 +294,10 @@ namespace cformat
 				{
 					pString[index++] = '0';
 					pString[index] = '\0';
-					return pString;
+					return index;
 				}
 			
-				if (pValue < 0 && pBase == 10)
+				if (pValue < 0 && pBase == 10u)
 				{
 					isNegative = true;
 					pValue = -pValue;
@@ -306,7 +306,7 @@ namespace cformat
 				while (pValue != 0)
 				{
 					int32 remainder = pValue % pBase;
-					pString[index++] = (remainder > 9)? (remainder - 10u) + 'a' : remainder + '0';
+					pString[index++] = (remainder > 9u) ? (remainder - 10u) + 'a' : remainder + '0';
 					pValue /= pBase;
 				}
 			
@@ -314,40 +314,14 @@ namespace cformat
 					pString[index++] = '-';
 			
 				pString[index] = '\0';
-				return pString;
+				return index;
 			}
 
-			static FORMAT_INLINE FORMAT_CONSTEXPR char* itoa(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
+			static FORMAT_INLINE FORMAT_CONSTEXPR uint32 itoa(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
 			{
-				uint32 index = 0;
-				bool isNegative = false;
-
-				if (pValue == 0)
-				{
-					pString[index++] = '0';
-					pString[index] = '\0';
-					return pString;
-				}
-			
-				if (pValue < 0 && pBase == 10)
-				{
-					isNegative = true;
-					pValue = -pValue;
-				}
-			
-				while (pValue != 0)
-				{
-					int32 remainder = pValue % pBase;
-					pString[index++] = (remainder > 9)? (remainder - 10u) + 'a' : remainder + '0';
-					pValue /= pBase;
-				}
-			
-				if (isNegative)
-					pString[index++] = '-';
-			
-				pString[index] = '\0';
-				reverse(pString, index);
-				return pString;
+				uint32 size = itoar(pValue, pString, pBase);
+				reverse(pString, size);
+				return size;
 			}
 
 			static FORMAT_INLINE FORMAT_CONSTEXPR char* dtoa(double pValue, char* pString, uint32 pPrecision) FORMAT_NOEXCEPT
@@ -382,7 +356,7 @@ namespace cformat
 							m -= 1.0;
 						}
 
-						pValue = pValue / ::pow(10.0, m);
+						pValue /= ::pow(10.0, m);
 						m1 = m;
 						m = 0;
 					}
@@ -438,9 +412,9 @@ namespace cformat
 						
 						for (uint32 i = 0, j = m - 1u; i < j; i++, j--)
 						{
-							iterator[i] ^= iterator[j];
-							iterator[j] ^= iterator[i];
-							iterator[i] ^= iterator[j];
+							char temp = iterator[i];
+							iterator[i] = iterator[j];
+							iterator[j] = temp;
 						}
 
 						iterator += m;
@@ -875,8 +849,8 @@ namespace cformat
 		template<typename Context>
 		static FORMAT_INLINE FORMAT_CONSTEXPR void parseIgnore(Context& pContext) FORMAT_NOEXCEPT
 		{
-			for (; *pContext != '}'; pContext++);
-			pContext++;
+			for (; *pContext != '}'; ++pContext);
+			++pContext;
 		}
 	};
 
@@ -942,8 +916,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -956,8 +930,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -970,8 +944,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -984,8 +958,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -998,8 +972,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoar(pValue COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -1012,8 +986,8 @@ namespace cformat
 		{
 			const details::uint32 size = 33u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(pValue COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -1026,8 +1000,8 @@ namespace cformat
 		{
 			const details::uint32 size = 65u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -1040,8 +1014,8 @@ namespace cformat
 		{
 			const details::uint32 size = 65u;
 			char buffer[size] = { };
-			details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
-			pContext.appendReversed(buffer COMMA details::ascii::length(buffer));
+			const details::uint32 length = details::ascii::itoar(static_cast<details::int32>(pValue) COMMA buffer COMMA 10);
+			pContext.appendReversed(buffer COMMA length);
 		}
 	);
 
@@ -1187,11 +1161,11 @@ namespace cformat
 	static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		const char* previous = pReader.iterator();
-		for (; *pReader != '{' && pReader.iterator() != pReader.end(); pReader++);
+		for (; *pReader != '{' && pReader.iterator() != pReader.end(); ++pReader);
 
 		if (*pReader == '{')
 		{
-			pWriter.append(previous, (details::uint32)(pReader.iterator() - previous));
+			pWriter.append(previous, static_cast<details::uint32>(pReader.iterator() - previous));
 			using DRefArgument = typename details::RemoveVolatile<typename details::RemoveReference<Argument>::Type>::Type;
 			Formatter<DRefArgument>::template parse<Reader>(pReader);
 			Formatter<DRefArgument>::template format<Writer>(pWriter, pArgument);
@@ -1345,11 +1319,10 @@ namespace cformat
 
 		FORMAT_INLINE void FORMAT_CONSTEXPR append(char pChar) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + 1 > this->mCapacity)
+			if (this->mSize + 1u > this->mCapacity)
 				reallocate(this->mCapacity + this->mCapacity / 2);
 			
 			this->mData[this->mSize++] = pChar;
-			this->mData[this->mSize] = '\0';
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
@@ -1360,7 +1333,7 @@ namespace cformat
 			for (details::uint32 index = 0; index < pSize; index++)
 				this->mData[this->mSize + index] = pData[index];
 
-			this->mData[this->mSize += pSize] = '\0';
+			this->mSize += pSize;
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR void appendReversed(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
@@ -1371,11 +1344,12 @@ namespace cformat
 			for (details::uint32 index = 0; index < pSize; index++)
 				this->mData[this->mSize + index] = pData[pSize - index - 1u];
 
-			this->mData[this->mSize += pSize] = '\0';
+			this->mSize += pSize;
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR char* get() FORMAT_NOEXCEPT
 		{
+			this->mData[this->mSize] = '\0';
 			return this->mData;
 		}
 	};
@@ -1400,13 +1374,13 @@ namespace cformat
 		
 		FORMAT_INLINE FORMAT_CONSTEXPR void append(char pChar) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + 1u <= tCapacity)
+			if (this->mSize + 1u <= tCapacity + 1u)
 				this->mData[this->mSize++] = pChar;
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + pSize <= tCapacity)
+			if (this->mSize + pSize <= tCapacity + 1u)
 			{
 				for (details::uint32 index = 0; index < pSize; index++)
 					this->mData[this->mSize + index] = pData[index];
@@ -1417,7 +1391,7 @@ namespace cformat
 
 		FORMAT_INLINE FORMAT_CONSTEXPR void appendReversed(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + pSize <= tCapacity)
+			if (this->mSize + pSize <= tCapacity + 1u)
 			{
 				for (details::uint32 index = 0; index < pSize; index++)
 					this->mData[this->mSize + index] = pData[pSize - index - 1u];
@@ -1494,58 +1468,61 @@ namespace cformat
 		::fwrite(pString, sizeof(char), details::ascii::length(pString), pStream);
 	}
 
-	template<typename Type>
-	struct SpecifierOf
+	namespace experimental
 	{
-	public:
-		static FORMAT_CONSTEXPR const char sValue = ' ';
-
-		static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT
-		{ return sValue; }
-	};
-
-	#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
-	template<Dependencies> \
-	struct SpecifierOf<Type> \
-	{ \
-	public: \
-		static FORMAT_CONSTEXPR const char sValue = Specifier; \
-		 \
-		static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT \
-		{ return sValue; } \
-	}
-
-	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint8, 'u');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int16, 'd');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint16, 'u');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, details::int32, 'd');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint32, 'u');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, float, 'f');
-	__struct_INTERNAL_SPECIFIER_OF(NONE, double, 'f');
-	
-	template<details::uint32 tSize, typename Type>
-	static FORMAT_INLINE FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) FORMAT_NOEXCEPT
-	{
-		char temp[10] { };
-		details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
-
-		if (count <= 0)
+		template<typename Type>
+		struct SpecifierOf
 		{
-			return nullptr;
+		public:
+			static FORMAT_CONSTEXPR const char sValue = ' ';
+
+			static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT
+			{ return sValue; }
+		};
+
+		#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
+		template<Dependencies> \
+		struct SpecifierOf<Type> \
+		{ \
+		public: \
+			static FORMAT_CONSTEXPR const char sValue = Specifier; \
+			\
+			static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT \
+			{ return sValue; } \
 		}
+
+		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint8, 'u');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int16, 'd');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint16, 'u');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int32, 'd');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint32, 'u');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, float, 'f');
+		__struct_INTERNAL_SPECIFIER_OF(NONE, double, 'f');
 		
-		temp[0] = '%';
-		temp[++count] = SpecifierOf<Type>::value();
-		const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
+		template<details::uint32 tSize, typename Type>
+		static FORMAT_INLINE FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) FORMAT_NOEXCEPT
+		{
+			char temp[10] { };
+			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
 
-		if (written > 0)
-		{
-			return pBuffer;
-		}
-		else
-		{
-			return nullptr;
+			if (count <= 0)
+			{
+				return nullptr;
+			}
+			
+			temp[0] = '%';
+			temp[++count] = SpecifierOf<Type>::value();
+			const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
+
+			if (written > 0)
+			{
+				return pBuffer;
+			}
+			else
+			{
+				return nullptr;
+			}
 		}
 	}
 }
@@ -1558,8 +1535,8 @@ namespace cformat
 #undef __struct_INTERNAL_SPECIFIER_OF
 
 #define PARSE_IGNORE(pContext) \
-for (; *pContext != '}'; pContext++); \
-pContext++;
+for (; *pContext != '}'; ++pContext); \
+++pContext;
 
 #define struct_CUSTOM_FORMAT_OF(Dependencies, Type) \
 namespace cformat \
