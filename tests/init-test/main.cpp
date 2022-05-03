@@ -1,5 +1,5 @@
 #define ENABLE_STD_FORMATTERS 1
-#include <cxxtlib/format/format.hpp>
+#include <cformat/format.hpp>
 
 #include <iostream>
 
@@ -129,6 +129,30 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cformat;
 	using namespace ::cformat::details;
+	
+	TO_NEXT("Starting sfromat tests:\n")
+	{
+		TEST_OPERATION("Testing print:\n",
+			{
+				print(cout COMMA "{} + ({}) = {}\n");
+			}
+		);
+
+		TEST_OPERATION("Testing cprint:\n",
+			{
+				cprint(stdout COMMA "{} + ({}) = {}\n");
+			}
+		);
+	
+		TEST_OPERATION("Testing FORMATTER using std::string:\n",
+			{
+				std::string str = sformat<std::string>("{} + ({}) = {}\n" COMMA int32(987) COMMA int32(-987) COMMA int32(0));
+				cout << str;
+				print(cout COMMA str.c_str());
+				cprint(stdout COMMA str.c_str());
+			}
+		);
+	}
 
 	TO_NEXT("Starting reversed appender tests:\n")
 	{
@@ -207,7 +231,7 @@ int main(void)
 
 	TO_NEXT("Starting std tests:\n")
 	{
-			TEST_OPERATION("Testing FORMATTER with std::string:\n",
+		TEST_OPERATION("Testing FORMATTER with std::string:\n",
 			{
 				string container = "std string label as text";
 				char* buffer = format("Container: {}.\n" COMMA container);
@@ -574,7 +598,7 @@ int main(void)
 				{
 					char* formatted = new char[100];
 					snprintf(formatted COMMA 100 COMMA "%d" COMMA int(i));
-					delete formatted;
+					delete[] formatted;
 				}
 			}
 		);

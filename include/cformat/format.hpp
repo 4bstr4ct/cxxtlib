@@ -1401,21 +1401,21 @@ namespace cformat
 	};
 
 	template<typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	static FORMAT_INLINE char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		const details::uint32 patternLength = details::ascii::length(pPattern);
 		DynamicReader reader = DynamicReader(pPattern, pPattern, pPattern + patternLength);
-		DynamicWriter writer = DynamicWriter(patternLength + sizeof...(pArguments) * 2);
+		DynamicWriter writer = DynamicWriter(patternLength + sizeof...(pArguments) * 2u);
 		formatHandle<DynamicReader, DynamicWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
 		return writer.get();
 	}
 
 	template<class Result, typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR Result sformat(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	static FORMAT_INLINE Result sformat(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		const details::uint32 patternLength = details::ascii::length(pPattern);
 		DynamicReader reader = DynamicReader(pPattern, pPattern, pPattern + patternLength);
-		DynamicWriter writer = DynamicWriter(patternLength + sizeof...(pArguments) * 2);
+		DynamicWriter writer = DynamicWriter(patternLength + sizeof...(pArguments) * 2u);
 		
 		formatHandle<DynamicReader, DynamicWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
 		char* buffer = writer.get();
@@ -1426,7 +1426,7 @@ namespace cformat
 	}
 
 	template<details::uint32 tSize, typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 formatTo(char pBuffer[tSize], const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	static FORMAT_INLINE details::uint32 formatTo(char pBuffer[tSize], const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		DynamicReader reader = DynamicReader(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
 		StaticWriter<tSize> writer = StaticWriter<tSize>(pBuffer);
@@ -1435,17 +1435,11 @@ namespace cformat
 	}
 
 	template<typename Stream, typename... Arguments>
-	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	static FORMAT_INLINE void print(Stream& pStream, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 		pStream << formatted;
 		delete[] formatted;
-	}
-
-	template<typename Stream>
-	static FORMAT_INLINE FORMAT_CONSTEXPR void print(Stream& pStream, const char* const pString) FORMAT_NOEXCEPT
-	{
-		pStream << pString;
 	}
 
 	template<typename... Arguments>
@@ -1454,11 +1448,6 @@ namespace cformat
 		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 		::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
 		delete[] formatted;
-	}
-
-	static FORMAT_INLINE void cprint(::FILE* pStream, const char* const pString) FORMAT_NOEXCEPT
-	{
-		::fwrite(pString, sizeof(char), details::ascii::length(pString), pStream);
 	}
 
 	namespace experimental
