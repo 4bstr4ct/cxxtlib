@@ -5,11 +5,11 @@
 | [![License](https://img.shields.io/badge/license-GNU_3-blue.svg)](#) | [![Version](https://img.shields.io/badge/version-0.2.0-brightgreen.svg)](#) | [![Releases](https://img.shields.io/badge/releases-Latest-brightgreen.svg)](#) | |
 
 
-| Compilers | OS | Standards |
-|:----------|:---|:----------|
-| [![](https://img.shields.io/badge/compiler-MSVC-brightgreen)](#) | [![](https://img.shields.io/badge/platform-Windows-brightgreen)](#) | [![](https://img.shields.io/badge/c%2B%2B-11-brightgreen.svg)](#) |
-| [![](https://img.shields.io/badge/compiler-Clang%2FLLVM-brightgreen)](#) | [![](https://img.shields.io/badge/platform-Linux-yellow)](#) | [![](https://img.shields.io/badge/c%2B%2B-14-yellow.svg)](#) |
-| [![](https://img.shields.io/badge/compiler-GCC-yellow)](#) | [![](https://img.shields.io/badge/platform-MacOS-red)](#) | [![](https://img.shields.io/badge/c%2B%2B-17-yellow.svg)](#) | |
+| Compilers | Standards | Platforms |
+|:----------|:----------|:----------|
+| [![](https://img.shields.io/badge/compiler-MSVC-brightgreen)](#)| [![](https://img.shields.io/badge/c%2B%2B-11-brightgreen.svg)](#) | [![](https://img.shields.io/badge/c%2B%2B-Windows-brightgreen.svg)](#) |
+| [![](https://img.shields.io/badge/compiler-Clang%2FLLVM-brightgreen)](#)| [![](https://img.shields.io/badge/c%2B%2B-14-brightgreen.svg)](#) | [![](https://img.shields.io/badge/c%2B%2B-Linux-brightgreen.svg)](#) |
+| [![](https://img.shields.io/badge/compiler-GCC-brightgreen)](#) | [![](https://img.shields.io/badge/c%2B%2B-17-yellow.svg)](#) | [![](https://img.shields.io/badge/c%2B%2B-Macos-red.svg)](#) |
 
 
 ## Examples
