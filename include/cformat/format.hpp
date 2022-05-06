@@ -1144,6 +1144,43 @@ namespace cformat
 		}
 	);
 
+	struct ANSITextColor
+	{
+	public:
+		static FORMAT_CONSTEXPR const char reset[] = "\u001b[0m";
+		static FORMAT_CONSTEXPR const char black[] = "\u001b[30m";
+		static FORMAT_CONSTEXPR const char red[] = "\u001b[31m";
+		static FORMAT_CONSTEXPR const char green[] = "\u001b[32m";
+		static FORMAT_CONSTEXPR const char yellow[] = "\u001b[33m";
+		static FORMAT_CONSTEXPR const char blue[] = "\u001b[34m";
+		static FORMAT_CONSTEXPR const char magenta[] = "\u001b[35m";
+		static FORMAT_CONSTEXPR const char cyan[] = "\u001b[36m";
+		static FORMAT_CONSTEXPR const char white[] = "\u001b[37m";
+	};
+
+	struct ANSIBackgroundColor
+	{
+	public:
+		static FORMAT_CONSTEXPR const char reset[] = "\u001b[0m";
+		static FORMAT_CONSTEXPR const char black[] = "\u001b[40m";
+		static FORMAT_CONSTEXPR const char red[] = "\u001b[41m";
+		static FORMAT_CONSTEXPR const char green[] = "\u001b[42m";
+		static FORMAT_CONSTEXPR const char yellow[] = "\u001b[43m";
+		static FORMAT_CONSTEXPR const char blue[] = "\u001b[44m";
+		static FORMAT_CONSTEXPR const char magenta[] = "\u001b[45m";
+		static FORMAT_CONSTEXPR const char cyan[] = "\u001b[46m";
+		static FORMAT_CONSTEXPR const char white[] = "\u001b[47m";
+	};
+
+	struct ANSIDecorations
+	{
+	public:
+		static FORMAT_CONSTEXPR const char reset[] = "\u001b[0m";
+		static FORMAT_CONSTEXPR const char bold[] = "\u001b[1m";
+		static FORMAT_CONSTEXPR const char underline[] = "\u001b[4m";
+		static FORMAT_CONSTEXPR const char reversed[] = "\u001b[7m";
+	};
+
 	template<typename Reader, typename Writer>
 	static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) FORMAT_NOEXCEPT
 	{

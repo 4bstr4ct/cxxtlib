@@ -108,18 +108,18 @@ public:
 		cin >> input; \
 		if (input == 'y') \
 		{ \
-			system(CLEAR); \
-			cprint(stdout, "+----------------------------------+\n{}\n", label); \
+			auto result = system(CLEAR); \
+			cprint(stdout, "+----------------------------------+\n{}{}{}\n", ANSITextColor::red, label, ANSITextColor::reset); \
 			break; \
 		} \
 		else if (input == 'n') \
 		{ \
-			cprint(stdout, "+----------------------------------+\n{}\n", label); \
+			cprint(stdout, "+----------------------------------+\n{}{}{}\n", ANSITextColor::red, label, ANSITextColor::reset); \
 			break; \
 		} \
 		else \
 		{ \
-			cprint(stdout, "Try again: "); \
+			cprint(stdout, "{}Try again: {}", ANSITextColor::red, ANSITextColor::reset); \
 		} \
 	} \
 }
@@ -129,6 +129,29 @@ int main(void)
 	using namespace ::std;
 	using namespace ::cformat;
 	using namespace ::cformat::details;
+
+	TO_NEXT("Starting ansi support tests:\n")
+	{
+		TEST_OPERATION("Testing ansi text color:\n",
+			{
+				cprint(stdout COMMA "{} text goes here {}\n" COMMA ANSITextColor::red COMMA ANSITextColor::reset);
+			}
+		);
+
+		TEST_OPERATION("Testing ansi background color:\n",
+			{
+				cprint(stdout COMMA "{} text goes here {}\n" COMMA ANSIBackgroundColor::green COMMA ANSIBackgroundColor::reset);
+			}
+		);
+
+		TEST_OPERATION("Testing ansi decorations:\n",
+			{
+				cprint(stdout COMMA "{} text goes here {}\n" COMMA ANSIDecorations::underline COMMA ANSIBackgroundColor::reset);
+				cprint(stdout COMMA "{} text goes here {}\n" COMMA ANSIDecorations::bold COMMA ANSIBackgroundColor::reset);
+				cprint(stdout COMMA "{} text goes here {}\n" COMMA ANSIDecorations::reversed COMMA ANSIBackgroundColor::reset);
+			}
+		);
+	}
 	
 	TO_NEXT("Starting sfromat tests:\n")
 	{

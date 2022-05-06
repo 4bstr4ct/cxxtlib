@@ -43,7 +43,7 @@ public:
 		time += timer.stop(); \
 	} \
 	time /= (double)iterations; \
-	std::cout << "\nOperation worked for " << time << " s (in average).\n\n"; \
+	std::cout << SET_GREEN << "Operation worked for " << time << " s (in average)." << SET_RESET << "\n\n"; \
 }
 
 #if _WIN32
@@ -54,8 +54,15 @@ public:
 
 #define TO_NEXT(label) \
 { \
-	cprint(stdout, "+----------------------------------+\n{}\n", label); \
+	cprint(stdout, SET_RESET"+----------------------------------+\n{}\n", label); \
 }
+
+#define SET_RESET "\u001b[0m"
+#define SET_BLACK "\u001b[30m"
+#define SET_WHITE "\u001b[37m"
+#define SET_GREEN "\u001b[32m"
+#define SET_YELLOW "\u001b[33m"
+#define SET_RED "\u001b[31m"
 
 int main(void)
 {
@@ -65,8 +72,8 @@ int main(void)
 
 	// Ten million
 	#define ITERATIONS_COUNT 10000000
-	system(CLEAR);
-	
+	auto result = system(CLEAR);
+
 	TO_NEXT("Starting libc tests:\n")
 	{
 		TEST_OPERATION("Testing snprintf:\n",
@@ -87,10 +94,7 @@ int main(void)
 				delete[] buffer;
 			}
 		);
-	}
 
-	TO_NEXT("Starting cformat tests:\n")
-	{
 		TEST_OPERATION("Testing formatTo:\n",
 			for (int i = 0; i < ITERATIONS_COUNT; i++)
 			{
@@ -98,10 +102,7 @@ int main(void)
 				formatTo<33>(buffer COMMA "{}\n" COMMA int(100));
 			}
 		);
-	}
 
-	TO_NEXT("Starting cformat tests:\n")
-	{
 		TEST_OPERATION("Testing sformat:\n",
 			for (int i = 0; i < ITERATIONS_COUNT; i++)
 			{
