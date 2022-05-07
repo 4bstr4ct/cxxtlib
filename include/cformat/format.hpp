@@ -839,13 +839,37 @@ namespace cformat
 	struct FormatterHelpers
 	{
 	public:
+		static details::int32 sPrecision;
+
+	public:
 		template<typename Context>
 		static FORMAT_INLINE FORMAT_CONSTEXPR void parseIgnore(Context& pContext) FORMAT_NOEXCEPT
 		{
 			for (; *(pContext.current()) != '}'; pContext.next());
 			pContext.next();
 		}
+
+		template<typename Context>
+		static FORMAT_INLINE FORMAT_CONSTEXPR void parseColor(Context& pContext) FORMAT_NOEXCEPT
+		{
+			if (*(pContext.current()) == 'c' && *(pContext.current() + 1u) == ':')
+			{
+
+			}
+		}
+
+		template<typename Context>
+		static FORMAT_INLINE FORMAT_CONSTEXPR void parsePrecision(Context& pContext) FORMAT_NOEXCEPT
+		{
+			if (*(pContext.current()) == 'p' && *(pContext.current() + 1u) == ':')
+			{
+				::sscanf(pContext.current() + 2u, "%d", &sPrecision);
+				pContext.move(2u);
+			}
+		}
 	};
+
+	details::int32 FormatterHelpers::sPrecision = 0;
 
 	template<typename Type, typename Enabler = void>
 	struct Formatter
@@ -1015,13 +1039,25 @@ namespace cformat
 	__struct_INTERNAL_FORMATTER(NONE, float,
 		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 		{
+			// TODO: Implement parser for precision!
+			/*
+			for (; *(pContext.current()) != '}'; pContext.next())
+			{
+				FormatterHelpers::template parsePrecision<Context>(pContext);
+			}
+
+			pContext.next();
+			*/
+
 			FormatterHelpers::template parseIgnore<Context>(pContext);
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) FORMAT_NOEXCEPT
 		{
+			// TODO: Implement parser for precision!
 			const details::uint32 size = 65u;
-			const details::uint32 precision = 5u;
+			const details::uint32 precision = 5; // FormatterHelpers::sPrecision <= 0 ? 1e-10 : FormatterHelpers::sPrecision;
 			char buffer[size] = { };
+			// TODO: Redo dtoa(...) method - it does not work!
 			details::ascii::dtoa(static_cast<double>(pValue) COMMA buffer COMMA precision);
 			pContext.append(buffer COMMA details::ascii::length(buffer));
 		}
@@ -1256,6 +1292,11 @@ namespace cformat
 		FORMAT_INLINE FORMAT_CONSTEXPR void next() FORMAT_NOEXCEPT
 		{
 			++this->mCurrent;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR void move(details::uint32 pOffset) FORMAT_NOEXCEPT
+		{
+			this->mCurrent += pOffset;
 		}
 	};
 
