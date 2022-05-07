@@ -842,8 +842,8 @@ namespace cformat
 		template<typename Context>
 		static FORMAT_INLINE FORMAT_CONSTEXPR void parseIgnore(Context& pContext) FORMAT_NOEXCEPT
 		{
-			for (; *pContext != '}'; ++pContext);
-			++pContext;
+			for (; *(pContext.current()) != '}'; pContext.next());
+			pContext.next();
 		}
 	};
 
@@ -1184,18 +1184,18 @@ namespace cformat
 	template<typename Reader, typename Writer>
 	static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter) FORMAT_NOEXCEPT
 	{
-		pWriter.append(pReader.iterator(), pReader.size());
+		pWriter.append(pReader.current(), pReader.size());
 	}
 
 	template<typename Reader, typename Writer, typename Argument, typename... Arguments>
 	static FORMAT_INLINE FORMAT_CONSTEXPR void formatHandle(Reader& pReader, Writer& pWriter, Argument&& pArgument, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
-		const char* previous = pReader.iterator();
-		for (; *pReader != '{' && pReader.iterator() != pReader.end(); ++pReader);
+		pReader.setPrevious();
+		for (; *(pReader.current()) != '{' && pReader.current() != pReader.end(); pReader.next());
 
-		if (*pReader == '{')
+		if (*(pReader.current()) == '{')
 		{
-			pWriter.append(previous, static_cast<details::uint32>(pReader.iterator() - previous));
+			pWriter.append(pReader.previous(), pReader.fromPreviousToCurrent());
 			using DRefArgument = typename details::RemoveVolatile<typename details::RemoveReference<Argument>::Type>::Type;
 			Formatter<DRefArgument>::template parse<Reader>(pReader);
 			Formatter<DRefArgument>::template format<Writer>(pWriter, pArgument);
@@ -1204,103 +1204,58 @@ namespace cformat
 		formatHandle<Reader, Writer>(pReader, pWriter, pArguments...);
 	}
 
-	class DynamicReader
+	class FormatStringReader
 	{
 	private:
-		const char* mIterator;
-		const char* mBegin;
-		const char* mEnd;
-	
+		const char* mPointer;
+		const char* mCurrent;
+		const char* mPrevious;
+		details::uint32 mSize;
+
 	public:
-		explicit DynamicReader(const char* pIterator, const char* pBegin, const char* pEnd) FORMAT_NOEXCEPT
-			: mIterator(pIterator), mBegin(pBegin), mEnd(pEnd)
+		explicit FormatStringReader(const char* pPointer, details::uint32 pSize) FORMAT_NOEXCEPT
+			: mPointer(pPointer), mCurrent(pPointer), mPrevious(pPointer), mSize(pSize)
 		{ }
 
 	public:
 		FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 size() const FORMAT_NOEXCEPT
 		{
-			return static_cast<details::uint32>(this->mEnd - this->mIterator);
+			return this->mSize;
 		}
 
-		FORMAT_INLINE FORMAT_CONSTEXPR const char* iterator() const FORMAT_NOEXCEPT
+		FORMAT_INLINE FORMAT_CONSTEXPR details::uint32 fromPreviousToCurrent() const FORMAT_NOEXCEPT
 		{
-			return this->mIterator;
+			return static_cast<details::uint32>(this->mCurrent - this->mPrevious);
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR const char* current() const FORMAT_NOEXCEPT
+		{
+			return this->mCurrent;
+		}
+
+		FORMAT_INLINE FORMAT_CONSTEXPR const char* previous() const FORMAT_NOEXCEPT
+		{
+			return this->mPrevious;
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR const char* begin() const FORMAT_NOEXCEPT
 		{
-			return this->mBegin;
+			return this->mPointer;
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR const char* end() const FORMAT_NOEXCEPT
 		{
-			return this->mEnd;
+			return this->mPointer + this->mSize;
 		}
 
-	public:
-		FORMAT_INLINE DynamicReader operator +(details::int32 pOffset) FORMAT_NOEXCEPT
+		FORMAT_INLINE FORMAT_CONSTEXPR void setPrevious() FORMAT_NOEXCEPT
 		{
-			DynamicReader reader = DynamicReader(this->mIterator + pOffset, this->mBegin, this->mEnd);
-			return reader;
+			this->mPrevious = this->mCurrent;
 		}
 
-		FORMAT_INLINE FORMAT_CONSTEXPR DynamicReader& operator +=(details::int32 pOffset) FORMAT_NOEXCEPT
+		FORMAT_INLINE FORMAT_CONSTEXPR void next() FORMAT_NOEXCEPT
 		{
-			this->mIterator += pOffset;
-			return *this;
-		}
-		
-		FORMAT_INLINE FORMAT_CONSTEXPR DynamicReader& operator ++() FORMAT_NOEXCEPT
-		{
-			this->mIterator++;
-			return *this;
-		}
-
-		FORMAT_INLINE DynamicReader operator ++(details::int32) FORMAT_NOEXCEPT
-		{
-			DynamicReader reader = DynamicReader(this->mIterator, this->mBegin, this->mEnd);
-			++(*this);
-			return reader;
-		}
-
-		FORMAT_INLINE DynamicReader operator -(details::int32 pOffset) FORMAT_NOEXCEPT
-		{
-			DynamicReader reader = DynamicReader(this->mIterator - pOffset, this->mBegin, this->mEnd);
-			return reader;
-		}
-
-		FORMAT_INLINE FORMAT_CONSTEXPR DynamicReader& operator -=(details::int32 pOffset) FORMAT_NOEXCEPT
-		{
-			this->mIterator -= pOffset;
-			return *this;
-		}
-
-		FORMAT_INLINE FORMAT_CONSTEXPR DynamicReader& operator --() FORMAT_NOEXCEPT
-		{
-			this->mIterator--;
-			return *this;
-		}
-
-		FORMAT_INLINE DynamicReader operator --(details::int32) FORMAT_NOEXCEPT
-		{
-			DynamicReader reader = DynamicReader(this->mIterator, this->mBegin, this->mEnd);
-			--(*this);
-			return reader;
-		}
-
-		FORMAT_INLINE FORMAT_CONSTEXPR const char& operator *() const FORMAT_NOEXCEPT
-		{
-			return *this->mIterator;
-		}
-
-		FORMAT_INLINE FORMAT_CONSTEXPR bool operator ==(const DynamicReader& pOther) const FORMAT_NOEXCEPT
-		{
-			return this->mIterator == pOther.iterator() && this->mBegin == pOther.begin() && this->mEnd == pOther.end();
-		}
-
-		FORMAT_INLINE FORMAT_CONSTEXPR bool operator !=(const DynamicReader& pOther) const FORMAT_NOEXCEPT
-		{
-			return !(*this == pOther);
+			++this->mCurrent;
 		}
 	};
 
@@ -1384,16 +1339,16 @@ namespace cformat
 		}
 	};
 
-	template<details::uint32 tCapacity>
 	class StaticWriter
 	{
 	private:
 		char* mData;
 		details::uint32 mSize;
+		details::uint32 mCapacity;
 
 	public:
-		explicit StaticWriter(char* pData) FORMAT_NOEXCEPT
-			: mData(pData), mSize(0)
+		explicit StaticWriter(char* pData, details::uint32 pCapacity) FORMAT_NOEXCEPT
+			: mData(pData), mSize(0), mCapacity(pCapacity)
 		{ }
 
 	public:
@@ -1404,13 +1359,13 @@ namespace cformat
 		
 		FORMAT_INLINE FORMAT_CONSTEXPR void append(char pChar) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + 1u <= tCapacity + 1u)
+			if (this->mSize + 1u <= this->mCapacity + 1u)
 				this->mData[this->mSize++] = pChar;
 		}
 
 		FORMAT_INLINE FORMAT_CONSTEXPR void append(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + pSize <= tCapacity + 1u)
+			if (this->mSize + pSize <= this->mCapacity + 1u)
 			{
 				for (details::uint32 index = 0; index < pSize; index++)
 					this->mData[this->mSize + index] = pData[index];
@@ -1421,7 +1376,7 @@ namespace cformat
 
 		FORMAT_INLINE FORMAT_CONSTEXPR void appendReversed(const char* const pData, details::uint32 pSize) FORMAT_NOEXCEPT
 		{
-			if (this->mSize + pSize <= tCapacity + 1u)
+			if (this->mSize + pSize <= this->mCapacity + 1u)
 			{
 				for (details::uint32 index = 0; index < pSize; index++)
 					this->mData[this->mSize + index] = pData[pSize - index - 1u];
@@ -1441,9 +1396,9 @@ namespace cformat
 	static FORMAT_INLINE char* format(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		const details::uint32 patternLength = details::ascii::length(pPattern);
-		DynamicReader reader = DynamicReader(pPattern, pPattern, pPattern + patternLength);
+		FormatStringReader reader = FormatStringReader(pPattern, patternLength);
 		DynamicWriter writer = DynamicWriter(patternLength + sizeof...(pArguments) * 2u);
-		formatHandle<DynamicReader, DynamicWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
+		formatHandle<FormatStringReader, DynamicWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
 		return writer.get();
 	}
 
@@ -1451,10 +1406,10 @@ namespace cformat
 	static FORMAT_INLINE Result sformat(const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
 		const details::uint32 patternLength = details::ascii::length(pPattern);
-		DynamicReader reader = DynamicReader(pPattern, pPattern, pPattern + patternLength);
+		FormatStringReader reader = FormatStringReader(pPattern, patternLength);
 		DynamicWriter writer = DynamicWriter(patternLength + sizeof...(pArguments) * 2u);
 		
-		formatHandle<DynamicReader, DynamicWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
+		formatHandle<FormatStringReader, DynamicWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
 		char* buffer = writer.get();
 		Result result = Result(buffer);
 		
@@ -1462,12 +1417,12 @@ namespace cformat
 		return result;
 	}
 
-	template<details::uint32 tSize, typename... Arguments>
-	static FORMAT_INLINE details::uint32 formatTo(char pBuffer[tSize], const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
+	template<typename... Arguments>
+	static FORMAT_INLINE details::uint32 formatTo(char pBuffer[], details::uint32 pSize, const char* const pPattern, Arguments&&... pArguments) FORMAT_NOEXCEPT
 	{
-		DynamicReader reader = DynamicReader(pPattern, pPattern, pPattern + details::ascii::length(pPattern));
-		StaticWriter<tSize> writer = StaticWriter<tSize>(pBuffer);
-		formatHandle<DynamicReader, StaticWriter<tSize>, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
+		FormatStringReader reader = FormatStringReader(pPattern, details::ascii::length(pPattern));
+		StaticWriter writer = StaticWriter(pBuffer, pSize);
+		formatHandle<FormatStringReader, StaticWriter, Arguments...>(reader, writer, details::forward<Arguments>(pArguments)...);
 		return writer.size();
 	}
 
@@ -1554,8 +1509,7 @@ namespace cformat
 #undef __struct_INTERNAL_SPECIFIER_OF
 
 #define PARSE_IGNORE(pContext) \
-for (; *pContext != '}'; ++pContext); \
-++pContext;
+FormatterHelpers::template parseIgnore<Context>(pContext);
 
 #define struct_CUSTOM_FORMAT_OF(Dependencies, Type) \
 namespace cformat \

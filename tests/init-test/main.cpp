@@ -202,7 +202,7 @@ int main(void)
 		TEST_OPERATION("Testing int32 FORMATTER with reversed appender:\n",
 			{
 				char buffer[100] = { };
-				const uint32 length = formatTo<100>(buffer, "{} + ({}) = {}\n" COMMA int32(9) COMMA int32(-9) COMMA int32(0));
+				const uint32 length = formatTo(buffer COMMA 100 COMMA "{} + ({}) = {}\n" COMMA int32(9) COMMA int32(-9) COMMA int32(0));
 				cout << buffer;
 				print(cout COMMA buffer);
 				cprint(stdout COMMA buffer);
@@ -212,7 +212,7 @@ int main(void)
 		TEST_OPERATION("Testing int32 FORMATTER with reversed appender:\n",
 			{
 				char buffer[100] = { };
-				const uint32 length = formatTo<100>(buffer, "{} + ({}) = {}\n" COMMA int32(987) COMMA int32(-987) COMMA int32(0));
+				const uint32 length = formatTo(buffer COMMA 100 COMMA "{} + ({}) = {}\n" COMMA int32(987) COMMA int32(-987) COMMA int32(0));
 				cout << buffer;
 				print(cout COMMA buffer);
 				cprint(stdout COMMA buffer);
@@ -235,7 +235,7 @@ int main(void)
 		TEST_OPERATION("Testing FORMATTER with static chars buffer:\n",
 			{
 				char buffer[256] = { };
-				unsigned int length = formatTo<256>(buffer COMMA "{} + {} = {} and it is {} operation.\n" COMMA 3 COMMA 5 COMMA 8 COMMA "mathematical");
+				unsigned int length = formatTo(buffer COMMA 256 COMMA "{} + {} = {} and it is {} operation.\n" COMMA 3 COMMA 5 COMMA 8 COMMA "mathematical");
 				cout << buffer;
 				print(cout COMMA buffer);
 				cprint(stdout COMMA buffer);
@@ -381,8 +381,8 @@ int main(void)
 			{
 				for (uint32 i = 0; i < COUNT; i++)
 				{
-					char buffer[2048];
-					uint32 written = formatTo<2048>(buffer COMMA "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nSome string value is : {}\n" COMMA
+					char buffer[2048] = { };
+					uint32 written = formatTo(buffer COMMA 2048 COMMA "Boolean value is : {}\nChar value is : {}\nInt8 value is : {}\nUInt8 value is : {}\nInt16 value is : {}\nUInt16 value is : {}\nInt32 value is : {}\nUInt32 value is : {}\nLongLong value is : {}\nULongLong value is : {}\nFloat value is : {}\nFloat value with precision is : {p:3.5}\nDouble value is : {}\nDouble value with precision is : {p:3.5}\nLongDouble value is : {}\nLongDouble value with precision is : {p:3.5}\nNullptr stringified is : {}\nPoint here goes brrr : [{} {} {}]\nSome string value is : {}\n" COMMA
 						bool() COMMA
 						char(67) COMMA
 						int8(1) COMMA
@@ -519,7 +519,7 @@ int main(void)
 				for (uint32 i = 0; i < COUNT; i++)
 				{
 					char buffer[450];
-					unsigned int written = formatTo<450>(buffer COMMA "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {}\n" COMMA
+					unsigned int written = formatTo(buffer COMMA 450 COMMA "{} {} {} {} {} {} {} {} {} {} {} {} {} {} [{} {} {}] {}\n" COMMA
 						bool() COMMA
 						char(67) COMMA
 						int8(1) COMMA
@@ -609,8 +609,8 @@ int main(void)
 			{
 				for (int i = 0; i < STRESS_COUNT; i++)
 				{
-					char formatted[100];
-					formatTo<100>(formatted COMMA "{}" COMMA int(i));
+					char formatted[100] = { };
+					formatTo(formatted COMMA 100 COMMA "{}" COMMA int(i));
 				}
 			}
 		);

@@ -83,6 +83,15 @@ int main(void)
 				snprintf(buffer COMMA 33 COMMA "%d\n" COMMA int(100));
 			}
 		);
+
+		TEST_OPERATION("Testing sprintf:\n",
+			for (int i = 0; i < ITERATIONS_COUNT; i++)
+			{
+				char* buffer = new char[33];
+				sprintf(buffer COMMA "%d\n" COMMA int(100));
+				delete[] buffer;
+			}
+		);
 	}
 
 	TO_NEXT("Starting cformat tests:\n")
@@ -99,7 +108,7 @@ int main(void)
 			for (int i = 0; i < ITERATIONS_COUNT; i++)
 			{
 				char buffer[33] = { };
-				formatTo<33>(buffer COMMA "{}\n" COMMA int(100));
+				formatTo(buffer COMMA 33 COMMA "{}\n" COMMA int(100));
 			}
 		);
 
