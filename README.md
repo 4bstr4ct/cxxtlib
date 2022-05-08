@@ -57,7 +57,7 @@ Formatting into static buffer:
 int main(int argc, char** argv)
 {
 	char buffer[100] = { };
-	unsigned int length = cformat::formatTo<100>(buffer, "Hello, {}!\n", "World");
+	unsigned int length = cformat::formatTo(buffer, 100, "Hello, {}!\n", "World");
 	return 0;
 }
 ```
@@ -77,6 +77,7 @@ int main(int argc, char** argv)
 
 Printing a STL container:
 ```c++
+#define ENABLE_STD_FORMATTERS 1 // Formatters for STL containers.
 #include <cformat/format.hpp>
 
 #include <vector>
