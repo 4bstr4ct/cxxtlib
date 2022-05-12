@@ -130,24 +130,6 @@ int main(void)
 	using namespace ::cformat;
 	using namespace ::cformat::details;
 
-	cprint(stdout, "Float with precision : {}\n", 145.76854f);
-	/*
-	TO_NEXT("Starting formatter helpers tests:\n")
-	{
-		TEST_OPERATION("Testing precision parser:\n",
-			{
-				cprint(stdout COMMA "Float with precision : {}\n" COMMA 145.76854f);
-			}
-		);
-
-		TEST_OPERATION("Testing precision parser:\n",
-			{
-				cprint(stdout COMMA "Float with precision : {}\n" COMMA 145.76854f);
-			}
-		);
-	}
-	*/
-	
 	TO_NEXT("Starting ansi support tests:\n")
 	{
 		TEST_OPERATION("Testing ansi text color:\n",

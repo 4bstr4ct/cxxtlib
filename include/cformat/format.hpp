@@ -309,115 +309,6 @@ namespace cformat
 				pString[index] = '\0';
 				return index;
 			}
-
-			static FORMAT_INLINE FORMAT_CONSTEXPR uint32 itoa(int32 pValue, char* pString, uint32 pBase) FORMAT_NOEXCEPT
-			{
-				uint32 size = itoar(pValue, pString, pBase);
-				reverse(pString, size);
-				return size;
-			}
-
-			static FORMAT_INLINE FORMAT_CONSTEXPR char* dtoa(double pValue, char* pString, uint32 pPrecision) FORMAT_NOEXCEPT
-			{
-				if (pValue == 0.0)
-				{
-					copy(pString, "0");
-				}
-				else
-				{
-					int32 digit = 0, m = 0, m1 = 0;
-					char* iterator = pString;
-					int32 negate = (pValue < 0);
-
-					if (negate)
-					{
-						pValue = -pValue;
-					}
-
-					m = (int32)::log10(pValue);
-					int32 useExponent = (m >= 14 || (negate && m >= 9) || m <= -9);
-
-					if (negate)
-					{
-						*(iterator++) = '-';
-					}
-
-					if (useExponent)
-					{
-						if (m < 0)
-						{
-							m -= 1;
-						}
-
-						pValue /= ::pow(10.0, m);
-						m1 = m;
-						m = 0;
-					}
-
-					if (m < 1.0)
-					{
-						m = 0;
-					}
-
-					while (pValue > pPrecision || m >= 0) 
-					{
-						double weight = ::pow(10.0, m);
-						
-						if (weight > 0 && !::isinf(weight))
-						{
-							digit = (int32)::floor(pValue / weight);
-							pValue -= (digit * weight);
-							*(iterator++) = '0' + digit;
-						}
-
-						if (m == 0 && pValue > 0)
-						{
-							*(iterator++) = '.';
-						}
-
-						m--;
-					}
-
-					if (useExponent)
-					{
-						*(iterator++) = 'e';
-
-						if (m1 > 0)
-						{
-							*(iterator++) = '+';
-						}
-						else
-						{
-							*(iterator++) = '-';
-							m1 = -m1;
-						}
-
-						m = 0;
-
-						while (m1 > 0)
-						{
-							*(iterator++) = '0' + m1 % 10;
-							m1 /= 10;
-							m++;
-						}
-
-						iterator -= m;
-						
-						for (uint32 i = 0, j = m - 1u; i < j; i++, j--)
-						{
-							char temp = iterator[i];
-							iterator[i] = iterator[j];
-							iterator[j] = temp;
-						}
-
-						iterator += m;
-					}
-					
-					*(iterator) = '\0';
-				}
-
-				return pString;
-			}
 		}
 
 		template<typename OldT>
@@ -1039,27 +930,18 @@ namespace cformat
 	__struct_INTERNAL_FORMATTER(NONE, float,
 		FORMAT_INLINE FORMAT_CONSTEXPR void parse(Context& pContext) FORMAT_NOEXCEPT
 		{
-			// TODO: Implement parser for precision!
-			/*
-			for (; *(pContext.current()) != '}'; pContext.next())
-			{
-				FormatterHelpers::template parsePrecision<Context>(pContext);
-			}
-
-			pContext.next();
-			*/
-
 			FormatterHelpers::template parseIgnore<Context>(pContext);
 		},
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA float pValue) FORMAT_NOEXCEPT
 		{
-			// TODO: Implement parser for precision!
 			const details::uint32 size = 65u;
-			const details::uint32 precision = 5; // FormatterHelpers::sPrecision <= 0 ? 1e-10 : FormatterHelpers::sPrecision;
 			char buffer[size] = { };
-			// TODO: Redo dtoa(...) method - it does not work!
-			details::ascii::dtoa(static_cast<double>(pValue) COMMA buffer COMMA precision);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
+
+			if (written >= 0)
+			{
+				pContext.append(buffer COMMA written);
+			}
 		}
 	);
 
@@ -1071,10 +953,13 @@ namespace cformat
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA double pValue) FORMAT_NOEXCEPT
 		{
 			const details::uint32 size = 65u;
-			const details::uint32 precision = 5u;
 			char buffer[size] = { };
-			details::ascii::dtoa(pValue COMMA buffer COMMA precision);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%f" COMMA pValue);
+
+			if (written >= 0)
+			{
+				pContext.append(buffer COMMA written);
+			}
 		}
 	);
 
@@ -1086,10 +971,13 @@ namespace cformat
 		FORMAT_INLINE FORMAT_CONSTEXPR void format(Context& pContext COMMA details::ldouble pValue) FORMAT_NOEXCEPT
 		{
 			const details::uint32 size = 65u;
-			const details::uint32 precision = 5u;
 			char buffer[size] = { };
-			details::ascii::dtoa(static_cast<double>(pValue) COMMA buffer COMMA precision);
-			pContext.append(buffer COMMA details::ascii::length(buffer));
+			const details::int32 written = ::snprintf(buffer COMMA size COMMA "%Lf" COMMA pValue);
+
+			if (written >= 0)
+			{
+				pContext.append(buffer COMMA written);
+			}
 		}
 	);
 
@@ -1481,64 +1369,6 @@ namespace cformat
 		char* formatted = format<Arguments...>(pPattern, details::forward<Arguments>(pArguments)...);
 		::fwrite(formatted, sizeof(char), details::ascii::length(formatted), pStream);
 		delete[] formatted;
-	}
-
-	namespace experimental
-	{
-		template<typename Type>
-		struct SpecifierOf
-		{
-		public:
-			static FORMAT_CONSTEXPR const char sValue = ' ';
-
-			static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT
-			{ return sValue; }
-		};
-
-		#define __struct_INTERNAL_SPECIFIER_OF(Dependencies, Type, Specifier) \
-		template<Dependencies> \
-		struct SpecifierOf<Type> \
-		{ \
-		public: \
-			static FORMAT_CONSTEXPR const char sValue = Specifier; \
-			\
-			static FORMAT_INLINE FORMAT_CONSTEXPR const char value() FORMAT_NOEXCEPT \
-			{ return sValue; } \
-		}
-
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int8, 'd');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint8, 'u');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int16, 'd');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint16, 'u');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::int32, 'd');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, details::uint32, 'u');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, float, 'f');
-		__struct_INTERNAL_SPECIFIER_OF(NONE, double, 'f');
-		
-		template<details::uint32 tSize, typename Type>
-		static FORMAT_INLINE FORMAT_CONSTEXPR const char* precision(char* pBuffer, Type pValue, details::uint32 pPre, details::uint32 pPost) FORMAT_NOEXCEPT
-		{
-			char temp[10] { };
-			details::uint32 count = ::snprintf(temp + 1, 9, "%u.%u", pPre, pPost);
-
-			if (count <= 0)
-			{
-				return nullptr;
-			}
-			
-			temp[0] = '%';
-			temp[++count] = SpecifierOf<Type>::value();
-			const details::uint32 written = ::snprintf(pBuffer, tSize, temp, pValue);
-
-			if (written > 0)
-			{
-				return pBuffer;
-			}
-			else
-			{
-				return nullptr;
-			}
-		}
 	}
 }
 
